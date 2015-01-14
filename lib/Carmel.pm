@@ -26,6 +26,15 @@ Carmel - CPAN Artifact Repository Manager
   # prints export PERL5LIB=... etc for shell scripting
   carmel export
 
+  # find a module in repository
+  carmel find DBI
+
+  # find a module matching the version query
+  carmel find Plack ">= 1.0000, < 1.1000"
+
+  # list all the modules to be loaded
+  carmel list
+
 =head1 DESCRIPTION
 
 B<THIS IS EXPERIMENTAL!>
@@ -36,9 +45,40 @@ Unlike traditional CPAN module installer, Carmel keeps the build of
 your dependencies in a central repository, then select the library
 paths to include upon runtime.
 
-=head1 CAVEATS
+=head1 HOW IT WORKS
 
-Carmel requires C<cpanminus> with a patch to support keeping build artifacts. L<https://github.com/miyagawa/cpanminus/pull/429>
+Carmel requires C<cpanminus> with a patch to support keeping build
+artifacts. L<https://github.com/miyagawa/cpanminus/pull/429>
+
+With the patch, cpanm will keep the build directory (artifacts) in a
+repository, which defaults to C<$HOME/.cpanm/builds>, and your
+directory structure would look like:
+
+  $HOME/.cpanm/builds
+    Plack-1.0033/
+      blib/
+        arch/
+        lib/
+    URI-1.64/
+      blib/
+        arch/
+        lib/
+    URI-1.63/
+      blib/
+        arch/
+        lib/
+
+Carmel scans this directory and creates the mapping of which package
+belongs to which build directory. Given the list of modules and
+requirements (using C<cpanfile> or even better C<cpanfile.snapshot>
+from L<Carton>), Carmel lists all the build directories you need, and
+then prepend the C<blib> directories to C<PERL5LIB> environment
+variables.
+
+You have a choice to exec a sub process from Carmel, by using the
+C<exec> sub command. If you prefer full control, you can also use
+C<env> or C<export> command to integrate with your own shell script
+wrapper.
 
 =head1 AUTHOR
 
