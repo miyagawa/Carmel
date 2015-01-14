@@ -75,10 +75,10 @@ from L<Carton>), Carmel lists all the build directories you need, and
 then prepend the C<blib> directories to C<PERL5LIB> environment
 variables.
 
-You have a choice to exec a sub process from Carmel, by using the
-C<exec> sub command. If you prefer full control, you can also use
-C<env> or C<export> command to integrate with your own shell script
-wrapper.
+You have a choice to execute a subprocess from Carmel, by using the
+C<exec> sub command. If you prefer a fine grained control, you can
+also use C<env> or C<export> command to integrate with your own shell
+script wrapper.
 
 =head1 AUTHOR
 
