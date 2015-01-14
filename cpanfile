@@ -9,6 +9,7 @@ requires 'Parse::PMFile';
 requires 'CPAN::DistnameInfo';
 requires 'File::pushd';
 requires 'YAML';
+requires 'Module::CoreList';
 
 recommends 'Carton', 'v1.0.12';
 
