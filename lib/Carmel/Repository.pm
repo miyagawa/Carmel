@@ -26,7 +26,7 @@ sub load {
 
         my $install = $self->_install_info("$dir/$ent");
         while (my($package, $data) = each %{ $install->{provides} }) {
-            $self->add($package, "$dir/$ent", $data->{version}, $install->{version});
+            $self->add($package, "$dir/$ent", $data->{version}, $install);
         }
     }
 }
@@ -52,14 +52,14 @@ sub _install_info {
 }
 
 sub add {
-    my($self, $package, $path, $version, $dist_version) = @_;
+    my($self, $package, $path, $version, $install) = @_;
 
     if (my $artifact = $self->lookup($package, $version)) {
-        if ($self->_compare($dist_version, $artifact->dist_version) > 0) {
-            $self->{$package}{$version} = [ $path, $dist_version ];
+        if ($self->_compare($install->{version}, $artifact->dist_version) > 0) {
+            $self->{$package}{$version} = [ $path, $install ];
         }
     } else {
-        $self->{$package}{$version} = [ $path, $dist_version ];
+        $self->{$package}{$version} = [ $path, $install ];
     }
 }
 

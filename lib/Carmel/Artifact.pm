@@ -2,17 +2,21 @@ package Carmel::Artifact;
 use strict;
 
 sub new {
-    my($class, $package, $version, $path, $dist_version) = @_;
-    bless [ $package, $version, $path, $dist_version ], $class;
+    my($class, @args) = @_;
+    bless [ @args ], $class;
 }
 
 sub package { $_[0]->[0] }
 sub version { $_[0]->[1] || '0' }
 sub path    { $_[0]->[2] }
-sub dist_version { $_[0]->[3] }
+sub install { $_[0]->[3] }
+
+sub dist_version {
+    $_[0]->install->{version};
+}
 
 sub blib {
-    "$_->[2]/blib";
+    "$_[0]->[2]/blib";
 }
 
 sub paths {
