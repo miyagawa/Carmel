@@ -5,3 +5,4 @@
 MYMETA.*
 !META.json
 /.prove
+/blib
