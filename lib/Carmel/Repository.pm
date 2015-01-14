@@ -20,7 +20,7 @@ sub read_json {
 sub load {
     my($self, $dir) = @_;
 
-    my $dh = DirHandle->new($dir);
+    my $dh = DirHandle->new($dir) or return;
     while (my $ent = $dh->read) {
         next unless -d "$dir/$ent" && -e "$dir/$ent/blib";
 

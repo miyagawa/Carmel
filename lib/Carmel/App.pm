@@ -4,6 +4,9 @@ use warnings;
 
 use Carp ();
 use Carmel::Repository;
+use CPAN::Meta;
+use CPAN::Meta::Requirements;
+use Module::CoreList;
 
 sub new {
     my $class = shift;
@@ -38,22 +41,95 @@ sub build_repo {
 }
 
 sub cmd_install {
+    my($self, $module, $requirement) = @_;
+
+    my $requirements;
+    if ($module) {
+        $requirement =~ s/^@/==/ if $requirement;
+        $self->install_module([ $module, $requirement ]);
+        $requirements = CPAN::Meta::Requirements->from_string_hash({ $module => $requirement || '0' });
+    } else {
+        $requirements = $self->build_requirements
+          or Carp::croak "Could not locate 'cpanfile' to load module list.";
+    }
+
+    $self->install_recursive($requirements, {});
+}
+
+sub install_recursive {
+    my($self, $requirements, $seen) = @_;
+
+    my $repo = $self->build_repo;
+    my $recurse;
+
+    my @missing;
+    for my $module (sort $requirements->required_modules) {
+        next if $module eq 'perl';
+
+        my $want_version = $requirements->requirements_for_module($module);
+        if ($self->is_core($module, $want_version)) {
+            next;
+        } elsif (my $artifact = $repo->find($module, $want_version)) {
+            next if $seen->{$artifact->path}++;
+            printf "You have %s (%s) in %s\n", $artifact->package, $artifact->version || '0', $artifact->path;
+            my $meta = CPAN::Meta->load_file($artifact->path . "/MYMETA.json");
+            $requirements->add_requirements($meta->effective_prereqs->merged_requirements(['runtime'], ['requires']));
+        } else {
+            push @missing, [ $module, $want_version ];
+        }
+
+        $recurse++;
+    }
+
+    $self->install_module(@missing) if @missing;
+    $self->install_recursive($requirements, $seen) if $recurse;
+}
+
+sub is_core {
+    my($self, $module, $want_version) = @_;
+
+    unless (exists $Module::CoreList::version{$]+0}{$module}) {
+        return;
+    }
+
+    my $accepts = CPAN::Meta::Requirements->from_string_hash({ $module => $want_version })
+        ->accepts_module($module, $Module::CoreList::version{$]+0}{$module} || '0');
+
+    # This might not be true, but a good indicator that is dual-live
+    my $upstream_is_cpan = ($Module::CoreList::upstream{$module} || '') eq 'cpan';
+
+    $accepts && !$upstream_is_cpan;
+}
+
+sub install_module {
     my($self, @modules) = @_;
 
-    my @args = @modules ? @modules : ("--installdeps", ".");
-    system $^X, "-S", "cpanm", "--reinstall", "-L", $self->temp_dir, @args;
+    my $repo = $self->build_repo;
+
+    my @args;
+    for my $pair (@modules) {
+        my($module, $requirement) = @$pair;
+        my @artifacts = $repo->find_all($module, $requirement || '0');
+        if (@artifacts) {
+            printf "You have %s (%s) in %s\n", $module, $artifacts[0]->version || '0', $artifacts[0]->path;
+        } else {
+            push @args, ($requirement ? "$module~$requirement" : $module);
+        }
+    }
+
+    system $^X, "-S", "cpanm", "--notest", "--reinstall", "-l", $self->temp_dir, @args if @args;
 }
 
 sub cmd_export {
     my($self, @args) = @_;
     my %env = $self->env;
-    print STDOUT "export PATH=$env{PATH} PERL5LIB=$env{PERL5LIB}\n";
+    print "export PATH=$env{PATH} PERL5LIB=$env{PERL5LIB}\n";
 }
 
 sub cmd_env {
     my($self, @args) = @_;
     my %env = $self->env;
-    print STDOUT "PATH=$env{PATH}\nPERL5LIB=$env{PERL5LIB}\n";
+    print "PATH=$env{PATH}\nPERL5LIB=$env{PERL5LIB}\n";
 }
 
 sub cmd_exec {
@@ -68,7 +144,7 @@ sub cmd_find {
 
     my @artifacts = $self->build_repo->find_all($module, $requirement || '0');
     for my $artifact (@artifacts) {
-        printf "%s (%s) at %s\n", $artifact->package, $artifact->version || '0', $artifact->path;
+        printf "%s (%s) in %s\n", $artifact->package, $artifact->version || '0', $artifact->path;
     }
 }
 
@@ -76,7 +152,7 @@ sub cmd_list {
     my($self, $module, $want) = @_;
 
     for my $artifact ($self->resolve) {
-        printf "%s (%s) at %s\n", $artifact->package, $artifact->version || '0', $artifact->path;
+        printf "%s (%s) in %s\n", $artifact->package, $artifact->version || '0', $artifact->path;
     }
 }
 
@@ -108,7 +184,7 @@ sub build_requirements {
 
     if (my $cpanfile = $self->try_cpanfile) {
         require Module::CPANfile;
-        return Module::CPANfile->load($cpanfile)->prereqs->merged_requirements;
+        return Module::CPANfile->load($cpanfile)->prereqs->merged_requirements(['runtime'],['requires']);
     }
 
     return;
@@ -141,10 +217,12 @@ sub resolve {
 
     my(@artifacts, %seen);
 
-    for my $module ($requirements->required_modules) {
+    for my $module (sort $requirements->required_modules) {
         next if $module eq 'perl';
         my $want_version = $requirements->requirements_for_module($module);
-        if (my $artifact = $repo->find($module, $want_version)) {
+        if ($self->is_core($module, $want_version)) {
+            next;
+        } elsif (my $artifact = $repo->find($module, $want_version)) {
             next if $seen{$artifact->path}++;
             push @artifacts, $artifact;
             # TODO: recurse into $artifact's own runtime dependencies
