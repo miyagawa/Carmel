@@ -24,8 +24,9 @@ sub run {
     $self->$call(@args);
 }
 
-sub temp_dir {
-    ($ENV{TMPDIR} || "/tmp") . "/carmel-" . time() . "." . $$;
+sub base_dir {
+    # It just needs to be a temporary location to make re-installation faster
+    "$ENV{HOME}/.perl-carmel/cache/$]";
 }
 
 sub repository_path {
@@ -42,23 +43,13 @@ sub build_repo {
 }
 
 sub cmd_install {
-    my($self, $module, $requirement) = @_;
+    my($self, @args) = @_;
 
-    my $requirements;
-    if ($module) {
-        $requirement =~ s/^@/==/ if $requirement;
-        $self->install_module([ $module, $requirement ]);
-        $requirements = CPAN::Meta::Requirements->from_string_hash({ $module => $requirement || '0' });
+    if (@args) {
+        $self->install("--reinstall", @args);
     } else {
-        $requirements = $self->build_requirements
-          or Carp::croak "Could not locate 'cpanfile' to load module list.";
+        $self->install("--installdeps", ".");
     }
-
-    $self->resolve_recursive(
-        $requirements, {},
-        sub { printf "You have %s (%s) in %s\n", $_[0]->package, $_[0]->version || '0', $_[0]->path },
-        sub { $self->install_module(@_) },
-    );
 }
 
 sub is_core {
@@ -68,32 +59,13 @@ sub is_core {
         return;
     }
 
-    my $accepts = CPAN::Meta::Requirements->from_string_hash({ $module => $want_version })
+    CPAN::Meta::Requirements->from_string_hash({ $module => $want_version })
         ->accepts_module($module, $Module::CoreList::version{$]+0}{$module} || '0');
-
-    # This might not be true, but a good indicator that is dual-live
-    my $upstream_is_cpan = ($Module::CoreList::upstream{$module} || '') eq 'cpan';
-
-    $accepts && !$upstream_is_cpan;
 }
 
-sub install_module {
-    my($self, @modules) = @_;
-
-    my $repo = $self->build_repo;
-
-    my @args;
-    for my $pair (@modules) {
-        my($module, $requirement) = @$pair;
-        my @artifacts = $repo->find_all($module, $requirement || '0');
-        if (@artifacts) {
-            printf "You have %s (%s) in %s\n", $module, $artifacts[0]->version || '0', $artifacts[0]->path;
-        } else {
-            push @args, ($requirement ? "$module~$requirement" : $module);
-        }
-    }
-
-    system $^X, "-S", "cpanm", "--notest", "--reinstall", "-l", $self->temp_dir, @args if @args;
+sub install {
+    my($self, @args) = @_;
+    system $^X, "-S", "cpanm", "--notest", "--reinstall", "-L", $self->base_dir, @args if @args;
 }
 
 sub cmd_export {

@@ -18,8 +18,7 @@ Carmel - CPAN Artifact Repository Manager
   carmel install
 
   # Manually pull a module if you don't have it
-  carmel install DBI @1.633
-  carmel install Plack ">= 1.0000, < 2.0000"
+  carmel install DBI@1.633 Plack@1.0000
 
   # Runs your perl script with modules from artifacts
   carmel exec perl ...
