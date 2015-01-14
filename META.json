@@ -1,5 +1,5 @@
 {
-   "abstract" : "Blah blah blah",
+   "abstract" : "CPAN Artifact Repository Manager",
    "author" : [
       "Tatsuhiko Miyagawa <miyagawa@bulknews.net>"
    ],
@@ -36,8 +36,15 @@
          }
       },
       "runtime" : {
+         "recommends" : {
+            "Carton" : "v1.0.12"
+         },
          "requires" : {
-            "perl" : "5.008005"
+            "CPAN::Meta::Prereqs" : "2.132830",
+            "CPAN::Meta::Requirements" : "2.129",
+            "JSON" : "0",
+            "Module::CPANfile" : "1.1000",
+            "perl" : "5.010001"
          }
       },
       "test" : {
@@ -47,6 +54,17 @@
       }
    },
    "release_status" : "stable",
-   "version" : "0.01"
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/miyagawa/Carmel/issues"
+      },
+      "homepage" : "https://github.com/miyagawa/Carmel",
+      "repository" : {
+         "type" : "git",
+         "url" : "https://github.com/miyagawa/Carmel.git",
+         "web" : "https://github.com/miyagawa/Carmel"
+      }
+   },
+   "version" : "v0.1.0"
 }
 
