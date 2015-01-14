@@ -2,6 +2,7 @@ package Carmel::App;
 use strict;
 use warnings;
 
+use Carmel;
 use Carp ();
 use Carmel::Repository;
 use CPAN::Meta;
@@ -124,11 +125,57 @@ sub cmd_find {
 }
 
 sub cmd_list {
-    my($self, $module, $want) = @_;
+    my($self) = @_;
 
     for my $artifact ($self->resolve) {
         printf "%s (%s) in %s\n", $artifact->package, $artifact->version || '0', $artifact->path;
     }
+}
+
+sub cmd_index {
+    my $self = shift;
+    $self->write_index(*STDOUT);
+}
+
+sub write_index {
+    my($self, $fh) = @_;
+
+    my @packages;
+    for my $artifact ($self->resolve) {
+        while (my($package, $data) = each %{$artifact->install->{provides}}) {
+            push @packages, {
+                package => $package,
+                version => $data->{version} || 'undef',
+                pathname => $artifact->install->{pathname},
+            }
+        }
+    }
+
+    print $fh <<EOF;
+File:         02packages.details.txt
+URL:          http://www.perl.com/CPAN/modules/02packages.details.txt
+Description:  Package names found in Carmel build artifacts
+Columns:      package name, version, path
+Intended-For: Automated fetch routines, namespace documentation.
+Written-By:   Carmel $Carmel::VERSION
+Line-Count:   @{[ $#packages + 1 ]}
+Last-Updated: @{[ scalar localtime ]}
+
+EOF
+
+    for my $p (@packages) {
+        print $fh sprintf "%s %s  %s\n", pad($p->{package}, 32), pad($p->{version}, 10, 1), $p->{pathname};
+    }
+}
+
+sub pad {
+    my($str, $len, $left) = @_;
+
+    my $howmany = $len - length($str);
+    return $str if $howmany <= 0;
+
+    my $pad = " " x $howmany;
+    return $left ? "$pad$str" : "$str$pad";
 }
 
 sub try_snapshot {
