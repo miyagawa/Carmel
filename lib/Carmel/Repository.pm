@@ -24,13 +24,31 @@ sub load {
     while (my $ent = $dh->read) {
         next unless -d "$dir/$ent" && -e "$dir/$ent/blib";
 
-        my $file = "$dir/$ent/blib/meta/install.json";
-        my $install = read_json($file);
-
+        my $install = $self->_install_info("$dir/$ent");
         while (my($package, $data) = each %{ $install->{provides} }) {
             $self->add($package, "$dir/$ent", $data->{version}, $install->{version});
         }
     }
+}
+
+sub _install_info {
+    my($self, $dir) = @_;
+
+    my $file = "$dir/blib/meta/install.json";
+
+    # cpanm build artifact
+    if (-e $file) {
+        return read_json($file);
+    }
+
+    # CPAN.pm build artifact
+    if (-e "$dir.yml") {
+        require Carmel::InstallInfo;
+        Carmel::InstallInfo->build($dir, $file);
+        return read_json($file);
+    }
+
+    die "Could not read build artifact from $dir";
 }
 
 sub add {
