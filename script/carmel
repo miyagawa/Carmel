@@ -1,0 +1,22 @@
+#!perl
+use strict;
+use Carmel::App;
+
+exit Carmel::App->new->run(@ARGV);
+
+__END__
+
+=head1 NAME
+
+carmel - CPAN Artifact Repository Manager
+
+=head1 SYNOPSIS
+
+  > carmel install
+  > carmel exec perl ...
+
+=head1 SEE ALSO
+
+L<Carmel>
+
+=cut
