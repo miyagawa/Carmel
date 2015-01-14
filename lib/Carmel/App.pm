@@ -53,36 +53,11 @@ sub cmd_install {
           or Carp::croak "Could not locate 'cpanfile' to load module list.";
     }
 
-    $self->install_recursive($requirements, {});
-}
-
-sub install_recursive {
-    my($self, $requirements, $seen) = @_;
-
-    my $repo = $self->build_repo;
-    my $recurse;
-
-    my @missing;
-    for my $module (sort $requirements->required_modules) {
-        next if $module eq 'perl';
-
-        my $want_version = $requirements->requirements_for_module($module);
-        if ($self->is_core($module, $want_version)) {
-            next;
-        } elsif (my $artifact = $repo->find($module, $want_version)) {
-            next if $seen->{$artifact->path}++;
-            printf "You have %s (%s) in %s\n", $artifact->package, $artifact->version || '0', $artifact->path;
-            my $meta = CPAN::Meta->load_file($artifact->path . "/MYMETA.json");
-            $requirements->add_requirements($meta->effective_prereqs->merged_requirements(['runtime'], ['requires']));
-        } else {
-            push @missing, [ $module, $want_version ];
-        }
-
-        $recurse++;
-    }
-
-    $self->install_module(@missing) if @missing;
-    $self->install_recursive($requirements, $seen) if $recurse;
+    $self->resolve_recursive(
+        $requirements, {},
+        sub { printf "You have %s (%s) in %s\n", $_[0]->package, $_[0]->version || '0', $_[0]->path },
+        sub { $self->install_module(@_) },
+    );
 }
 
 sub is_core {
@@ -207,31 +182,53 @@ sub snapshot_to_requirements {
     $requirements;
 }
 
+sub resolve_recursive {
+    my($self, $requirements, $seen, $cb, $missing_cb) = @_;
+
+    my $repo = $self->build_repo;
+    my $recurse;
+
+    my @missing;
+    for my $module (sort $requirements->required_modules) {
+        next if $module eq 'perl';
+
+        my $want_version = $requirements->requirements_for_module($module);
+        if ($self->is_core($module, $want_version)) {
+            next;
+        } elsif (my $artifact = $repo->find($module, $want_version)) {
+            next if $seen->{$artifact->path}++;
+            $cb->($artifact);
+            my $meta = CPAN::Meta->load_file($artifact->path . "/MYMETA.json");
+            $requirements->add_requirements($meta->effective_prereqs->merged_requirements(['runtime'], ['requires']));
+        } else {
+            push @missing, [ $module, $want_version ];
+        }
+
+        $recurse++;
+    }
+
+    $missing_cb->(@missing) if @missing;
+    $self->resolve_recursive($requirements, $seen, $cb, $missing_cb) if $recurse;
+}
+
 sub resolve {
     my($self, $requirements) = @_;
 
     $requirements ||= $self->build_requirements
       or Carp::croak "Could not locate 'cpanfile' to load module list.";
 
-    my $repo = $self->build_repo;
+    my @artifacts;
+    $self->resolve_recursive($requirements, {}, sub { push @artifacts, @_ }, sub { $self->warn_missing(@_) });
 
-    my(@artifacts, %seen);
+    @artifacts;
+}
 
-    for my $module (sort $requirements->required_modules) {
-        next if $module eq 'perl';
-        my $want_version = $requirements->requirements_for_module($module);
-        if ($self->is_core($module, $want_version)) {
-            next;
-        } elsif (my $artifact = $repo->find($module, $want_version)) {
-            next if $seen{$artifact->path}++;
-            push @artifacts, $artifact;
-            # TODO: recurse into $artifact's own runtime dependencies
-        } else {
-            Carp::carp "Could not find an artifact for $module => $want_version";
-        }
+sub warn_missing {
+    my($self, @missing) = @_;
+
+    for my $missing (@missing) {
+        Carp::carp "Could not find an artifact for $missing->[0] => $missing->[1]";
     }
-
-    return @artifacts;
 }
 
 sub env {
