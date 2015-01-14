@@ -139,12 +139,13 @@ sub resolve {
 
     my $repo = $self->build_repo;
 
-    my @artifacts;
+    my(@artifacts, %seen);
 
     for my $module ($requirements->required_modules) {
         next if $module eq 'perl';
         my $want_version = $requirements->requirements_for_module($module);
         if (my $artifact = $repo->find($module, $want_version, $requirements)) {
+            next if $seen{$artifact->path}++;
             push @artifacts, $artifact;
             # TODO: recurse into $artifact's own runtime dependencies
         } else {
