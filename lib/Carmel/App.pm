@@ -283,9 +283,15 @@ sub env {
 
     my @artifacts = $self->resolve(@args);
     return (
-        PATH => join(":", (map $_->paths, @artifacts), ($ENV{PATH} || '')),
-        PERL5LIB => join(":", (map $_->libs, @artifacts), ($ENV{PERL5LIB} || '')),
+        _join(PATH => map $_->paths, @artifacts),
+        _join(PERL5LIB => map $_->libs, @artifacts),
     );
+}
+
+sub _join {
+    my($env, @list) = @_;
+    push @list, $ENV{$env} if $ENV{$env};
+    return ($env => join(":", @list));
 }
 
 1;
