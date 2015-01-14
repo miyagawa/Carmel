@@ -4,7 +4,7 @@ Carmel - CPAN Artifact Repository Manager
 
 # SYNOPSIS
 
-    # Run with a directory with cpanfile or META.json
+    # Run with a directory with cpanfile or cpanfile.snapshot
     carmel install
 
     # Manually pull the modules
