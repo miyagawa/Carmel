@@ -55,7 +55,7 @@ sub add {
     my($self, $package, $path, $version, $dist_version) = @_;
 
     if (my $artifact = $self->lookup($package, $version)) {
-        if ($self->_compare($dist_version, $artifact->dist_version)) {
+        if ($self->_compare($dist_version, $artifact->dist_version) > 0) {
             $self->{$package}{$version} = [ $path, $dist_version ];
         }
     } else {
