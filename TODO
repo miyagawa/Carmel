@@ -3,4 +3,4 @@
 - Add Module::CPANfile shortcut to "require" all listed modules for given phase (like Bundler.require)
 - runtime checks to detect modules loaded from site_perl by installing @INC hooks
 - Add a mechanism to *generate* snapshot like Carton does
-
+- Don't need to run "install" with cpanm because all you need to do is "build"
