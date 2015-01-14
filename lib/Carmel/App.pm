@@ -46,7 +46,7 @@ sub cmd_install {
     my($self, @args) = @_;
 
     if (@args) {
-        $self->install("--reinstall", @args);
+        $self->install(@args);
     } else {
         $self->install("--installdeps", ".");
     }
@@ -65,7 +65,7 @@ sub is_core {
 
 sub install {
     my($self, @args) = @_;
-    system $^X, "-S", "cpanm", "--notest", "--reinstall", "-L", $self->base_dir, @args if @args;
+    system $^X, "-S", "cpanm", "--notest", "-L", $self->base_dir, @args if @args;
 }
 
 sub cmd_export {
