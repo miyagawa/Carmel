@@ -23,6 +23,9 @@ Carmel - CPAN Artifact Repository Manager
   # Runs your perl script with modules from artifacts
   carmel exec perl ...
 
+  # Runs your perl script with a checker to guarantee everything is loaded from Carmel
+  carmel exec perl -MDevel::Carmel script.pl
+
   # prints export PERL5LIB=... etc for shell scripting
   carmel export
 
