@@ -36,19 +36,33 @@ sub _package {
 
 sub new {
     my($class, @inc) = @_;
-    bless { inc => \@inc }, shift;
+    bless {
+        inc => \@inc,
+        corelist => {},
+    }, $class;
 }
 
 sub Devel::Carmel::INC {
     my($self, $file) = @_;
 
-    return if $file =~ /\.pl$/; # Config_heavy.pl etc.
-
-    my @caller = caller 1;
-    return if $caller[3] =~ /^\(eval/ or defined $caller[6];
+    # Config_heavy.pl etc.
+    return if $file =~ /\.pl$/;
 
     my $mod = _package($file);
+    my @caller = caller 0;
+
+    # eval { require Module }
+    return if $caller[3] =~ /^\(eval/ or defined $caller[6];
+
+    # FIXME: Updated core module calls a new package
+    if ($self->{corelist}{$caller[0]}) {
+        $self->{corelist}{$mod} = 1;
+        return;
+    }
+
+    # core module
     if ($Module::CoreList::version{$]+0}{$mod}) {
+        $self->{corelist}{$mod} = 1;
         return;
     }
 
