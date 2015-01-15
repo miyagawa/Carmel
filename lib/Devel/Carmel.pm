@@ -42,10 +42,10 @@ sub new {
 sub Devel::Carmel::INC {
     my($self, $file) = @_;
 
+    return if $file =~ /\.pl$/; # Config_heavy.pl etc.
+
     my @caller = caller 1;
-    if ($caller[3] =~ /^\(eval/ or defined $caller[6]) {
-        return;
-    }
+    return if $caller[3] =~ /^\(eval/ or defined $caller[6];
 
     my $mod = _package($file);
     if ($Module::CoreList::version{$]+0}{$mod}) {
