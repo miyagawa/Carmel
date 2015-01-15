@@ -5,3 +5,5 @@
 - runtime checks to detect modules loaded from site_perl by installing @INC hooks
 - Add a mechanism to *generate* snapshot like Carton does
 - Don't even need to run "install" with cpanm because all you need to do is "build"
+- Core module adding a new package will be triggerd by Devel::Carmel (e.g. ExtUtils::MakeMaker::version)
+
