@@ -71,12 +71,31 @@ directory structure would look like:
         arch/
         lib/
 
-Carmel scans this directory and creates the mapping of which package
-belongs to which build directory. Given the list of modules and
-requirements (using C<cpanfile> or even better C<cpanfile.snapshot>
-from L<Carton>), Carmel lists all the build directories you need, and
-then prepend the C<blib> directories to C<PERL5LIB> environment
-variables.
+Carmel scans this directory and creates the mapping of which version
+of any package belongs to which build directory.
+
+Given the list of modules and requirements (using C<cpanfile> or even
+better C<cpanfile.snapshot> from L<Carton>), Carmel lists all the
+build directories you need, and then prepend the C<blib> directories
+to C<PERL5LIB> environment variables.
+
+For example, if you have:
+
+  requires 'URI', '== 1.63';
+
+Carmel finds URI package with C<$VERSION> set to 1.63 in
+C<URI-1.63/blib/lib> so it will set that directory. Instead, if you
+have:
+
+  requires 'URI';
+
+it will find the latest that satisfies the (empty) requirement, which
+is in C<URI-1.64/blib/lib>.
+
+The fact that it prefers the latest, rather than the oldest, might
+change in the future once a mechanism to make snapshot is instroduced,
+since you will not like to upgrade one of the dependencies
+unexpectedly.
 
 You have a choice to execute a subprocess from Carmel, by using the
 C<exec> sub command. If you prefer a fine grained control, you can
