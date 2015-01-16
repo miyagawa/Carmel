@@ -66,7 +66,7 @@ sub Devel::Carmel::INC {
         return;
     }
 
-    die "Can't locate $file in \@INC in Carmel artifacts (You may need to install the $mod module with carmel install) (\@INC contains: @{$self->{inc}}).\n";
+    die "Can't locate $file in \@INC with Carmel artifacts (You may need to add `requires '$mod';` to your cpanfile and run carmel install) (\@INC contains: @{$self->{inc}}).\n";
 }
 
 1;
