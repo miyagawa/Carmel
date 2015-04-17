@@ -254,7 +254,7 @@ sub resolve_recursive {
             $root_reqs->add_requirements($reqs);
             $self->resolve_recursive($root_reqs, $reqs, $seen, $cb, $depth + 1);
         } else {
-            die "Coulld not find an artifact for $module => $want_version\n";
+            die "Coulld not find an artifact for $module => $want_version\nYou need to run `carmel install` first to get the modules installed and artifacts built.\n";
         }
     }
 }
