@@ -20,7 +20,7 @@ sub _find_border {
 }
 
 # This assumes it's run under carmel exec
-my $base = $ENV{PERL_CARMEL_REPO} || "$ENV{HOME}/.cpanm/builds";
+my $base = $ENV{PERL_CARMEL_REPO} || "$ENV{HOME}/.perl-carmel/builds";
 my $index = _find_border qr!$base/.*?/blib/(lib|arch)?$!, @INC;
 
 if ($index) {
