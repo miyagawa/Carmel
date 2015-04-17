@@ -2,5 +2,9 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.1  2015-04-17 22:45:55 CEST
+        - include archname in build artifacts directory
+        - remove unused modules
+
 v0.1.0  2015-04-17 19:59:52 CEST
         - Initial release
