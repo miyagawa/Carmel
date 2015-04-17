@@ -1,9 +1,0 @@
-- infinite loop when an artifact is not found
-- revert to the use of -L, but make sure it installs to the same (shared) directory over time to speed up installs @done(2015-01-14)
-- Build artifacts might contain binaries, which should be perl version dependent
-- Add Module::CPANfile shortcut to "require" all listed modules for given phase (like Bundler.require)
-- runtime checks to detect modules loaded from site_perl by installing @INC hooks
-- Add a mechanism to *generate* snapshot like Carton does
-- Don't even need to run "install" with cpanm because all you need to do is "build"
-- Core module adding a new package will be triggerd by Devel::Carmel (e.g. ExtUtils::MakeMaker::version) @done(2015-01-14)
-
