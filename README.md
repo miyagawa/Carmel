@@ -7,11 +7,14 @@ Carmel - CPAN Artifact Repository Manager
     # Run with a directory with cpanfile or cpanfile.snapshot
     carmel install
 
-    # Manually pull the modules
-    carmel install DBI@1.633 Plack@1.0032
+    # Manually pull a module if you don't have it
+    carmel install DBI@1.633 Plack@1.0000
 
     # Runs your perl script with modules from artifacts
     carmel exec perl ...
+
+    # Runs your perl script with a checker to guarantee everything is loaded from Carmel
+    carmel exec perl -MDevel::Carmel script.pl
 
     # prints export PERL5LIB=... etc for shell scripting
     carmel export
@@ -37,14 +40,11 @@ paths to include upon runtime.
 
 # HOW IT WORKS
 
-Carmel requires `cpanminus` with a patch to support keeping build
-artifacts. [https://github.com/miyagawa/cpanminus/pull/429](https://github.com/miyagawa/cpanminus/pull/429)
+Carmel will keep the build directory (artifacts) after a cpanm
+installation in a repository, which defaults to `$HOME/.perl-carmel/builds`,
+and your directory structure would look like:
 
-With the patch, cpanm will keep the build directory (artifacts) in a
-repository, which defaults to `$HOME/.cpanm/builds`, and your
-directory structure would look like:
-
-    $HOME/.cpanm/builds
+    $HOME/.perl-carmel/builds
       Plack-1.0033/
         blib/
           arch/
@@ -58,17 +58,36 @@ directory structure would look like:
           arch/
           lib/
 
-Carmel scans this directory and creates the mapping of which package
-belongs to which build directory. Given the list of modules and
-requirements (using `cpanfile` or even better `cpanfile.snapshot`
-from [Carton](https://metacpan.org/pod/Carton)), Carmel lists all the build directories you need, and
-then prepend the `blib` directories to `PERL5LIB` environment
-variables.
+Carmel scans this directory and creates the mapping of which version
+of any package belongs to which build directory.
 
-You have a choice to exec a sub process from Carmel, by using the
-`exec` sub command. If you prefer full control, you can also use
-`env` or `export` command to integrate with your own shell script
-wrapper.
+Given the list of modules and requirements (using `cpanfile` or even
+better `cpanfile.snapshot` from [Carton](https://metacpan.org/pod/Carton)), Carmel lists all the
+build directories you need, and then prepend the `blib` directories
+to `PERL5LIB` environment variables.
+
+For example, if you have:
+
+    requires 'URI', '== 1.63';
+
+Carmel finds URI package with `$VERSION` set to 1.63 in
+`URI-1.63/blib/lib` so it will set that directory. Instead, if you
+have:
+
+    requires 'URI';
+
+it will find the latest that satisfies the (empty) requirement, which
+is in `URI-1.64/blib/lib`.
+
+The fact that it prefers the latest, rather than the oldest, might
+change in the future once a mechanism to make snapshot is instroduced,
+since you will not like to upgrade one of the dependencies
+unexpectedly.
+
+You have a choice to execute a subprocess from Carmel, by using the
+`exec` sub command. If you prefer a fine grained control, you can
+also use `env` or `export` command to integrate with your own shell
+script wrapper.
 
 # AUTHOR
 
