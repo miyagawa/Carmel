@@ -56,6 +56,11 @@ sub cmd_install {
     } else {
         $self->install("--installdeps", ".");
     }
+
+    my @artifacts;
+    $self->resolve(sub { push @artifacts, $_[0] });
+
+    print "---> Complete! @{[scalar @artifacts]} artifacts resolved and installed.\n";
 }
 
 sub is_core {
