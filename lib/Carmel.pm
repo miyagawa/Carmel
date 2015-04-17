@@ -51,10 +51,10 @@ paths to include upon runtime.
 =head1 HOW IT WORKS
 
 Carmel will keep the build directory (artifacts) after a cpanm
-installation in a repository, which defaults to C<$HOME/.perl-carmel/builds>,
+installation in a repository, which defaults to C<$HOME/.perl-carmel/builds/{version}-{archname}>,
 and your directory structure would look like:
 
-  $HOME/.perl-carmel/builds
+  $HOME/.perl-carmel/builds/5.20.1-darwin-2level
     Plack-1.0033/
       blib/
         arch/

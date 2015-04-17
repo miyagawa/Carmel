@@ -5,6 +5,7 @@ use warnings;
 use Carmel;
 use Carp ();
 use Carmel::Repository;
+use Config qw(%Config);
 use CPAN::Meta;
 use CPAN::Meta::Requirements;
 use File::Temp;
@@ -14,7 +15,9 @@ use Module::CoreList;
 
 sub new {
     my $class = shift;
-    bless {}, $class;
+    bless {
+        perl_arch => "$]-$Config{archname}",
+    }, $class;
 }
 
 sub run {
@@ -29,12 +32,13 @@ sub run {
 
 sub base_dir {
     # It just needs to be a temporary location to make re-installation faster
-    "$ENV{HOME}/.perl-carmel/cache/$]";
+    my $self = shift;
+    "$ENV{HOME}/.perl-carmel/cache/$self->{perl_arch}";
 }
 
 sub repository_path {
     my $self = shift;
-    $ENV{PERL_CARMEL_REPO} || "$ENV{HOME}/.perl-carmel/builds";
+    $ENV{PERL_CARMEL_REPO} || "$ENV{HOME}/.perl-carmel/builds/$self->{perl_arch}";
 }
 
 sub build_repo {
