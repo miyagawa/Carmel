@@ -50,14 +50,11 @@ paths to include upon runtime.
 
 =head1 HOW IT WORKS
 
-Carmel requires C<cpanminus> with a patch to support keeping build
-artifacts. L<https://github.com/miyagawa/cpanminus/pull/429>
+Carmel will keep the build directory (artifacts) after a cpanm
+installation in a repository, which defaults to C<$HOME/.perl-carmel/builds>,
+and your directory structure would look like:
 
-With the patch, cpanm will keep the build directory (artifacts) in a
-repository, which defaults to C<$HOME/.cpanm/builds>, and your
-directory structure would look like:
-
-  $HOME/.cpanm/builds
+  $HOME/.perl-carmel/builds
     Plack-1.0033/
       blib/
         arch/

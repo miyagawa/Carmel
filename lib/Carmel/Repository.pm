@@ -41,13 +41,6 @@ sub _install_info {
         return read_json($file);
     }
 
-    # CPAN.pm build artifact
-    if (-e "$dir.yml") {
-        require Carmel::InstallInfo;
-        Carmel::InstallInfo->build($dir, $file);
-        return read_json($file);
-    }
-
     die "Could not read build artifact from $dir";
 }
 

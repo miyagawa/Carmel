@@ -7,6 +7,9 @@ use Carp ();
 use Carmel::Repository;
 use CPAN::Meta;
 use CPAN::Meta::Requirements;
+use File::Temp;
+use File::Basename;
+use File::Copy::Recursive;
 use Module::CoreList;
 
 sub new {
@@ -31,8 +34,7 @@ sub base_dir {
 
 sub repository_path {
     my $self = shift;
-    $ENV{PERL_CARMEL_REPO}
-      || (($ENV{PERL_CPANM_HOME} || "$ENV{HOME}/.cpanm") . "/builds");
+    $ENV{PERL_CARMEL_REPO} || "$ENV{HOME}/.perl-carmel/builds";
 }
 
 sub build_repo {
@@ -65,7 +67,16 @@ sub is_core {
 
 sub install {
     my($self, @args) = @_;
+
+    my $dir = File::Temp::tempdir(CLEANUP => 1);
+    local $ENV{PERL_CPANM_HOME} = $dir;
     system $^X, "-S", "cpanm", "--notest", "-L", $self->base_dir, @args if @args;
+
+    for my $ent (glob "$dir/latest-build/*") {
+        next unless -d $ent;
+        next unless -e "$ent/blib/meta/install.json";
+        File::Copy::Recursive::dircopy($ent, $self->repository_path . "/" . File::Basename::basename($ent));
+    }
 }
 
 sub cmd_export {
