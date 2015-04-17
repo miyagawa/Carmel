@@ -84,13 +84,13 @@ sub install {
 }
 
 sub cmd_export {
-    my($self, @args) = @_;
+    my($self) = @_;
     my %env = $self->env;
     print "export PATH=$env{PATH} PERL5LIB=$env{PERL5LIB}\n";
 }
 
 sub cmd_env {
-    my($self, @args) = @_;
+    my($self) = @_;
     my %env = $self->env;
     print "PATH=$env{PATH}\nPERL5LIB=$env{PERL5LIB}\n";
 }
@@ -114,9 +114,15 @@ sub cmd_find {
 sub cmd_list {
     my($self) = @_;
 
-    for my $artifact ($self->resolve) {
+    $self->resolve(sub {
+        my $artifact = shift;
         printf "%s (%s) in %s\n", $artifact->package, $artifact->version || '0', $artifact->path;
-    }
+    });
+}
+
+sub cmd_tree {
+    my($self) = @_;
+
 }
 
 sub cmd_index {
@@ -241,21 +247,22 @@ sub resolve_recursive {
 }
 
 sub resolve {
-    my($self, $requirements) = @_;
+    my($self, $cb) = @_;
 
-    $requirements ||= $self->build_requirements
+    my $requirements = $self->build_requirements
       or Carp::croak "Could not locate 'cpanfile' to load module list.";
 
     my @artifacts;
-    $self->resolve_recursive($requirements, $requirements, {}, sub { push @artifacts, @_ });
+    $self->resolve_recursive($requirements, $requirements, {}, $cb);
 
     @artifacts;
 }
 
 sub env {
-    my($self, @args) = @_;
+    my($self) = @_;
 
-    my @artifacts = $self->resolve(@args);
+    my @artifacts;
+    $self->resolve(sub { push @artifacts, @_ });
     return (
         _join(PATH => map $_->paths, @artifacts),
         _join(PERL5LIB => map $_->libs, @artifacts),
