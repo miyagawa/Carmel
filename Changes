@@ -2,6 +2,10 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.2  2015-04-17 23:25:24 CEST
+        - fix possible infinite loop in many commands
+        - implement tree command
+
 v0.1.1  2015-04-17 22:45:55 CEST
         - include archname in build artifacts directory
         - remove unused modules
