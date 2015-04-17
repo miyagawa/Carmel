@@ -114,14 +114,21 @@ sub cmd_find {
 sub cmd_list {
     my($self) = @_;
 
-    $self->resolve(sub {
-        my $artifact = shift;
+    my @artifacts;
+    $self->resolve(sub { push @artifacts, $_[0] });
+
+    for my $artifact (sort { $a->package cmp $b->package } @artifacts) {
         printf "%s (%s) in %s\n", $artifact->package, $artifact->version || '0', $artifact->path;
-    });
+    }
 }
 
 sub cmd_tree {
     my($self) = @_;
+
+    $self->resolve(sub {
+        my($artifact, $depth) = @_;
+        printf "%s%s (%s) in %s\n", (" " x $depth), $artifact->package, $artifact->version || '0', $artifact->path;
+    });
 
 }
 
@@ -134,7 +141,8 @@ sub write_index {
     my($self, $fh) = @_;
 
     my @packages;
-    for my $artifact ($self->resolve) {
+    $self->resolve(sub {
+        my $artifact = shift;
         while (my($package, $data) = each %{$artifact->install->{provides}}) {
             push @packages, {
                 package => $package,
@@ -142,7 +150,7 @@ sub write_index {
                 pathname => $artifact->install->{pathname},
             }
         }
-    }
+    });
 
     print $fh <<EOF;
 File:         02packages.details.txt
@@ -223,7 +231,7 @@ sub snapshot_to_requirements {
 }
 
 sub resolve_recursive {
-    my($self, $root_reqs, $requirements, $seen, $cb) = @_;
+    my($self, $root_reqs, $requirements, $seen, $cb, $depth) = @_;
 
     my $repo = $self->build_repo;
 
@@ -235,11 +243,11 @@ sub resolve_recursive {
             next;
         } elsif (my $artifact = $repo->find($module, $want_version)) {
             next if $seen->{$artifact->path}++;
-            $cb->($artifact);
+            $cb->($artifact, $depth);
             my $meta = CPAN::Meta->load_file($artifact->path . "/MYMETA.json");
             my $reqs = $meta->effective_prereqs->merged_requirements(['runtime'], ['requires']);
             $root_reqs->add_requirements($reqs);
-            $self->resolve_recursive($root_reqs, $reqs, $seen, $cb);
+            $self->resolve_recursive($root_reqs, $reqs, $seen, $cb, $depth + 1);
         } else {
             die "Coulld not find an artifact for $module => $want_version\n";
         }
@@ -253,7 +261,7 @@ sub resolve {
       or Carp::croak "Could not locate 'cpanfile' to load module list.";
 
     my @artifacts;
-    $self->resolve_recursive($requirements, $requirements, {}, $cb);
+    $self->resolve_recursive($requirements, $requirements, {}, $cb, 0);
 
     @artifacts;
 }
@@ -262,7 +270,7 @@ sub env {
     my($self) = @_;
 
     my @artifacts;
-    $self->resolve(sub { push @artifacts, @_ });
+    $self->resolve(sub { push @artifacts, $_[0] });
     return (
         _join(PATH => map $_->paths, @artifacts),
         _join(PERL5LIB => map $_->libs, @artifacts),
