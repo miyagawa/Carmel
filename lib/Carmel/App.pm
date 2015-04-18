@@ -264,7 +264,7 @@ sub resolve_recursive {
     for my $module (sort $requirements->required_modules) {
         next if $module eq 'perl';
 
-        my $want_version = $requirements->requirements_for_module($module);
+        my $want_version = $root_reqs->requirements_for_module($module);
         next if $self->is_core($module, $want_version);
 
         # FIXME there's a chance different version of the same module can be loaded here
