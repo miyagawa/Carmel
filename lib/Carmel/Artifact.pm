@@ -1,5 +1,6 @@
 package Carmel::Artifact;
 use strict;
+use CPAN::Meta;
 
 sub new {
     my($class, @args) = @_;
@@ -27,6 +28,16 @@ sub paths {
 sub libs {
     my $self = shift;
     ($self->blib . "/arch", $self->blib . "/lib");
+}
+
+sub meta {
+    my $self = shift;
+    CPAN::Meta->load_file($self->path . "/MYMETA.json");
+}
+
+sub requirements {
+    my $self = shift;
+    $self->meta->effective_prereqs->merged_requirements(['runtime'], ['requires']);
 }
 
 1;

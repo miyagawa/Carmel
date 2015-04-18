@@ -6,7 +6,6 @@ use Carmel;
 use Carp ();
 use Carmel::Repository;
 use Config qw(%Config);
-use CPAN::Meta;
 use CPAN::Meta::Requirements;
 use File::Temp;
 use File::Basename;
@@ -256,9 +255,9 @@ sub resolve_recursive {
         next if $seen->{$artifact->path}++;
         $cb->($artifact, $depth);
 
-        my $meta = CPAN::Meta->load_file($artifact->path . "/MYMETA.json");
-        my $reqs = $meta->effective_prereqs->merged_requirements(['runtime'], ['requires']);
+        my $reqs = $artifact->requirements;
         $root_reqs->add_requirements($reqs);
+
         $self->resolve_recursive($root_reqs, $reqs, $seen, $cb, $depth + 1);
     }
 }
