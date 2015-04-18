@@ -78,9 +78,7 @@ sub cmd_install {
 sub is_core {
     my($self, $module, $want_version) = @_;
 
-    unless (exists $Module::CoreList::version{$]+0}{$module}) {
-        return;
-    }
+    return unless exists $Module::CoreList::version{$]+0}{$module};
 
     CPAN::Meta::Requirements->from_string_hash({ $module => $want_version })
         ->accepts_module($module, $Module::CoreList::version{$]+0}{$module} || '0');
