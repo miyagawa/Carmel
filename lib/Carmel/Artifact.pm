@@ -1,6 +1,7 @@
 package Carmel::Artifact;
 use strict;
 use CPAN::Meta;
+use File::Basename ();
 
 sub new {
     my($class, @args) = @_;
@@ -11,6 +12,10 @@ sub package { $_[0]->[0] }
 sub version { $_[0]->[1] || '0' }
 sub path    { $_[0]->[2] }
 sub install { $_[0]->[3] }
+
+sub distname {
+    File::Basename::basename($_[0]->path);
+}
 
 sub dist_version {
     $_[0]->install->{version};
