@@ -10,6 +10,7 @@ requires 'CPAN::DistnameInfo';
 requires 'File::pushd';
 requires 'YAML';
 requires 'Module::CoreList';
+requires 'App::cpanminus', '1.7027';
 
 recommends 'Carton', 'v1.0.12';
 
