@@ -58,11 +58,12 @@ sub cmd_install {
 
     if (@args) {
         $self->install(@args);
-    } else {
-        my $cpanfile = File::Temp->new->filename;
-        $self->requirements_to_cpanfile->save($cpanfile);
-        $self->install("--installdeps", "--cpanfile", $cpanfile, ".");
+        return;
     }
+
+    my $cpanfile = File::Temp->new->filename;
+    $self->requirements_to_cpanfile->save($cpanfile);
+    $self->install("--installdeps", "--cpanfile", $cpanfile, ".");
 
     my @artifacts;
     $self->resolve(sub {
