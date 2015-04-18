@@ -67,7 +67,8 @@ sub Devel::Carmel::INC {
         return;
     }
 
-    die "Can't locate $file in \@INC with Carmel artifacts (You may need to add `requires '$mod';` to your cpanfile and run carmel install) (\@INC contains: @{$self->{inc}}).\n";
+    # Module::Runtime::use_package_optimistically tries to parse this message.
+    die "Can't locate $file in \@INC with Carmel artifacts (You may need to add `requires '$mod';` to your cpanfile and run carmel install) (\@INC contains: @{$self->{inc}}) at $caller[1] line $caller[2].\n";
 }
 
 1;
