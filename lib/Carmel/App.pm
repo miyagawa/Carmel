@@ -251,6 +251,7 @@ sub apply_snapshot_recursively {
     for my $module (@$modules) {
         my $dist = $snapshot->find($module) or next;
         my $version = $dist->version_for($module);
+        # FIXME in carmel update, conflicting version requirement should be ignored
         $requirements->exact_version($module, $version);
         $requirements->add_requirements($dist->requirements);
         $self->apply_snapshot_recursively($requirements, $snapshot, [$dist->requirements->required_modules]);
