@@ -116,8 +116,4 @@ it under the same terms as Perl itself.
 
 L<App::cpanminus> L<Carton>
 
-https://github.com/ingydotnet/only-pm
-
-https://github.com/gugod/perlrocks
-
 =cut
