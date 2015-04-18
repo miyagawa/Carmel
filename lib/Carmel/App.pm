@@ -180,7 +180,7 @@ Last-Updated: @{[ scalar localtime ]}
 
 EOF
 
-    for my $p (@packages) {
+    for my $p (sort { $a->{package} cmp $b->{package} } @packages) {
         print $fh sprintf "%s %s  %s\n", pad($p->{package}, 32), pad($p->{version}, 10, 1), $p->{pathname};
     }
 }
