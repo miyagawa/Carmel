@@ -2,6 +2,8 @@ package Devel::Carmel;
 use Config;
 use Module::CoreList;
 
+sub DB::DB {} # allow -d:Carmel
+
 sub _find_border {
     my($re, @entry) = @_;
 
