@@ -270,11 +270,7 @@ sub resolve {
 
     my $requirements = $self->build_requirements
       or Carp::croak "Could not locate 'cpanfile' to load module list.";
-
-    my @artifacts;
     $self->resolve_recursive($requirements, $requirements, {}, $cb, 0);
-
-    @artifacts;
 }
 
 sub env {
