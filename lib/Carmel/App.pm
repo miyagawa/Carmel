@@ -40,6 +40,11 @@ sub repository_path {
     $ENV{PERL_CARMEL_REPO} || "$ENV{HOME}/.perl-carmel/builds/$self->{perl_arch}";
 }
 
+sub repo {
+    my $self = shift;
+    $self->{repo} ||= $self->build_repo;
+}
+
 sub build_repo {
     my $self = shift;
     my $repo = Carmel::Repository->new;
@@ -109,7 +114,7 @@ sub cmd_exec {
 sub cmd_find {
     my($self, $module, $requirement) = @_;
 
-    my @artifacts = $self->build_repo->find_all($module, $requirement || '0');
+    my @artifacts = $self->repo->find_all($module, $requirement || '0');
     for my $artifact (@artifacts) {
         printf "%s (%s) in %s\n", $artifact->package, $artifact->version || '0', $artifact->path;
     }
@@ -241,15 +246,13 @@ sub snapshot_to_requirements {
 sub resolve_recursive {
     my($self, $root_reqs, $requirements, $seen, $cb, $depth) = @_;
 
-    my $repo = $self->build_repo;
-
     for my $module (sort $requirements->required_modules) {
         next if $module eq 'perl';
 
         my $want_version = $requirements->requirements_for_module($module);
         next if $self->is_core($module, $want_version);
 
-        my $artifact = $repo->find($module, $want_version)
+        my $artifact = $self->repo->find($module, $want_version)
           or die "Could not find an artifact for $module => $want_version\nYou need to run `carmel install` first to get the modules installed and artifacts built.\n";
 
         next if $seen->{$artifact->path}++;
