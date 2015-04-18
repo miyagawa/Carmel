@@ -67,9 +67,7 @@ sub cmd_install {
     my @artifacts;
     $self->resolve(sub {
         my($artifact, $depth) = @_;
-        if ($depth == 0) {
-            printf "Using %s (%s)\n", $artifact->package, $artifact->version || '0';
-        }
+        printf "Using %s (%s)\n", $artifact->package, $artifact->version || '0';
         push @artifacts, $artifact;
     });
 
