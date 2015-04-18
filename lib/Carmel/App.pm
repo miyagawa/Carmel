@@ -11,6 +11,7 @@ use File::Temp;
 use File::Basename;
 use File::Copy::Recursive;
 use Module::CoreList;
+use Module::CPANfile;
 
 sub new {
     my $class = shift;
@@ -199,9 +200,6 @@ sub pad {
 sub try_snapshot {
     my $self = shift;
 
-    # TODO loading snapshot without install causes artifacts not found
-    return;
-
     if (my $cpanfile = $self->try_cpanfile) {
         return "$cpanfile.snapshot" if -e "$cpanfile.snapshot";
     }
@@ -221,45 +219,44 @@ sub requirements {
 }
 
 sub build_requirements {
-    my($self, @args) = @_;
+    my $self = shift;
 
-    # TODO support more explicit way to load the list of modules
+    my $cpanfile = $self->try_cpanfile
+      or Carp::croak "Could not locate 'cpanfile' to load module list.";
+
+    my $requirements = Module::CPANfile->load($cpanfile)
+      ->prereqs->merged_requirements(['runtime', 'test'],['requires']);
 
     if (my $snapshot = $self->try_snapshot) {
         require Carton::Snapshot;
         my $snapshot = Carton::Snapshot->new(path => $snapshot);
-        return $self->snapshot_to_requirements($snapshot);
+        $self->apply_snapshot($requirements, $snapshot);
     }
 
-    if (my $cpanfile = $self->try_cpanfile) {
-        require Module::CPANfile;
-        return Module::CPANfile->load($cpanfile)->prereqs->merged_requirements(['runtime'],['requires']);
-    }
-
-    Carp::croak "Could not locate 'cpanfile' to load module list.";
+    $requirements;
 }
 
 sub requirements_to_cpanfile {
     my $self = shift;
-    require Module::CPANfile;
     Module::CPANfile->from_prereqs({ runtime => { requires => $self->requirements->as_string_hash } });
 }
 
-sub snapshot_to_requirements {
-    my($self, $snapshot) = @_;
-
+sub apply_snapshot {
+    my($self, $requirements, $snapshot) = @_;
     $snapshot->load;
+    $self->apply_snapshot_recursively($requirements, $snapshot, [$requirements->required_modules]);
+}
 
-    my $requirements = CPAN::Meta::Requirements->new;
-    for my $package ($snapshot->packages) {
-        if ($package->version && $package->version ne 'undef') {
-            $requirements->exact_version($package->name, $package->version);
-        } else {
-            $requirements->add_minimum($package->name, '0');
-        }
+sub apply_snapshot_recursively {
+    my($self, $requirements, $snapshot, $modules) = @_;
+
+    for my $module (@$modules) {
+        my $dist = $snapshot->find($module) or next;
+        my $version = $dist->version_for($module);
+        $requirements->exact_version($module, $version);
+        $requirements->add_requirements($dist->requirements);
+        $self->apply_snapshot_recursively($requirements, $snapshot, [$dist->requirements->required_modules]);
     }
-
-    $requirements;
 }
 
 sub resolve_recursive {
@@ -271,6 +268,7 @@ sub resolve_recursive {
         my $want_version = $requirements->requirements_for_module($module);
         next if $self->is_core($module, $want_version);
 
+        # FIXME there's a chance different version of the same module can be loaded here
         my $artifact = $self->repo->find($module, $want_version)
           or die "Could not find an artifact for $module => $want_version\nYou need to run `carmel install` first to get the modules installed and artifacts built.\n";
 
