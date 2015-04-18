@@ -283,7 +283,7 @@ sub resolve_recursive {
 
 sub resolve {
     my($self, $cb) = @_;
-    $self->resolve_recursive($self->requirements, $self->requirements, {}, $cb, 0);
+    $self->resolve_recursive($self->requirements, $self->requirements->clone, {}, $cb, 0);
 }
 
 sub env {
