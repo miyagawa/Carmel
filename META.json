@@ -40,6 +40,7 @@
             "Carton" : "v1.0.12"
          },
          "requires" : {
+            "App::cpanminus" : "1.7027",
             "CPAN::DistnameInfo" : "0",
             "CPAN::Meta::Prereqs" : "2.132830",
             "CPAN::Meta::Requirements" : "2.129",
@@ -70,6 +71,6 @@
          "web" : "https://github.com/miyagawa/Carmel"
       }
    },
-   "version" : "v0.1.2"
+   "version" : "v0.1.3"
 }
 
