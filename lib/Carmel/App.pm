@@ -58,7 +58,9 @@ sub cmd_install {
     if (@args) {
         $self->install(@args);
     } else {
-        $self->install("--installdeps", ".");
+        my $cpanfile = File::Temp->new->filename;
+        $self->requirements_to_cpanfile->save($cpanfile);
+        $self->install("--installdeps", "--cpanfile", $cpanfile, ".");
     }
 
     my @artifacts;
@@ -213,6 +215,11 @@ sub try_cpanfile {
     return;
 }
 
+sub requirements {
+    my $self = shift;
+    $self->{requirements} ||= $self->build_requirements;
+}
+
 sub build_requirements {
     my($self, @args) = @_;
 
@@ -229,7 +236,13 @@ sub build_requirements {
         return Module::CPANfile->load($cpanfile)->prereqs->merged_requirements(['runtime'],['requires']);
     }
 
-    return;
+    Carp::croak "Could not locate 'cpanfile' to load module list.";
+}
+
+sub requirements_to_cpanfile {
+    my $self = shift;
+    require Module::CPANfile;
+    Module::CPANfile->from_prereqs({ runtime => { requires => $self->requirements->as_string_hash } });
 }
 
 sub snapshot_to_requirements {
@@ -273,10 +286,7 @@ sub resolve_recursive {
 
 sub resolve {
     my($self, $cb) = @_;
-
-    my $requirements = $self->build_requirements
-      or Carp::croak "Could not locate 'cpanfile' to load module list.";
-    $self->resolve_recursive($requirements, $requirements, {}, $cb, 0);
+    $self->resolve_recursive($self->requirements, $self->requirements, {}, $cb, 0);
 }
 
 sub env {
