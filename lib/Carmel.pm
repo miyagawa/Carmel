@@ -20,6 +20,12 @@ Carmel - CPAN Artifact Repository Manager
   # Manually pull a module if you don't have it
   carmel install DBI@1.633 Plack@1.0000
 
+  # list all the modules to be loaded
+  carmel list
+
+  # list all the modules in a tree
+  carmel tree
+
   # Runs your perl script with modules from artifacts
   carmel exec perl ...
 
@@ -35,8 +41,6 @@ Carmel - CPAN Artifact Repository Manager
   # find a module matching the version query
   carmel find Plack ">= 1.0000, < 1.1000"
 
-  # list all the modules to be loaded
-  carmel list
 
 =head1 DESCRIPTION
 

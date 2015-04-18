@@ -12,6 +12,7 @@ use File::Basename;
 use File::Copy::Recursive;
 use Module::CoreList;
 use Module::CPANfile;
+use Pod::Usage ();
 
 sub new {
     my $class = shift;
@@ -51,6 +52,17 @@ sub build_repo {
     my $repo = Carmel::Repository->new;
     $repo->load($self->repository_path);
     $repo;
+}
+
+sub cmd_help {
+    my $self = shift;
+    print "Carmel version $Carmel::VERSION\n\n";
+    Pod::Usage::pod2usage(1);
+}
+
+sub cmd_version {
+    my $self = shift;
+    print "Carmel version $Carmel::VERSION\n";
 }
 
 sub cmd_install {

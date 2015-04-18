@@ -12,8 +12,32 @@ carmel - CPAN Artifact Repository Manager
 
 =head1 SYNOPSIS
 
-  > carmel install
-  > carmel exec perl ...
+  # Run with a directory with cpanfile or cpanfile.snapshot
+  carmel install
+
+  # Manually pull a module if you don't have it
+  carmel install DBI@1.633 Plack@1.0000
+
+  # list all the modules to be loaded
+  carmel list
+
+  # list all the modules in a tree
+  carmel tree
+
+  # Runs your perl script with modules from artifacts
+  carmel exec perl ...
+
+  # Runs your perl script with a checker to guarantee everything is loaded from Carmel
+  carmel exec perl -MDevel::Carmel script.pl
+
+  # prints export PERL5LIB=... etc for shell scripting
+  carmel export
+
+  # find a module in repository
+  carmel find DBI
+
+  # find a module matching the version query
+  carmel find Plack ">= 1.0000, < 1.1000"
 
 =head1 SEE ALSO
 
