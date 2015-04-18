@@ -248,18 +248,18 @@ sub resolve_recursive {
         next if $module eq 'perl';
 
         my $want_version = $requirements->requirements_for_module($module);
-        if ($self->is_core($module, $want_version)) {
-            next;
-        } elsif (my $artifact = $repo->find($module, $want_version)) {
-            next if $seen->{$artifact->path}++;
-            $cb->($artifact, $depth);
-            my $meta = CPAN::Meta->load_file($artifact->path . "/MYMETA.json");
-            my $reqs = $meta->effective_prereqs->merged_requirements(['runtime'], ['requires']);
-            $root_reqs->add_requirements($reqs);
-            $self->resolve_recursive($root_reqs, $reqs, $seen, $cb, $depth + 1);
-        } else {
-            die "Coulld not find an artifact for $module => $want_version\nYou need to run `carmel install` first to get the modules installed and artifacts built.\n";
-        }
+        next if $self->is_core($module, $want_version);
+
+        my $artifact = $repo->find($module, $want_version)
+          or die "Could not find an artifact for $module => $want_version\nYou need to run `carmel install` first to get the modules installed and artifacts built.\n";
+
+        next if $seen->{$artifact->path}++;
+        $cb->($artifact, $depth);
+
+        my $meta = CPAN::Meta->load_file($artifact->path . "/MYMETA.json");
+        my $reqs = $meta->effective_prereqs->merged_requirements(['runtime'], ['requires']);
+        $root_reqs->add_requirements($reqs);
+        $self->resolve_recursive($root_reqs, $reqs, $seen, $cb, $depth + 1);
     }
 }
 
