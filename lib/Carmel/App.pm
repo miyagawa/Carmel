@@ -90,7 +90,8 @@ sub install {
 
     my $dir = File::Temp::tempdir(CLEANUP => 1);
     local $ENV{PERL_CPANM_HOME} = $dir;
-    system $^X, "-S", "cpanm", "--notest", "-L", $self->base_dir, @args if @args;
+    local $ENV{PERL_CPANM_OPT};
+    system $^X, "-S", "cpanm", "--quiet", "--notest", "-L", $self->base_dir, @args if @args;
 
     for my $ent (glob "$dir/latest-build/*") {
         next unless -d $ent;
