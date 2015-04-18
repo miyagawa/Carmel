@@ -186,6 +186,10 @@ sub pad {
 
 sub try_snapshot {
     my $self = shift;
+
+    # TODO loading snapshot without install causes artifacts not found
+    return;
+
     if (my $cpanfile = $self->try_cpanfile) {
         return "$cpanfile.snapshot" if -e "$cpanfile.snapshot";
     }
