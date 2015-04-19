@@ -34,6 +34,7 @@ sub read_json {
 
 sub load_artifacts {
     my $self = shift;
+    $self->path->mkpath unless $self->path->exists;
 
     for my $ent ($self->path->children) {
         if ($ent->is_dir && $ent->child("blib")->exists) {
