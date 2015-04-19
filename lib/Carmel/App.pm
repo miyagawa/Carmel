@@ -29,15 +29,19 @@ sub run {
     $self->$call(@args);
 }
 
-sub base_dir {
-    # It just needs to be a temporary location to make re-installation faster
+sub repository_base {
     my $self = shift;
-    Path::Tiny->new("$ENV{HOME}/.perl-carmel/cache/$self->{perl_arch}");
+    Path::Tiny->new($ENV{PERL_CARMEL_REPO} || "$ENV{HOME}/.perl-carmel/$self->{perl_arch}");
 }
 
-sub repository_path {
+sub cache_dir {
     my $self = shift;
-    Path::Tiny->new($ENV{PERL_CARMEL_REPO} || "$ENV{HOME}/.perl-carmel/builds/$self->{perl_arch}");
+    $self->repository_base->child("cache");
+}
+
+sub build_dir {
+    my $self = shift;
+    $self->repository_base->child("builds");
 }
 
 sub repo {
@@ -47,7 +51,7 @@ sub repo {
 
 sub build_repo {
     my $self = shift;
-    Carmel::Repository->new($self->repository_path);
+    Carmel::Repository->new($self->build_dir);
 }
 
 sub cmd_help {
@@ -127,7 +131,7 @@ sub install {
     my $dir = Path::Tiny->tempdir;
     local $ENV{PERL_CPANM_HOME} = $dir;
     local $ENV{PERL_CPANM_OPT};
-    system $^X, "-S", "cpanm", "--quiet", "--notest", "-L", $self->base_dir, @args if @args;
+    system $^X, "-S", "cpanm", "--quiet", "--notest", "-L", $self->cache_dir, @args if @args;
 
     for my $ent ($dir->child("latest-build")->children) {
         next unless $ent->is_dir && $ent->child("blib/meta/install.json")->exists;
