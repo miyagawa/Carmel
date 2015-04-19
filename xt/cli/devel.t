@@ -1,5 +1,5 @@
 use strict;
-use Test::More skip_all => 'Test::Harness munges PERL5LIb';
+use Test::More skip_all => 'Test::Harness munges PERL5LIB';
 use xt::CLI;
 
 subtest 'carmel install' => sub {
