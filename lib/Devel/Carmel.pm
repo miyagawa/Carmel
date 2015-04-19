@@ -24,7 +24,6 @@ sub _find_border {
 
 # This assumes it's run under carmel exec
 my $base = $ENV{PERL_CARMEL_REPO} || "$ENV{HOME}/.perl-carmel/$]-$Config{archname}/builds";
-warn @INC;
 my $index = _find_border qr!$base/.*?/blib/(lib|arch)?$!, @INC;
 
 if ($index) {
