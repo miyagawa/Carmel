@@ -8,8 +8,6 @@ use Carmel::Repository;
 use Config qw(%Config);
 use CPAN::Meta::Requirements;
 use File::Temp;
-use File::Basename;
-use File::Copy::Recursive;
 use Module::CoreList;
 use Module::CPANfile;
 use Pod::Usage ();
@@ -49,9 +47,7 @@ sub repo {
 
 sub build_repo {
     my $self = shift;
-    my $repo = Carmel::Repository->new;
-    $repo->load($self->repository_path);
-    $repo;
+    Carmel::Repository->new($self->repository_path);
 }
 
 sub cmd_help {
@@ -70,8 +66,13 @@ sub cmd_install {
 
     if (@args) {
         $self->install(@args);
-        return;
+    } else {
+        $self->install_from_cpanfile(@args);
     }
+}
+
+sub install_from_cpanfile {
+    my $self = shift;
 
     my $cpanfile = File::Temp->new->filename;
     $self->requirements_to_cpanfile->save($cpanfile);
@@ -107,7 +108,7 @@ sub install {
     for my $ent (glob "$dir/latest-build/*") {
         next unless -d $ent;
         next unless -e "$ent/blib/meta/install.json";
-        File::Copy::Recursive::dircopy($ent, $self->repository_path . "/" . File::Basename::basename($ent));
+        $self->repo->import_artifact($ent);
     }
 }
 
@@ -235,7 +236,7 @@ sub build_requirements {
       or Carp::croak "Could not locate 'cpanfile' to load module list.";
 
     my $requirements = Module::CPANfile->load($cpanfile)
-      ->prereqs->merged_requirements(['runtime', 'test'],['requires']);
+      ->prereqs->merged_requirements(['runtime', 'test'], ['requires']);
 
     if (my $snapshot = $self->try_snapshot) {
         require Carton::Snapshot;

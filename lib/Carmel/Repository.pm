@@ -4,11 +4,26 @@ use version ();
 use DirHandle;
 use Carmel::Artifact;
 use CPAN::Meta::Requirements;
+use File::Basename ();
+use File::Copy::Recursive ();
 use JSON ();
 
 sub new {
-    my $class = shift;
-    bless {}, $class;
+    my($class, $path) = @_;
+    my $self = bless {
+        path => $path,
+    }, $class;
+    $self->load_artifacts;
+    $self;
+}
+
+sub path { $_[0]->{path} }
+
+sub import_artifact {
+    my($self, $dir) = @_;
+    my $dest = $self->path . "/" . File::Basename::basename($dir);
+    File::Copy::Recursive::dircopy($dir, $dest);
+    $self->load($dest);
 }
 
 sub read_json {
@@ -17,17 +32,21 @@ sub read_json {
     JSON::decode_json(join '', <$fh>);
 }
 
+sub load_artifacts {
+    my $self = shift;
+
+    for my $ent (glob "$self->{path}/*") {
+        next unless -d $ent && -e "$ent/blib";
+        $self->load($ent);
+    }
+}
+
 sub load {
     my($self, $dir) = @_;
 
-    my $dh = DirHandle->new($dir) or return;
-    while (my $ent = $dh->read) {
-        next unless -d "$dir/$ent" && -e "$dir/$ent/blib";
-
-        my $install = $self->_install_info("$dir/$ent");
-        while (my($package, $data) = each %{ $install->{provides} }) {
-            $self->add($package, "$dir/$ent", $data->{version}, $install);
-        }
+    my $install = $self->_install_info($dir);
+    while (my($package, $data) = each %{ $install->{provides} }) {
+        $self->add($package, $dir, $data->{version}, $install);
     }
 }
 
