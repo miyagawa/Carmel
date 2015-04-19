@@ -10,6 +10,15 @@ Carmel - CPAN Artifact Repository Manager
     # Manually pull a module if you don't have it
     carmel install DBI@1.633 Plack@1.0000
 
+    # list all the modules to be loaded
+    carmel list
+
+    # list all the modules in a tree
+    carmel tree
+
+    # show a location where a module is installed
+    carmel show Plack
+
     # Runs your perl script with modules from artifacts
     carmel exec perl ...
 
@@ -19,14 +28,11 @@ Carmel - CPAN Artifact Repository Manager
     # prints export PERL5LIB=... etc for shell scripting
     carmel export
 
-    # find a module in repository
+    # find a module in a repository
     carmel find DBI
 
     # find a module matching the version query
     carmel find Plack ">= 1.0000, < 1.1000"
-
-    # list all the modules to be loaded
-    carmel list
 
 # DESCRIPTION
 
@@ -105,7 +111,3 @@ it under the same terms as Perl itself.
 # SEE ALSO
 
 [App::cpanminus](https://metacpan.org/pod/App::cpanminus) [Carton](https://metacpan.org/pod/Carton)
-
-https://github.com/ingydotnet/only-pm
-
-https://github.com/gugod/perlrocks

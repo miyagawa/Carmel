@@ -2,6 +2,13 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.5  2015-04-19 16:07:40 CEST
+        - `carmel install` now only installs missing requirements
+        - internal refactorings
+        - add `carmel show` command
+        - add help and version subcommand
+        - requires newer cpanm that supports better cpanfile requirement support
+
 v0.1.4  2015-04-18 19:52:12 CEST
         - Fixed an issue with Devel::Carmel where Module::Runtime requires the module
         - Pass requirements as a dumped cpanfile to cpanm for more accurate requirements
