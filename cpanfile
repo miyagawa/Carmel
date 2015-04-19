@@ -5,6 +5,7 @@ requires 'CPAN::Meta::Requirements', '2.129';
 requires 'CPAN::Meta::Prereqs', '2.132830';
 requires 'Module::CPANfile', '1.1000';
 requires 'Path::Tiny', '0.068';
+requires 'File::Copy::Recursive';
 
 requires 'Parse::PMFile';
 requires 'CPAN::DistnameInfo';
