@@ -55,8 +55,6 @@ sub _install_info {
     my($self, $dir) = @_;
 
     my $file = $dir->child("blib/meta/install.json");
-
-    # cpanm build artifact
     if ($file->exists) {
         return read_json($file);
     }
