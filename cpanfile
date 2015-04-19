@@ -10,7 +10,7 @@ requires 'File::Copy::Recursive';
 
 requires 'App::cpanminus', '1.7030';
 
-requires 'Carton', 'v1.0.12';
+requires 'Carton', 'v1.0.13';
 
 on test => sub {
     requires 'Test::More', '0.96';
