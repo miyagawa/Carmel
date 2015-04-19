@@ -99,7 +99,8 @@ sub install_from_cpanfile {
     my @artifacts;
     $self->resolve(sub { push @artifacts, $_[0] });
 
-    printf "---> Complete! %d cpanfile dependencies. %d modules installed.\n",
+    printf "---> Complete! %d cpanfile dependencies. %d modules installed.\n" .
+      "---> Use `carmel show [module]` to see where a module is installed.\n",
       scalar($self->requirements->required_modules), scalar(@artifacts);
 }
 
@@ -162,8 +163,18 @@ sub cmd_find {
     }
 }
 
+sub cmd_show {
+    my $self = shift;
+    $self->cmd_list(@_);
+}
+
 sub cmd_list {
-    my($self) = @_;
+    my($self, @args) = @_;
+
+    if (my $module = shift @args) {
+        $self->show_module($module);
+        return;
+    }
 
     my @artifacts;
     $self->resolve(sub { push @artifacts, $_[0] });
@@ -171,6 +182,23 @@ sub cmd_list {
     for my $artifact (sort { $a->package cmp $b->package } @artifacts) {
         printf "%s (%s)\n", $artifact->package, $artifact->version || '0';
     }
+}
+
+sub show_module {
+    my($self, $module) = @_;
+
+    eval {
+        $self->resolve(sub {
+            my $artifact = shift;
+            if ($module eq $artifact->package) {
+                printf "%s (%s) in %s\n", $artifact->package, $artifact->version || '0', $artifact->path;
+                die "__FOUND__\n";
+            }
+        });
+        die "Could not find a module named '$module' in the cpanfile dependencies.\n";
+    };
+
+    die $@ if $@ && $@ ne "__FOUND__\n";
 }
 
 sub cmd_tree {

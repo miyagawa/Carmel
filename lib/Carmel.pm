@@ -26,6 +26,9 @@ Carmel - CPAN Artifact Repository Manager
   # list all the modules in a tree
   carmel tree
 
+  # show a location where a module is installed
+  carmel show Plack
+
   # Runs your perl script with modules from artifacts
   carmel exec perl ...
 
@@ -35,7 +38,7 @@ Carmel - CPAN Artifact Repository Manager
   # prints export PERL5LIB=... etc for shell scripting
   carmel export
 
-  # find a module in repository
+  # find a module in a repository
   carmel find DBI
 
   # find a module matching the version query
