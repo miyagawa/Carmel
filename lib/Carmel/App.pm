@@ -326,16 +326,17 @@ sub resolve_recursive {
         next if $self->is_core($module, $want_version);
 
         # FIXME there's a chance different version of the same module can be loaded here
-        my $artifact = $self->repo->find($module, $want_version)
-          or $missing_cb->($module, $want_version, $depth);
+        if (my $artifact = $self->repo->find($module, $want_version)) {
+            next if $seen->{$artifact->path}++;
+            $cb->($artifact, $depth);
 
-        next if $seen->{$artifact->path}++;
-        $cb->($artifact, $depth);
+            my $reqs = $artifact->requirements;
+            $root_reqs->add_requirements($reqs);
 
-        my $reqs = $artifact->requirements;
-        $root_reqs->add_requirements($reqs);
-
-        $self->resolve_recursive($root_reqs, $reqs, $seen, $cb, $missing_cb, $depth + 1);
+            $self->resolve_recursive($root_reqs, $reqs, $seen, $cb, $missing_cb, $depth + 1);
+        } else {
+            $missing_cb->($module, $want_version, $depth);
+        }
     }
 }
 
