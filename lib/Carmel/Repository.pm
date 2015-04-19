@@ -4,14 +4,13 @@ use version ();
 use DirHandle;
 use Carmel::Artifact;
 use CPAN::Meta::Requirements;
-use File::Basename ();
 use File::Copy::Recursive ();
 use JSON ();
 
 sub new {
     my($class, $path) = @_;
     my $self = bless {
-        path => $path,
+        path => Path::Tiny->new($path),
     }, $class;
     $self->load_artifacts;
     $self;
@@ -21,21 +20,22 @@ sub path { $_[0]->{path} }
 
 sub import_artifact {
     my($self, $dir) = @_;
-    my $dest = $self->path . "/" . File::Basename::basename($dir);
+
+    my $dest = $self->path->child($dir->basename);
     File::Copy::Recursive::dircopy($dir, $dest);
+
     $self->load($dest);
 }
 
 sub read_json {
     my $file = shift;
-    open my $fh, "<", $file or die "$file: $!";
-    JSON::decode_json(join '', <$fh>);
+    JSON::decode_json($file->slurp);
 }
 
 sub load_artifacts {
     my $self = shift;
 
-    for my $ent (glob "$self->{path}/*") {
+    for my $ent ($self->path->children) {
         next unless -d $ent && -e "$ent/blib";
         $self->load($ent);
     }
@@ -53,10 +53,10 @@ sub load {
 sub _install_info {
     my($self, $dir) = @_;
 
-    my $file = "$dir/blib/meta/install.json";
+    my $file = $dir->child("blib/meta/install.json");
 
     # cpanm build artifact
-    if (-e $file) {
+    if ($file->exists) {
         return read_json($file);
     }
 

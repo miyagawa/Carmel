@@ -7,9 +7,9 @@ use Carp ();
 use Carmel::Repository;
 use Config qw(%Config);
 use CPAN::Meta::Requirements;
-use File::Temp;
 use Module::CoreList;
 use Module::CPANfile;
+use Path::Tiny ();
 use Pod::Usage ();
 
 sub new {
@@ -32,12 +32,12 @@ sub run {
 sub base_dir {
     # It just needs to be a temporary location to make re-installation faster
     my $self = shift;
-    "$ENV{HOME}/.perl-carmel/cache/$self->{perl_arch}";
+    Path::Tiny->new("$ENV{HOME}/.perl-carmel/cache/$self->{perl_arch}");
 }
 
 sub repository_path {
     my $self = shift;
-    $ENV{PERL_CARMEL_REPO} || "$ENV{HOME}/.perl-carmel/builds/$self->{perl_arch}";
+    Path::Tiny->new($ENV{PERL_CARMEL_REPO} || "$ENV{HOME}/.perl-carmel/builds/$self->{perl_arch}");
 }
 
 sub repo {
@@ -74,7 +74,7 @@ sub cmd_install {
 sub install_from_cpanfile {
     my $self = shift;
 
-    my $cpanfile = File::Temp->new->filename;
+    my $cpanfile = Path::Tiny->tempfile;
     $self->requirements_to_cpanfile->save($cpanfile);
     $self->install("--installdeps", "--cpanfile", $cpanfile, ".");
 
@@ -100,14 +100,13 @@ sub is_core {
 sub install {
     my($self, @args) = @_;
 
-    my $dir = File::Temp::tempdir(CLEANUP => 1);
+    my $dir = Path::Tiny->tempdir;
     local $ENV{PERL_CPANM_HOME} = $dir;
     local $ENV{PERL_CPANM_OPT};
     system $^X, "-S", "cpanm", "--quiet", "--notest", "-L", $self->base_dir, @args if @args;
 
-    for my $ent (glob "$dir/latest-build/*") {
-        next unless -d $ent;
-        next unless -e "$ent/blib/meta/install.json";
+    for my $ent ($dir->child("latest-build")->children) {
+        next unless $ent->is_dir && $ent->child("blib/meta/install.json")->exists;
         $self->repo->import_artifact($ent);
     }
 }
