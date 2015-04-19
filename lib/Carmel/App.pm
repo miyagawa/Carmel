@@ -219,43 +219,20 @@ sub cmd_index {
 sub write_index {
     my($self, $fh) = @_;
 
-    my @packages;
+    require Carton::Index;
+    require Carton::Package;
+
+    my $index = Carton::Index->new(generator => "Carmel $Carmel::VERSION");
+
     $self->resolve(sub {
         my $artifact = shift;
-        while (my($package, $data) = each %{$artifact->install->{provides}}) {
-            push @packages, {
-                package => $package,
-                version => $data->{version} || 'undef',
-                pathname => $artifact->install->{pathname},
-            }
+        while (my($pkg, $data) = each %{$artifact->install->{provides}}) {
+            my $package = Carton::Package->new($pkg, $data->{version} || 'undef', $artifact->install->{pathname});
+            $index->add_package($package);
         }
     });
 
-    print $fh <<EOF;
-File:         02packages.details.txt
-URL:          http://www.perl.com/CPAN/modules/02packages.details.txt
-Description:  Package names found in Carmel build artifacts
-Columns:      package name, version, path
-Intended-For: Automated fetch routines, namespace documentation.
-Written-By:   Carmel $Carmel::VERSION
-Line-Count:   @{[ $#packages + 1 ]}
-Last-Updated: @{[ scalar localtime ]}
-
-EOF
-
-    for my $p (sort { $a->{package} cmp $b->{package} } @packages) {
-        print $fh sprintf "%s %s  %s\n", pad($p->{package}, 32), pad($p->{version}, 10, 1), $p->{pathname};
-    }
-}
-
-sub pad {
-    my($str, $len, $left) = @_;
-
-    my $howmany = $len - length($str);
-    return $str if $howmany <= 0;
-
-    my $pad = " " x $howmany;
-    return $left ? "$pad$str" : "$str$pad";
+    $index->write($fh);
 }
 
 sub try_snapshot {
