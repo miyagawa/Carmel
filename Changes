@@ -2,6 +2,10 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.6  2015-04-20 01:55:23 CEST
+        - up dependency on Carton
+        - Fixed an issue with exact v-strings in requirements
+
 v0.1.5  2015-04-19 16:07:40 CEST
         - `carmel install` now only installs missing requirements
         - internal refactorings
