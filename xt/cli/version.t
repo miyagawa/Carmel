@@ -2,7 +2,7 @@ use strict;
 use Test::More;
 use xt::CLI;
 
-subtest 'carmel --version' => sub {
+subtest 'carmel version' => sub {
     my $app = cli();
 
     $app->run("version");

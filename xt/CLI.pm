@@ -22,6 +22,11 @@ $Carmel::App::UseSystem = 1;
 
 use Class::Tiny qw( dir stdout stderr exit_code );
 
+sub BUILD {
+    my $self = shift;
+    $self->{dir} = File::pushd::pushd $self->dir;
+}
+
 sub write_file {
     my($self, $file, @args) = @_;
     $self->dir->child($file)->spew(@args);
@@ -42,6 +47,7 @@ sub run {
     my($self, @args) = @_;
 
     my $pushd = File::pushd::pushd $self->dir;
+    local $ENV{PERL_CARMEL_REPO} = $self->dir->child(".carmel");
 
     my @capture = capture {
         my $code = eval { Carmel::App->new->run(@args) };
@@ -50,11 +56,6 @@ sub run {
 
     $self->stdout($capture[0]);
     $self->stderr($capture[1]);
-}
-
-sub clean_local {
-    my $self = shift;
-    $self->dir->child("local")->remove_tree({ safe => 0 });
 }
 
 1;
