@@ -6,37 +6,37 @@ subtest 'carmel install' => sub {
     my $app = cli();
 
     $app->write_cpanfile(<<EOF);
-requires 'Mojolicious', '6, <7';
+requires 'Try::Tiny';
 EOF
     $app->run("list");
-    like $app->stderr, qr/Could not find an artifact for Mojolicious/;
+    like $app->stderr, qr/Could not find an artifact for Try::Tiny/;
 
     $app->run("install");
     $app->run("list");
-    like $app->stdout, qr/Mojolicious \(6/;
+    like $app->stdout, qr/Try::Tiny \(/;
 
     $app->write_cpanfile(<<EOF);
-requires 'Mojolicious', '< 6';
+requires 'Try::Tiny', '< 0.22';
 EOF
     $app->run("list");
-    like $app->stderr, qr/Could not find an artifact for Mojolicious => < 6/;
+    like $app->stderr, qr/Could not find an artifact for Try::Tiny => < 0\.22/;
 
     $app->run("install");
-    $app->run("show", "Mojolicious");
-    like $app->stdout, qr/Mojolicious-5/;
+    $app->run("show", "Try::Tiny");
+    like $app->stdout, qr/Try-Tiny-0\.21/;
 
-    $app->run("find", "Mojolicious");
-    like $app->stdout, qr/Mojolicious-5/;
-    like $app->stdout, qr/Mojolicious-6/;
+    $app->run("find", "Try::Tiny");
+    my @lines = grep length, split /\n/, $app->stdout;
+    is @lines, 2;
 
     $app->write_cpanfile(<<EOF);
-requires 'Mojolicious', '6, <7';
+requires 'Try::Tiny', '0.22';
 EOF
     $app->run("install");
-    like $app->stdout, qr/Using Mojolicious \(6/;
+    like $app->stdout, qr/Using Try::Tiny/;
 
-    $app->run("show", "Mojolicious");
-    like $app->stdout, qr/Mojolicious-6/;
+    $app->run("show", "Try::Tiny");
+    like $app->stdout, qr/Try-Tiny-0/;
 };
 
 done_testing;
