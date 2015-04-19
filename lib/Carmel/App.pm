@@ -74,16 +74,33 @@ sub cmd_install {
 sub install_from_cpanfile {
     my $self = shift;
 
-    $self->install_with_cpanfile($self->requirements_to_cpanfile);
+    my $requirements = CPAN::Meta::Requirements->new;
+    $self->resolve(
+        sub {
+            my($artifact) = @_;
+            printf "Using %s (%s)\n", $artifact->package, $artifact->version || '0';
+        },
+        sub {
+            my($module, $want_version) = @_;
+            $requirements->add_string_requirement($module => $want_version);
+        },
+    );
+
+
+    if (my @missing = $requirements->required_modules) {
+        my $cpanfile = Module::CPANfile->from_prereqs({
+            runtime => {
+                requires => $requirements->as_string_hash,
+            },
+        });
+        $self->install_with_cpanfile($cpanfile);
+    }
 
     my @artifacts;
-    $self->resolve(sub {
-        my($artifact, $depth) = @_;
-        printf "Using %s (%s)\n", $artifact->package, $artifact->version || '0';
-        push @artifacts, $artifact;
-    });
+    $self->resolve(sub { push @artifacts, $_[0] });
 
-    print "---> Complete! @{[scalar @artifacts]} artifacts resolved and installed.\n";
+    printf "---> Complete! %d cpanfile dependencies. %d modules installed.\n",
+      scalar($self->requirements->required_modules), scalar(@artifacts);
 }
 
 sub is_core {
@@ -99,7 +116,7 @@ sub install_with_cpanfile {
     my($self, $cpanfile) = @_;
 
     my $path = Path::Tiny->tempfile;
-    $self->requirements_to_cpanfile->save($path);
+    $cpanfile->save($path);
     $self->install("--installdeps", "--cpanfile", $path, ".");
 }
 
@@ -252,11 +269,6 @@ sub build_requirements {
     $requirements;
 }
 
-sub requirements_to_cpanfile {
-    my $self = shift;
-    Module::CPANfile->from_prereqs({ runtime => { requires => $self->requirements->as_string_hash } });
-}
-
 sub apply_snapshot {
     my($self, $requirements, $snapshot) = @_;
     $snapshot->load;
@@ -277,7 +289,7 @@ sub apply_snapshot_recursively {
 }
 
 sub resolve_recursive {
-    my($self, $root_reqs, $requirements, $seen, $cb, $depth) = @_;
+    my($self, $root_reqs, $requirements, $seen, $cb, $missing_cb, $depth) = @_;
 
     for my $module (sort $requirements->required_modules) {
         next if $module eq 'perl';
@@ -287,7 +299,7 @@ sub resolve_recursive {
 
         # FIXME there's a chance different version of the same module can be loaded here
         my $artifact = $self->repo->find($module, $want_version)
-          or die "Could not find an artifact for $module => $want_version\nYou need to run `carmel install` first to get the modules installed and artifacts built.\n";
+          or $missing_cb->($module, $want_version, $depth);
 
         next if $seen->{$artifact->path}++;
         $cb->($artifact, $depth);
@@ -295,13 +307,17 @@ sub resolve_recursive {
         my $reqs = $artifact->requirements;
         $root_reqs->add_requirements($reqs);
 
-        $self->resolve_recursive($root_reqs, $reqs, $seen, $cb, $depth + 1);
+        $self->resolve_recursive($root_reqs, $reqs, $seen, $cb, $missing_cb, $depth + 1);
     }
 }
 
 sub resolve {
-    my($self, $cb) = @_;
-    $self->resolve_recursive($self->requirements, $self->requirements->clone, {}, $cb, 0);
+    my($self, $cb, $missing_cb) = @_;
+    $missing_cb ||= sub {
+        my($module, $want_version, $depth) = @_;
+        die "Could not find an artifact for $module => $want_version\nYou need to run `carmel install` first to get the modules installed and artifacts built.\n";
+    };
+    $self->resolve_recursive($self->requirements, $self->requirements->clone, {}, $cb, $missing_cb, 0);
 }
 
 sub env {
