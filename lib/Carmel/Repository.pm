@@ -36,8 +36,9 @@ sub load_artifacts {
     my $self = shift;
 
     for my $ent ($self->path->children) {
-        next unless -d $ent && -e "$ent/blib";
-        $self->load($ent);
+        if ($ent->is_dir && $ent->child("blib")->exists) {
+            $self->load($ent);
+        }
     }
 }
 
