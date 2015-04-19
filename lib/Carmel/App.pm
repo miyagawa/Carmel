@@ -74,9 +74,7 @@ sub cmd_install {
 sub install_from_cpanfile {
     my $self = shift;
 
-    my $cpanfile = Path::Tiny->tempfile;
-    $self->requirements_to_cpanfile->save($cpanfile);
-    $self->install("--installdeps", "--cpanfile", $cpanfile, ".");
+    $self->install_with_cpanfile($self->requirements_to_cpanfile);
 
     my @artifacts;
     $self->resolve(sub {
@@ -95,6 +93,14 @@ sub is_core {
 
     CPAN::Meta::Requirements->from_string_hash({ $module => $want_version })
         ->accepts_module($module, $Module::CoreList::version{$]+0}{$module} || '0');
+}
+
+sub install_with_cpanfile {
+    my($self, $cpanfile) = @_;
+
+    my $path = Path::Tiny->tempfile;
+    $self->requirements_to_cpanfile->save($path);
+    $self->install("--installdeps", "--cpanfile", $path, ".");
 }
 
 sub install {
