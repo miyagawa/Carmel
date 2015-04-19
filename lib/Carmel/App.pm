@@ -169,7 +169,7 @@ sub cmd_list {
     $self->resolve(sub { push @artifacts, $_[0] });
 
     for my $artifact (sort { $a->package cmp $b->package } @artifacts) {
-        printf "%s (%s) in %s\n", $artifact->package, $artifact->version || '0', $artifact->distname;
+        printf "%s (%s)\n", $artifact->package, $artifact->version || '0';
     }
 }
 
@@ -178,7 +178,7 @@ sub cmd_tree {
 
     $self->resolve(sub {
         my($artifact, $depth) = @_;
-        printf "%s%s (%s) in %s\n", (" " x $depth), $artifact->package, $artifact->version || '0', $artifact->distname;
+        printf "%s%s (%s)\n", (" " x $depth), $artifact->package, $artifact->version || '0';
     });
 
 }
