@@ -124,6 +124,7 @@ sub list {
 
 sub lookup {
     my($self, $package, $version) = @_;
+    $version = version->parse($version)->numify;
     if ($self->{$package}{$version}) {
         return Carmel::Artifact->new($package, $version, @{$self->{$package}{$version}});
     }
