@@ -11,6 +11,9 @@ use Module::CoreList;
 use Module::CPANfile;
 use Path::Tiny ();
 use Pod::Usage ();
+use Try::Tiny;
+
+our $UseSystem = 0; # unit testing
 
 sub new {
     my $class = shift;
@@ -26,7 +29,14 @@ sub run {
     my $call = $self->can("cmd_$cmd")
       or die "Could not find command '$cmd'";
 
-    $self->$call(@args);
+    try {
+        $self->$call(@args);
+    } catch {
+        warn $_;
+        return 255;
+    };
+
+    return 0;
 }
 
 sub repository_base {
@@ -155,7 +165,7 @@ sub cmd_exec {
     my($self, @args) = @_;
     my %env = $self->env;
     %ENV = (%env, %ENV);
-    exec @args;
+    $UseSystem ? system(@args) : exec @args;
 }
 
 sub cmd_find {
