@@ -164,7 +164,7 @@ sub cmd_env {
 sub cmd_exec {
     my($self, @args) = @_;
     my %env = $self->env;
-    %ENV = (%env, %ENV);
+    %ENV = (%ENV, %env);
     $UseSystem ? system(@args) : exec @args;
 }
 
