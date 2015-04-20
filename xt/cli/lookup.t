@@ -3,7 +3,7 @@ use Test::More;
 use xt::CLI;
 
 subtest 'carmel install with v-strings' => sub {
-    my $app = cli();
+    my $app = cli(clean => 1);
 
     $app->write_cpanfile(<<EOF);
 requires 'CPAN::Test::Dummy::Perl5::VersionQV', 'v0.1.0';

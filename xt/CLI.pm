@@ -6,7 +6,7 @@ our @EXPORT = qw(run cli);
 use Test::Requires qw( Capture::Tiny File::pushd );
 
 sub cli {
-    my $cli = TestCLI->new;
+    my $cli = TestCLI->new(clean => $ENV{TEST_CLEAN}, @_);
     $cli->dir( Path::Tiny->tempdir(CLEANUP => !$ENV{NO_CLEANUP}) );
     warn "Temp directory: ", $cli->dir, "\n" if $ENV{NO_CLEANUP};
     $cli;
@@ -20,7 +20,7 @@ use Path::Tiny;
 
 $Carmel::App::UseSystem = 1;
 
-use Class::Tiny qw( dir stdout stderr exit_code );
+use Class::Tiny qw( dir stdout stderr exit_code clean );
 
 sub BUILD {
     my $self = shift;
@@ -47,7 +47,8 @@ sub run {
     my($self, @args) = @_;
 
     my $pushd = File::pushd::pushd $self->dir;
-    local $ENV{PERL_CARMEL_REPO} = $self->dir->child(".carmel");
+    local $ENV{PERL_CARMEL_REPO} = $self->dir->child(".carmel")
+      if $self->{clean};
 
     my @capture = capture {
         my $code = eval { Carmel::App->new->run(@args) };

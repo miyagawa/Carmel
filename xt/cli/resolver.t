@@ -3,7 +3,7 @@ use Test::More;
 use xt::CLI;
 
 subtest 'carmel install' => sub {
-    my $app = cli();
+    my $app = cli(clean => 1);
 
     $app->write_cpanfile(<<EOF);
 requires 'Try::Tiny';
