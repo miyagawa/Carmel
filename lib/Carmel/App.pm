@@ -112,7 +112,7 @@ sub install_from_cpanfile {
     my @artifacts;
     $self->resolve(sub { push @artifacts, $_[0] });
 
-    # $self->requirements has been ugpraded at this point with the whole subreqs
+    # $self->requirements has been upgraded at this point with the whole subreqs
     printf "---> Complete! %d cpanfile dependencies. %d modules installed.\n" .
       "---> Use `carmel show [module]` to see where a module is installed.\n",
       scalar($self->build_requirements->required_modules), scalar(@artifacts);
@@ -311,7 +311,7 @@ sub resolve_recursive {
     my($self, $root_reqs, $requirements, $seen, $cb, $missing_cb, $depth) = @_;
 
     # TODO rather than mutating $root_reqs directly, we should create a new object
-    # that allows accesing the result $requirements
+    # that allows accessing the result $requirements
     for my $module (sort $requirements->required_modules) {
         next if $module eq 'perl';
 
