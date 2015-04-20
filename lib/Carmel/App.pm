@@ -115,7 +115,7 @@ sub install_from_cpanfile {
     # $self->requirements has been upgraded at this point with the whole subreqs
     printf "---> Complete! %d cpanfile dependencies. %d modules installed.\n" .
       "---> Use `carmel show [module]` to see where a module is installed.\n",
-      scalar($self->build_requirements->required_modules), scalar(@artifacts);
+      scalar(grep { $_ ne 'perl' } $self->build_requirements->required_modules), scalar(@artifacts);
 }
 
 sub is_core {

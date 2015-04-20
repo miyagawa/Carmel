@@ -1,0 +1,18 @@
+use strict;
+use Test::More;
+use xt::CLI;
+
+subtest 'install count is wrong if "perl" is in the cpanfile' => sub {
+    my $app = cli();
+
+    $app->write_cpanfile(<<EOF);
+requires 'perl', '5.10.1';
+requires 'Path::Tiny';
+EOF
+
+
+    $app->run("install");
+    like $app->stdout, qr/1 cpanfile dependencies/;
+};
+
+done_testing;
