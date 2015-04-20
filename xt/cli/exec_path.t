@@ -9,6 +9,7 @@ subtest 'carmel exec overwrites ENV' => sub {
 requires 'Mojolicious';
 EOF
 
+    $app->run("install");
     $app->run("exec", "which", "mojo");
     like$app->stdout, qr!Mojolicious-.*/blib/script/mojo!;
 };
