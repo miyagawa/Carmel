@@ -15,6 +15,8 @@ use Try::Tiny;
 
 our $UseSystem = 0; # unit testing
 
+my $can_symlink => eval { symlink("", ""); 1 };
+
 sub new {
     my $class = shift;
     bless {
@@ -143,9 +145,11 @@ sub install {
     local $ENV{PERL_CPANM_OPT};
     system $^X, "-S", "cpanm", "--quiet", "--notest", "-L", $self->cache_dir, @args if @args;
 
-    for my $ent ($dir->child("latest-build")->children) {
-        next unless $ent->is_dir && $ent->child("blib/meta/install.json")->exists;
-        $self->repo->import_artifact($ent);
+    if ($can_symlink) {
+        for my $ent ($dir->child("latest-build")->children) {
+            next unless $ent->is_dir && $ent->child("blib/meta/install.json")->exists;
+            $self->repo->import_artifact($ent);
+        }
     }
 }
 
