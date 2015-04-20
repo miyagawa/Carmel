@@ -2,6 +2,10 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.7  2015-04-20 14:44:20 CEST
+        - Fix dependencies count display when 'perl' is in cpanfile
+        - Fix the ordering of %ENV in exec when PATH/PERL5LIB is already set (#4)
+
 v0.1.6  2015-04-20 01:55:23 CEST
         - up dependency on Carton
         - Fixed an issue with exact v-strings in requirements

@@ -89,7 +89,7 @@ it will find the latest that satisfies the (empty) requirement, which
 is in `URI-1.64/blib/lib`.
 
 The fact that it prefers the latest, rather than the oldest, might
-change in the future once a mechanism to make snapshot is instroduced,
+change in the future once a mechanism to make snapshot is introduced,
 since you will not like to upgrade one of the dependencies
 unexpectedly.
 
