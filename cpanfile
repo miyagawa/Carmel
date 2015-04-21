@@ -1,6 +1,7 @@
 requires 'perl', '5.010001';
 
 requires 'JSON';
+requires 'Class::Tiny', '1.001';
 requires 'CPAN::Meta::Requirements', '2.129';
 requires 'CPAN::Meta::Prereqs', '2.132830';
 requires 'Module::CoreList';

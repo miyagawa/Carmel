@@ -5,18 +5,24 @@ use DirHandle;
 use Carmel::Artifact;
 use CPAN::Meta::Requirements;
 use File::Copy::Recursive ();
-use JSON ();
 
-sub new {
-    my($class, $path) = @_;
-    my $self = bless {
-        path => Path::Tiny->new($path),
-    }, $class;
+use subs 'path';
+use Class::Tiny qw( path );
+
+sub BUILD {
+    my($self, $args) = @_;
+    $self->path($args->{path});
     $self->load_artifacts;
-    $self;
 }
 
-sub path { $_[0]->{path} }
+sub path {
+    my $self = shift;
+    if (@_ ){
+        $self->{path} = Path::Tiny->new($_[0]);
+    } else {
+        $self->{path};
+    }
+}
 
 sub import_artifact {
     my($self, $dir) = @_;
@@ -27,17 +33,13 @@ sub import_artifact {
     $self->load($dest);
 }
 
-sub read_json {
-    my $file = shift;
-    JSON::decode_json($file->slurp);
-}
-
 sub load_artifacts {
     my $self = shift;
     return unless $self->path->exists;
 
     for my $ent ($self->path->children) {
         if ($ent->is_dir && $ent->child("blib")->exists) {
+            warn "---> Loading artifact from $ent\n" if $Carmel::DEBUG;
             $self->load($ent);
         }
     }
@@ -46,32 +48,22 @@ sub load_artifacts {
 sub load {
     my($self, $dir) = @_;
 
-    my $install = $self->_install_info($dir);
-    while (my($package, $data) = each %{ $install->{provides} }) {
-        $self->add($package, $dir, $data->{version}, $install);
+    my $artifact = Carmel::Artifact->new($dir);
+    while (my($package, $data) = each %{ $artifact->provides }) {
+        $self->add($package, $artifact);
     }
-}
-
-sub _install_info {
-    my($self, $dir) = @_;
-
-    my $file = $dir->child("blib/meta/install.json");
-    if ($file->exists) {
-        return read_json($file);
-    }
-
-    die "Could not read build artifact from $dir";
 }
 
 sub add {
-    my($self, $package, $path, $version, $install) = @_;
+    my($self, $package, $artifact) = @_;
 
-    if (my $artifact = $self->lookup($package, $version)) {
-        if ($self->_compare($install->{version}, $artifact->dist_version) > 0) {
-            $self->{$package}{$version} = [ $path, $install ];
+    my $version = $artifact->version_for($package);
+    if (my $found = $self->lookup($package, $version)) {
+        if ($self->_compare($version, $found->version_for($package)) > 0) {
+            $self->{$package}{$version} = $artifact;
         }
     } else {
-        $self->{$package}{$version} = [ $path, $install ];
+        $self->{$package}{$version} = $artifact;
     }
 }
 
@@ -97,7 +89,7 @@ sub _find {
     my @artifacts;
 
     for my $artifact ($self->list($package)) {
-        if ($reqs->accepts_module($package, $artifact->version)) {
+        if ($reqs->accepts_module($package, $artifact->version_for($package))) {
             if ($all) {
                 push @artifacts, $artifact;
             } else {
@@ -112,23 +104,14 @@ sub _find {
 
 sub list {
     my($self, $package) = @_;
-
-    # XXX room for optimizations
-    map { $_->[1] }
-      sort { $b->[0] <=> $a->[0] }
-        map { [
-            version::->parse($_ || '0'),
-            Carmel::Artifact->new($package, $_, @{$self->{$package}{$_}})
-            ] } keys %{$self->{$package}};
+    sort { $b->version_for($package) || $a->version_for($package) }
+      values %{$self->{$package}};
 }
 
 sub lookup {
     my($self, $package, $version) = @_;
-    $version = version->parse($version)->numify;
-    if ($self->{$package}{$version}) {
-        return Carmel::Artifact->new($package, $version, @{$self->{$package}{$version}});
-    }
-    return;
+    $version = version::->parse($version)->numify;
+    $self->{$package}{$version}
 }
 
 sub _compare {

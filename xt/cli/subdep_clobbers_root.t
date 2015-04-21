@@ -12,12 +12,8 @@ EOF
 
     $app->run("install");
 
-    TODO: {
-        local $TODO = 'bug';
-        $app->run("show", "URI");
-        unlike $app->stderr, qr/Could not find a module named 'URI'/;
-    }
-    
+    $app->run("show", "URI");
+    unlike $app->stderr, qr/Could not find a module named 'URI'/;
 };
 
 done_testing;

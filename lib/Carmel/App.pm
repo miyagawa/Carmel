@@ -7,23 +7,41 @@ use Carp ();
 use Carmel::Repository;
 use Config qw(%Config);
 use CPAN::Meta::Requirements;
+use Getopt::Long ();
 use Module::CoreList;
 use Module::CPANfile;
 use Path::Tiny ();
 use Pod::Usage ();
 use Try::Tiny;
 
+use Class::Tiny {
+    verbose => sub { 0 },
+    perl_arch => sub { "$Config{version}-$Config{archname}" },
+};
+
 our $UseSystem = 0; # unit testing
 
-sub new {
-    my $class = shift;
-    bless {
-        perl_arch => "$Config{version}-$Config{archname}",
-    }, $class;
+sub parse_options {
+    my($self, $args) = @_;
+
+    my $cmd;
+    my $parser = Getopt::Long::Parser->new(
+        config => [ "no_ignore_case", "pass_through" ],
+    );
+    $parser->getoptionsfromarray(
+        $args,
+        "h|help"      => sub { $cmd = 'help' },
+        "version"     => sub { $cmd = 'version' },
+        "v|verbose!"  => sub { $Carmel::DEBUG = $self->verbose($_[1]) },
+    );
+
+    unshift @$args, $cmd if $cmd;
 }
 
 sub run {
     my($self, @args) = @_;
+
+    $self->parse_options(\@args);
 
     my $cmd = shift @args || 'install';
     my $call = $self->can("cmd_$cmd")
@@ -41,7 +59,7 @@ sub run {
 
 sub repository_base {
     my $self = shift;
-    Path::Tiny->new($ENV{PERL_CARMEL_REPO} || "$ENV{HOME}/.carmel/$self->{perl_arch}");
+    Path::Tiny->new($ENV{PERL_CARMEL_REPO} || "$ENV{HOME}/.carmel/" . $self->perl_arch);
 }
 
 sub cache_dir {
@@ -61,7 +79,7 @@ sub repo {
 
 sub build_repo {
     my $self = shift;
-    Carmel::Repository->new($self->build_dir);
+    Carmel::Repository->new(path => $self->build_dir);
 }
 
 sub cmd_help {

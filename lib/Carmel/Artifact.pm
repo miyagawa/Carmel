@@ -1,20 +1,54 @@
 package Carmel::Artifact;
 use strict;
 use CPAN::Meta;
-use File::Basename ();
+use JSON ();
+use Path::Tiny ();
 
 sub new {
-    my($class, @args) = @_;
-    bless [ @args ], $class;
+    my($class, $path) = @_;
+    bless { path => Path::Tiny->new($path) }, $class;
 }
 
-sub package { $_[0]->[0] }
-sub version { $_[0]->[1] || '0' }
-sub path    { $_[0]->[2] }
-sub install { $_[0]->[3] }
+sub path { $_[0]->{path} }
+
+sub install {
+    my $self = shift;
+    $self->{install} ||= $self->_build_install;
+}
+
+sub _build_install {
+    my $self = shift;
+
+    my $file = $self->path->child("blib/meta/install.json");
+    if ($file->exists) {
+        return JSON::decode_json($file->slurp);
+    }
+
+    die "Could not read build artifact from ", $self->path;
+}
+
+sub provides {
+    my $self = shift;
+    $self->install->{provides};
+}
+
+sub package {
+    my $self = shift;
+    $self->install->{name};
+}
+
+sub version {
+    my $self = shift;
+    $self->version_for($self->package);
+}
+
+sub version_for {
+    my($self, $package) = @_;
+    $self->provides->{$package}{version} || '0';
+}
 
 sub distname {
-    File::Basename::basename($_[0]->path);
+    $_[0]->path->basename;
 }
 
 sub dist_version {
@@ -22,7 +56,7 @@ sub dist_version {
 }
 
 sub blib {
-    "$_[0]->[2]/blib";
+    $_[0]->path->child("blib");
 }
 
 sub paths {
@@ -37,7 +71,7 @@ sub libs {
 
 sub meta {
     my $self = shift;
-    CPAN::Meta->load_file($self->path . "/MYMETA.json");
+    CPAN::Meta->load_file($self->path->child("MYMETA.json"));
 }
 
 sub requirements {
