@@ -2,6 +2,9 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.8  2015-04-20 21:40:06 PDT
+        - Change the default base to ~/.carmel/5.20.2-{arch} rather than ~/.perl-carmel/5.020002-{arch}
+
 v0.1.7  2015-04-20 14:44:20 CEST
         - Fix dependencies count display when 'perl' is in cpanfile
         - Fix the ordering of %ENV in exec when PATH/PERL5LIB is already set (#4)
