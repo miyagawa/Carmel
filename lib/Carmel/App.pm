@@ -10,6 +10,7 @@ use CPAN::Meta::Requirements;
 use Getopt::Long ();
 use Module::CoreList;
 use Module::CPANfile;
+use Module::Metadata;
 use Path::Tiny ();
 use Pod::Usage ();
 use Try::Tiny;
@@ -153,13 +154,19 @@ sub install_with_cpanfile {
     $self->install("--installdeps", "--cpanfile", $path, ".");
 }
 
+sub fatscript {
+    my $self = shift;
+    Module::Metadata->find_module_by_name("App::cpanminus::fatscript")
+        or die "Can't locate App::cpanminus::fatscript";
+}
+
 sub install {
     my($self, @args) = @_;
 
     my $dir = Path::Tiny->tempdir;
     local $ENV{PERL_CPANM_HOME} = $dir;
     local $ENV{PERL_CPANM_OPT};
-    system $^X, "-S", "cpanm", "--quiet", "--notest", "-L", $self->cache_dir, @args if @args;
+    system $^X, $self->fatscript, "--quiet", "--notest", "-L", $self->cache_dir, @args if @args;
 
     for my $ent ($dir->child("latest-build")->children) {
         next unless $ent->is_dir && $ent->child("blib/meta/install.json")->exists;
