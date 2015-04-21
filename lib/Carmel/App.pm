@@ -18,7 +18,7 @@ our $UseSystem = 0; # unit testing
 sub new {
     my $class = shift;
     bless {
-        perl_arch => "$]-$Config{archname}",
+        perl_arch => "$Config{version}-$Config{archname}",
     }, $class;
 }
 
@@ -41,7 +41,7 @@ sub run {
 
 sub repository_base {
     my $self = shift;
-    Path::Tiny->new($ENV{PERL_CARMEL_REPO} || "$ENV{HOME}/.perl-carmel/$self->{perl_arch}");
+    Path::Tiny->new($ENV{PERL_CARMEL_REPO} || "$ENV{HOME}/.carmel/$self->{perl_arch}");
 }
 
 sub cache_dir {
