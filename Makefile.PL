@@ -29,12 +29,13 @@ my %WriteMakefileArgs = (
     "JSON" => 0,
     "Module::CPANfile" => "1.1000",
     "Module::CoreList" => 0,
+    "Module::Metadata" => "1.000003",
     "Path::Tiny" => "0.068"
   },
   "TEST_REQUIRES" => {
     "Test::More" => "0.96"
   },
-  "VERSION" => "v0.1.9",
+  "VERSION" => "v0.1.10",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -52,6 +53,7 @@ my %FallbackPrereqs = (
   "JSON" => 0,
   "Module::CPANfile" => "1.1000",
   "Module::CoreList" => 0,
+  "Module::Metadata" => "1.000003",
   "Path::Tiny" => "0.068",
   "Test::More" => "0.96"
 );

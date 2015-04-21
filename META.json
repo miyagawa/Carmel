@@ -46,6 +46,7 @@
             "JSON" : "0",
             "Module::CPANfile" : "1.1000",
             "Module::CoreList" : "0",
+            "Module::Metadata" : "1.000003",
             "Path::Tiny" : "0.068",
             "perl" : "5.010001"
          }
@@ -68,7 +69,7 @@
          "web" : "https://github.com/miyagawa/Carmel"
       }
    },
-   "version" : "v0.1.9",
+   "version" : "v0.1.10",
    "x_contributors" : [
       "Syohei YOSHIDA <syohex@gmail.com>"
    ]

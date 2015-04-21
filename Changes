@@ -2,6 +2,10 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.10  2015-04-21 15:04:06 PDT
+        - Fixed a bug in 0.1.9 on sorting versions
+        - use fatscript version of cpanm so that 'cpanm' in $PATH won't be used ala Carton (#7)
+
 v0.1.9  2015-04-21 14:24:36 PDT
         - added -h and -v|--verbose for debugging
         - Internal refactoring and (de-)optimizations on artifact loading
