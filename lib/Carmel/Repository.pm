@@ -39,7 +39,7 @@ sub load_artifacts {
 
     for my $ent ($self->path->children) {
         if ($ent->is_dir && $ent->child("blib")->exists) {
-            warn "---> Loading artifact from $ent\n" if $Carmel::DEBUG;
+            warn "-> Loading artifact from $ent\n" if $Carmel::DEBUG;
             $self->load($ent);
         }
     }
