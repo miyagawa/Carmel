@@ -104,8 +104,10 @@ sub _find {
 
 sub list {
     my($self, $package) = @_;
-    sort { $b->version_for($package) || $a->version_for($package) }
-      values %{$self->{$package}};
+    map { $_->[1] }
+      sort { $b->[0] <=> $a->[0] }
+        map { [ version::->parse($_->version_for($package)), $_ ] }
+          values %{$self->{$package}};
 }
 
 sub lookup {
