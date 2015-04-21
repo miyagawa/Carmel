@@ -41,6 +41,7 @@
             "CPAN::Meta::Prereqs" : "2.132830",
             "CPAN::Meta::Requirements" : "2.129",
             "Carton" : "v1.0.13",
+            "Class::Tiny" : "1.001",
             "File::Copy::Recursive" : "0",
             "JSON" : "0",
             "Module::CPANfile" : "1.1000",
@@ -67,7 +68,7 @@
          "web" : "https://github.com/miyagawa/Carmel"
       }
    },
-   "version" : "v0.1.8",
+   "version" : "v0.1.9",
    "x_contributors" : [
       "Syohei YOSHIDA <syohex@gmail.com>"
    ]

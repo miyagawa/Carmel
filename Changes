@@ -2,6 +2,10 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.9  2015-04-21 14:24:36 PDT
+        - added -h and -v|--verbose for debugging
+        - Internal refactoring and (de-)optimizations on artifact loading
+
 v0.1.8  2015-04-20 21:40:06 PDT
         - Change the default base to ~/.carmel/5.20.2-{arch} rather than ~/.perl-carmel/5.020002-{arch}
 
