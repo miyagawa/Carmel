@@ -25,6 +25,8 @@ our $UseSystem = 0; # unit testing
 sub parse_options {
     my($self, $args) = @_;
 
+    return if $args->[0] && $args->[0] eq 'exec';
+
     my $cmd;
     my $parser = Getopt::Long::Parser->new(
         config => [ "no_ignore_case", "pass_through" ],
