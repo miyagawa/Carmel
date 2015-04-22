@@ -4,6 +4,7 @@ use Module::CoreList;
 
 my %environment;
 sub modules { %{$environment{modules}} }
+sub inc  { @{$environment{inc}} }
 sub path { @{$environment{path}} }
 sub base { $environment{base} }
 
@@ -14,12 +15,35 @@ sub environment {
 
 sub bootstrap {
     my $class = shift;
-    unshift @INC, $class->new($class->modules);
+    unshift @INC,
+      Carmel::Bootstrap::FastINC->new($class->modules),
+      $class->inc,
+      Carmel::Bootstrap::Guard->new;
 }
+
+package Carmel::Bootstrap::FastINC;
 
 sub new {
     my($class, %modules) = @_;
-    bless { modules => \%modules, corelist => {} }, $class;
+    bless \%modules, $class;
+}
+
+sub Carmel::Bootstrap::FastINC::INC {
+    my($self, $file) = @_;
+
+    if ($self->{$file}) {
+        open my $fh, '<', $self->{$file}
+          or die "Could not load $self->{$file}: $!";
+        $INC{$file} = $self->{$file};
+        return $fh;
+    }
+}
+
+package Carmel::Bootstrap::Guard;
+
+sub new {
+    my $class = shift;
+    bless { corelist => {} }, $class;
 }
 
 sub _package {
@@ -29,15 +53,8 @@ sub _package {
     $file;
 }
 
-sub Carmel::Bootstrap::INC {
+sub Carmel::Bootstrap::Guard::INC {
     my($self, $file) = @_;
-
-    if ($self->{modules}{$file}) {
-        open my $fh, '<', $self->{modules}{$file}
-          or die "Could not load $self->{modules}{$file}: $!";
-        $INC{$file} = $self->{modules}{$file};
-        return $fh;
-    }
 
     # Config_heavy.pl etc.
     return if $file =~ /\.pl$/;

@@ -200,10 +200,13 @@ sub dump_bootstrap {
 # This file serves dual purpose to load cached data in carmel exec setup phase
 # as well as on runtime to change \@INC
 package MyBootstrap;
-my(\%modules, \@path);
+my(\%modules, \@inc, \@path);
 BEGIN {
   \%modules = (
     @{[ join ",\n    ", map { B::perlstring($_) . " => " . B::perlstring($modules{$_}) } keys %modules ]}
+  );
+  \@inc = (
+    @{[ join ",\n    ", map B::perlstring($_), map $_->nonempty_libs, @artifacts ]}
   );
   \@path = (
     @{[ join ",\n    ", map B::perlstring($_), map $_->nonempty_paths, @artifacts ]}
@@ -215,6 +218,7 @@ use Carmel::Bootstrap;
 # for carmel exec setup
 Carmel::Bootstrap->environment(
   modules=> \\\%modules,
+  inc  => \\\@inc,
   path => \\\@path,
   base => @{[ B::perlstring($file->parent->absolute) ]}
 );
