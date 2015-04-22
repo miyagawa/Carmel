@@ -32,8 +32,8 @@ Carmel - CPAN Artifact Repository Manager
   # Runs your perl script with modules from artifacts
   carmel exec perl ...
 
-  # See which INC entry is added
-  carmel exec perl -V
+  # Requires all your modules in cpanfile in one shot
+  carmel exec perl -e 'Carmel::Runtime->require_all'
 
   # prints export PATH=... etc for shell scripting
   carmel export

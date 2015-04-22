@@ -4,9 +4,10 @@ use Module::CoreList;
 
 my %environment;
 sub modules { %{$environment{modules}} }
-sub inc  { @{$environment{inc}} }
-sub path { @{$environment{path}} }
-sub base { $environment{base} }
+sub inc     { @{$environment{inc}} }
+sub path    { @{$environment{path}} }
+sub base    { $environment{base} }
+sub prereqs { $environment{prereqs} }
 
 sub environment {
     my($class, %args) = @_;
@@ -19,6 +20,30 @@ sub bootstrap {
       Carmel::Runtime::FastINC->new($class->modules),
       $class->inc,
       Carmel::Runtime::Guard->new;
+}
+
+sub require_all {
+    my($class, @phase) = @_;
+
+    require Module::Runtime;
+    my $modules = Carmel::Runtime->required_modules($phase);
+    while (my($module, $version) = each %$modules) {
+        next if $module eq 'perl';
+        Module::Runtime::use_module($module, $version);
+    }
+
+    1;
+}
+
+sub required_modules {
+    my($class, @phase) = @_;
+
+    my %modules;
+    for my $phase ('runtime', @phase) {
+        %modules = (%modules, %{$class->prereqs->{$phase}{requires} || {}});
+    }
+
+    \%modules
 }
 
 package Carmel::Runtime::FastINC;
@@ -41,6 +66,11 @@ sub Carmel::Runtime::FastINC::INC {
 
 package Carmel::Runtime::Guard;
 
+# called in runtime via ->require_all
+my %whitelist = (
+    'Module/Runtime.pm' => 1,
+);
+
 sub new {
     my $class = shift;
     bless { corelist => {} }, $class;
@@ -58,6 +88,9 @@ sub Carmel::Runtime::Guard::INC {
 
     # Config_heavy.pl etc.
     return if $file =~ /\.pl$/;
+
+    # whitelist
+    return if $whitelist{$file};
 
     my $mod = _package($file);
     my @caller = caller 0;

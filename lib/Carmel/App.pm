@@ -138,7 +138,7 @@ sub install_from_cpanfile {
     # $self->requirements has been upgraded at this point with the whole subreqs
     printf "---> Complete! %d cpanfile dependencies. %d modules installed.\n" .
       "---> Use `carmel show [module]` to see where a module is installed.\n",
-      scalar(grep { $_ ne 'perl' } $self->build_requirements->required_modules), scalar(@artifacts);
+      scalar(grep { $_ ne 'perl' } $self->build_requirements(1)->required_modules), scalar(@artifacts);
 }
 
 sub is_core {
@@ -182,18 +182,49 @@ sub install {
     }
 }
 
+sub quote {
+    require Data::Dump;
+
+    my $value = transform(@_);
+    if (ref $value) {
+        Data::Dump::dump($value);
+    } else {
+        Data::Dump::quote($value);
+    }
+}
+
+sub transform {
+    my $data = shift;
+
+    # strinfigy elements
+    if (ref $data eq 'ARRAY') {
+        [map transform($_), @$data];
+    } elsif (ref $data eq 'HASH') {
+        my %value = map { $_ => transform($data->{$_}) } keys %$data;
+        \%value;
+    } else {
+        "$data";
+    }
+}
+
 sub dump_bootstrap {
     my($self) = @_;
 
-    require B;
-    
     my @artifacts;
     $self->resolve(sub { push @artifacts, $_[0] });
+
+    my @inc  = map $_->sharedir_libs, @artifacts;
+    my @path = map $_->nonempty_paths, @artifacts;
 
     my %modules;
     for my $artifact (@artifacts) {
         %modules = (%modules, %{$artifact->module_files});
     }
+
+    my $cpanfile = $self->try_cpanfile
+      or Carp::croak "Could not locate 'cpanfile' to load module list.";
+
+    my $prereqs = Module::CPANfile->load($cpanfile)->prereqs->as_string_hash;
 
     my $file = Path::Tiny->new(".carmel/MyBootstrap.pm");
     $file->parent->mkpath;
@@ -201,28 +232,18 @@ sub dump_bootstrap {
 # This file serves dual purpose to load cached data in carmel exec setup phase
 # as well as on runtime to change \@INC
 package MyBootstrap;
-my(\%modules, \@inc, \@path);
-BEGIN {
-  \%modules = (
-    @{[ join ",\n    ", map { B::perlstring($_) . " => " . B::perlstring($modules{$_}) } keys %modules ]}
-  );
-  \@inc = (
-    @{[ join ",\n    ", map B::perlstring($_), map $_->sharedir_libs, @artifacts ]}
-  );
-  \@path = (
-    @{[ join ",\n    ", map B::perlstring($_), map $_->nonempty_paths, @artifacts ]}
-  );
-}
-
 use Carmel::Runtime;
 
 # for carmel exec setup
-Carmel::Runtime->environment(
-  modules=> \\\%modules,
-  inc  => \\\@inc,
-  path => \\\@path,
-  base => @{[ B::perlstring($file->parent->absolute) ]}
+my %environment = (
+inc => @{[ quote \@inc ]},
+path => @{[ quote \@path ]},
+base => @{[ quote $file->parent->absolute ]},
+modules => @{[ quote \%modules ]},
+prereqs => @{[ quote $prereqs ]},
 );
+
+Carmel::Runtime->environment(%environment);
 
 # for carmel exec runtime
 sub import {
@@ -354,13 +375,15 @@ sub requirements {
 }
 
 sub build_requirements {
-    my $self = shift;
+    my($self, $skip_snapshot) = @_;
 
     my $cpanfile = $self->try_cpanfile
       or Carp::croak "Could not locate 'cpanfile' to load module list.";
 
     my $requirements = Module::CPANfile->load($cpanfile)
       ->prereqs->merged_requirements(['runtime', 'test'], ['requires']);
+
+    return $requirements if $skip_snapshot;
 
     if (my $snapshot = $self->try_snapshot) {
         require Carton::Snapshot;
