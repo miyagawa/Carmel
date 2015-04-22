@@ -381,7 +381,7 @@ sub build_requirements {
       or Carp::croak "Could not locate 'cpanfile' to load module list.";
 
     my $requirements = Module::CPANfile->load($cpanfile)
-      ->prereqs->merged_requirements(['runtime', 'test'], ['requires']);
+      ->prereqs->merged_requirements(['runtime', 'test', 'develop'], ['requires']);
 
     return $requirements if $skip_snapshot;
 
