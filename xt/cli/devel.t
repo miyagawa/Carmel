@@ -1,5 +1,5 @@
 use strict;
-use Test::More skip_all => 'Test::Harness munges PERL5LIB';
+use Test::More;
 use xt::CLI;
 
 subtest 'carmel install' => sub {
@@ -10,7 +10,7 @@ requires 'Try::Tiny';
 EOF
 
     $app->run("install");
-    $app->run("exec", "perl", "-MDevel::Carmel", "-e", "use Moose; warn \$INC{'Moose.pm'}");
+    $app->run("exec", "perl", "-e", "use Moose; warn \$INC{'Moose.pm'}");
 
     like $app->stderr, qr/Can't locate Moose.pm/;
 };
