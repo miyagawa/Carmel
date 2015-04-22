@@ -196,7 +196,7 @@ sub quote {
 sub transform {
     my $data = shift;
 
-    # strinfigy elements
+    # stringify elements
     if (ref $data eq 'ARRAY') {
         [map transform($_), @$data];
     } elsif (ref $data eq 'HASH') {
