@@ -25,10 +25,7 @@ Carmel - CPAN Artifact Repository Manager
     # See which INC entry is added
     carmel exec perl -V
 
-    # Runs your perl script with a checker to guarantee everything is loaded from Carmel
-    carmel exec perl -MDevel::Carmel script.pl
-
-    # prints export PERL5LIB=... etc for shell scripting
+    # prints export PATH=... etc for shell scripting
     carmel export
 
     # find a module in a repository
@@ -72,16 +69,18 @@ of any package belongs to which build directory.
 
 Given the list of modules and requirements (using `cpanfile` or even
 better `cpanfile.snapshot` from [Carton](https://metacpan.org/pod/Carton)), Carmel lists all the
-build directories you need, and then prepend the `blib` directories
-to `PERL5LIB` environment variables.
+build directories and `.pm` files you need, and then prepend the
+mappings of these files in the `@INC` hook.
 
 For example, if you have:
 
     requires 'URI', '== 1.63';
 
 Carmel finds URI package with `$VERSION` set to 1.63 in
-`URI-1.63/blib/lib` so it will set that directory. Instead, if you
-have:
+`URI-1.63/blib/lib` so it will let perl load `URI.pm` from that
+directory.
+
+Instead, if you have:
 
     requires 'URI';
 

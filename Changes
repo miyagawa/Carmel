@@ -2,6 +2,12 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.11  2015-04-22 12:03:03 PDT
+        - Big performance optimization in carmel exec, about 20 times less overhead
+        - Do not use PERL5LIB env var anymore, rather use PERL5OPT and bootstrap .pm file
+        - Fix a bug where -h/-v is swallowed in carton exec
+        - -v will make cpanm installation a bit verbose too
+
 v0.1.10  2015-04-21 15:04:06 PDT
         - Fixed a bug in 0.1.9 on sorting versions
         - use fatscript version of cpanm so that 'cpanm' in $PATH won't be used ala Carton (#7)
