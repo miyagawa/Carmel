@@ -206,7 +206,7 @@ BEGIN {
     @{[ join ",\n    ", map { B::perlstring($_) . " => " . B::perlstring($modules{$_}) } keys %modules ]}
   );
   \@inc = (
-    @{[ join ",\n    ", map B::perlstring($_), map $_->nonempty_libs, @artifacts ]}
+    @{[ join ",\n    ", map B::perlstring($_), map $_->sharedir_libs, @artifacts ]}
   );
   \@path = (
     @{[ join ",\n    ", map B::perlstring($_), map $_->nonempty_paths, @artifacts ]}

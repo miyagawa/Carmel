@@ -100,6 +100,11 @@ sub nonempty_libs {
     grep $self->_nonempty($_), $self->libs;
 }
 
+sub sharedir_libs {
+    my $self = shift;
+    grep $_->child('auto', 'share')->exists, $self->libs;
+}
+
 sub meta {
     my $self = shift;
     CPAN::Meta->load_file($self->path->child("MYMETA.json"));
