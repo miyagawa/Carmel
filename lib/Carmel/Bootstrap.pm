@@ -3,7 +3,7 @@ use Config;
 use Module::CoreList;
 
 my %environment;
-sub inc  { @{$environment{inc}} }
+sub modules { %{$environment{modules}} }
 sub path { @{$environment{path}} }
 sub base { $environment{base} }
 
@@ -14,7 +14,12 @@ sub environment {
 
 sub bootstrap {
     my $class = shift;
-    unshift @INC, $class->inc, __PACKAGE__->new;
+    unshift @INC, $class->new($class->modules);
+}
+
+sub new {
+    my($class, %modules) = @_;
+    bless { modules => \%modules, corelist => {} }, $class;
 }
 
 sub _package {
@@ -24,16 +29,15 @@ sub _package {
     $file;
 }
 
-sub new {
-    my $class = shift;
-    bless {
-        inc => [ $class->inc ],
-        corelist => {},
-    }, $class;
-}
-
 sub Carmel::Bootstrap::INC {
     my($self, $file) = @_;
+
+    if ($self->{modules}{$file}) {
+        open my $fh, '<', $self->{modules}{$file}
+          or die "Could not load $self->{modules}{$file}: $!";
+        $INC{$file} = $self->{modules}{$file};
+        return $fh;
+    }
 
     # Config_heavy.pl etc.
     return if $file =~ /\.pl$/;
@@ -58,7 +62,7 @@ sub Carmel::Bootstrap::INC {
     }
 
     # Module::Runtime::use_package_optimistically tries to parse this message.
-    die "Can't locate $file in \@INC with Carmel artifacts (You may need to add `requires '$mod';` to your cpanfile and run carmel install) (\@INC contains: @{$self->{inc}}) at $caller[1] line $caller[2].\n";
+    die "Can't locate $file in \@INC (You may need to add `requires '$mod';` to your cpanfile and run carmel install) (\@INC contains: @INC) at $caller[1] line $caller[2].\n";
 }
 
 1;

@@ -80,8 +80,8 @@ of any package belongs to which build directory.
 
 Given the list of modules and requirements (using C<cpanfile> or even
 better C<cpanfile.snapshot> from L<Carton>), Carmel lists all the
-build directories you need, and then prepend the C<blib> directories
-to C<@INC> entries as you need.
+build directories and C<.pm> files you need, and then prepend the
+mappings of these files in the C<@INC> hook.
 
 For example, if you have:
 

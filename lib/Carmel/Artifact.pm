@@ -32,6 +32,27 @@ sub provides {
     $self->install->{provides};
 }
 
+# "Foo/Bar.pm" => "blib/lib/Foo/Bar.pm"
+sub module_files {
+    my $self = shift;
+
+    my %modules;
+    for my $lib ($self->libs) {
+        $lib->visit(
+            sub {
+                my($path, $state) = @_;
+                if ($path->is_file && $path =~ /\.pm$/) {
+                    $modules{$path->relative($lib)->stringify} = $path;
+                }
+                return; # continue
+            },
+            { recurse => 1 },
+        );
+    }
+
+    \%modules;
+}
+
 sub package {
     my $self = shift;
     $self->install->{name};
@@ -92,18 +113,19 @@ sub requirements {
 sub _nonempty {
     my($self, $path) = @_;
 
-    my $files = $path->visit(
+    my $bool;
+    $path->visit(
         sub {
             my($path, $state) = @_;
             if ($path->is_file && $path !~ /\.exists$/) {
-                $state->{nonempty} = $path;
+                $bool = 1;
                 return \0;
             }
         },
         { recurse => 1 },
     );
 
-    return $files->{nonempty};
+    return $bool;
 }
 
 1;

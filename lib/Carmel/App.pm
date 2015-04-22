@@ -189,16 +189,21 @@ sub dump_bootstrap {
     my @artifacts;
     $self->resolve(sub { push @artifacts, $_[0] });
 
+    my %modules;
+    for my $artifact (@artifacts) {
+        %modules = (%modules, %{$artifact->module_files});
+    }
+
     my $file = Path::Tiny->new(".carmel/MyBootstrap.pm");
     $file->parent->mkpath;
     $file->spew(<<EOF);
 # This file serves dual purpose to load cached data in carmel exec setup phase
 # as well as on runtime to change \@INC
 package MyBootstrap;
-my(\@inc, \@path);
+my(\%modules, \@path);
 BEGIN {
-  \@inc = (
-    @{[ join ",\n    ", map B::perlstring($_), map $_->nonempty_libs, @artifacts ]}
+  \%modules = (
+    @{[ join ",\n    ", map { B::perlstring($_) . " => " . B::perlstring($modules{$_}) } keys %modules ]}
   );
   \@path = (
     @{[ join ",\n    ", map B::perlstring($_), map $_->nonempty_paths, @artifacts ]}
@@ -209,7 +214,7 @@ use Carmel::Bootstrap;
 
 # for carmel exec setup
 Carmel::Bootstrap->environment(
-  inc  => \\\@inc,
+  modules=> \\\%modules,
   path => \\\@path,
   base => @{[ B::perlstring($file->parent->absolute) ]}
 );
@@ -318,7 +323,7 @@ sub write_index {
 
     $self->resolve(sub {
         my $artifact = shift;
-        while (my($pkg, $data) = each %{$artifact->install->{provides}}) {
+        while (my($pkg, $data) = each %{$artifact->provides}) {
             my $package = Carton::Package->new($pkg, $data->{version} || 'undef', $artifact->install->{pathname});
             $index->add_package($package);
         }
