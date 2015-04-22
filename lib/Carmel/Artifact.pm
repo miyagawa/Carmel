@@ -19,7 +19,7 @@ sub install {
 sub _build_install {
     my $self = shift;
 
-    my $file = $self->path->child("blib/meta/install.json");
+    my $file = $self->path->child("blib", "meta", "install.json");
     if ($file->exists) {
         return JSON::decode_json($file->slurp);
     }
