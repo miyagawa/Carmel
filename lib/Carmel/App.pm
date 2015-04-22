@@ -228,13 +228,13 @@ sub cmd_perl {
 sub cmd_export {
     my($self) = @_;
     my %env = Carmel::Runtime->new->env;
-    print "export ", join(" ", map "$_=$env{$_}", keys %env), "\n";
+    print "export ", join(" ", map qq($_="$env{$_}"), keys %env), "\n";
 }
 
 sub cmd_env {
     my($self) = @_;
     my %env = Carmel::Runtime->new->env;
-    print join "", map "$_=$env{$_}\n", keys %env;
+    print join "", map qq($_="$env{$_}"\n), keys %env;
 }
 
 # TODO remove. just here for testing
