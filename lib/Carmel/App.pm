@@ -168,7 +168,11 @@ sub install {
     my $dir = Path::Tiny->tempdir;
     local $ENV{PERL_CPANM_HOME} = $dir;
     local $ENV{PERL_CPANM_OPT};
-    system $^X, $self->fatscript, "--quiet", "--notest", "-L", $self->cache_dir, @args if @args;
+    system $^X, $self->fatscript,
+      ($self->verbose ? () : "--quiet"),
+      "--notest",
+      "-L", $self->cache_dir,
+      @args;
 
     for my $ent ($dir->child("latest-build")->children) {
         next unless $ent->is_dir && $ent->child("blib/meta/install.json")->exists;
