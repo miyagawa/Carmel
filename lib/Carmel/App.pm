@@ -343,11 +343,11 @@ sub resolve_recursive {
         my $want_version = $root_reqs->requirements_for_module($module);
         next if $self->is_core($module, $want_version);
 
-        warn "Resolving $module for $want_version\n" if $self->verbose;
+        warn "$depth: Resolving $module ($want_version)\n" if $self->verbose;
 
         # FIXME there's a chance different version of the same module can be loaded here
         if (my $artifact = $self->repo->find($module, $want_version)) {
-            warn "-> ", $artifact->path, "\n" if $self->verbose;
+            warn sprintf "=> %s (%s) in %s\n", $module, $artifact->version_for($module), $artifact->path if $self->verbose;
             next if $seen->{$artifact->path}++;
             $cb->($artifact, $depth);
 
