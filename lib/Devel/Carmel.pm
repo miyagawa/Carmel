@@ -2,8 +2,6 @@ package Devel::Carmel;
 use Config;
 use Module::CoreList;
 
-sub DB::DB {} # allow -d:Carmel
-
 sub bootstrap {
     my($class, $inc) = @_;
     unshift @INC, @$inc, __PACKAGE__->new($inc);
@@ -56,20 +54,3 @@ sub Devel::Carmel::INC {
 1;
 
 __END__
-
-=head1 NAME
-
-Devel::Carmel - Development helper to check if a module is loaded from Carmel managed artifacts
-
-=head1 SYNOPSIS
-
-  carmel exec perl -MDevel::Carmel script.pl
-
-=head1 DESCRIPTION
-
-Devel::Carmel is a command line helper module to check if any
-used/required modules are loaded from the Carmel artifact
-directories. It should only be used under C<carmel exec> on a
-development environment.
-
-=cut

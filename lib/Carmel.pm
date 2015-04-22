@@ -35,9 +35,6 @@ Carmel - CPAN Artifact Repository Manager
   # See which INC entry is added
   carmel exec perl -V
 
-  # Runs your perl script with a checker to guarantee everything is loaded from Carmel
-  carmel exec perl -MDevel::Carmel script.pl
-
   # prints export PATH=... etc for shell scripting
   carmel export
 
