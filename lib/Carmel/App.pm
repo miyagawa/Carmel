@@ -214,10 +214,10 @@ BEGIN {
   );
 }
 
-use Carmel::Bootstrap;
+use Carmel::Runtime;
 
 # for carmel exec setup
-Carmel::Bootstrap->environment(
+Carmel::Runtime->environment(
   modules=> \\\%modules,
   inc  => \\\@inc,
   path => \\\@path,
@@ -226,16 +226,11 @@ Carmel::Bootstrap->environment(
 
 # for carmel exec runtime
 sub import {
-  Carmel::Bootstrap->bootstrap;
+  Carmel::Runtime->bootstrap;
 }
 
 1;
 EOF
-}
-
-sub cmd_perl {
-    my $self = shift;
-    exec $^X, '-I.carmel', '-MCarmel::Bootstrap', @_;
 }
 
 sub cmd_export {

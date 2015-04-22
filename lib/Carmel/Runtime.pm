@@ -1,4 +1,4 @@
-package Carmel::Bootstrap;
+package Carmel::Runtime;
 use Config;
 use Module::CoreList;
 
@@ -16,19 +16,19 @@ sub environment {
 sub bootstrap {
     my $class = shift;
     unshift @INC,
-      Carmel::Bootstrap::FastINC->new($class->modules),
+      Carmel::Runtime::FastINC->new($class->modules),
       $class->inc,
-      Carmel::Bootstrap::Guard->new;
+      Carmel::Runtime::Guard->new;
 }
 
-package Carmel::Bootstrap::FastINC;
+package Carmel::Runtime::FastINC;
 
 sub new {
     my($class, %modules) = @_;
     bless \%modules, $class;
 }
 
-sub Carmel::Bootstrap::FastINC::INC {
+sub Carmel::Runtime::FastINC::INC {
     my($self, $file) = @_;
 
     if ($self->{$file}) {
@@ -39,7 +39,7 @@ sub Carmel::Bootstrap::FastINC::INC {
     }
 }
 
-package Carmel::Bootstrap::Guard;
+package Carmel::Runtime::Guard;
 
 sub new {
     my $class = shift;
@@ -53,7 +53,7 @@ sub _package {
     $file;
 }
 
-sub Carmel::Bootstrap::Guard::INC {
+sub Carmel::Runtime::Guard::INC {
     my($self, $file) = @_;
 
     # Config_heavy.pl etc.
@@ -83,5 +83,3 @@ sub Carmel::Bootstrap::Guard::INC {
 }
 
 1;
-
-__END__

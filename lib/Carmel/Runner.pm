@@ -21,8 +21,8 @@ sub new {
 # Note: can't capture carmel exec perl -MModule because it's loaded earlier than PERL5OPT
 sub env {
     return (
-        _join(PATH => Carmel::Bootstrap->path),
-        PERL5OPT => "-I" . Carmel::Bootstrap->base . " -MMyBootstrap",
+        _join(PATH => Carmel::Runtime->path),
+        PERL5OPT => "-I" . Carmel::Runtime->base . " -MMyBootstrap",
     );
 }
 

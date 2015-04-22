@@ -18,7 +18,7 @@ use Capture::Tiny qw(capture);
 use File::pushd ();
 use Path::Tiny;
 
-$Carmel::Runtime::UseSystem = 1;
+$Carmel::Runner::UseSystem = 1;
 
 use Class::Tiny qw( dir stdout stderr exit_code clean );
 
