@@ -61,12 +61,12 @@ sub blib {
 
 sub paths {
     my $self = shift;
-    ($self->blib . "/script", $self->blib . "/bin");
+    ($self->blib->child("script"), $self->blib->child("bin"));
 }
 
 sub libs {
     my $self = shift;
-    ($self->blib . "/arch", $self->blib . "/lib");
+    ($self->blib->child("arch"), $self->blib->child("lib"));
 }
 
 sub meta {
