@@ -25,17 +25,19 @@ my %WriteMakefileArgs = (
     "CPAN::Meta::Requirements" => "2.129",
     "Carton" => "1.0.13",
     "Class::Tiny" => "1.001",
+    "Data::Dump" => 0,
     "File::Copy::Recursive" => 0,
     "JSON" => 0,
     "Module::CPANfile" => "1.1000",
     "Module::CoreList" => 0,
     "Module::Metadata" => "1.000003",
+    "Module::Runtime" => "0.014",
     "Path::Tiny" => "0.068"
   },
   "TEST_REQUIRES" => {
     "Test::More" => "0.96"
   },
-  "VERSION" => "v0.1.11",
+  "VERSION" => "v0.1.12",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -48,12 +50,14 @@ my %FallbackPrereqs = (
   "CPAN::Meta::Requirements" => "2.129",
   "Carton" => "1.0.13",
   "Class::Tiny" => "1.001",
+  "Data::Dump" => 0,
   "ExtUtils::MakeMaker" => 0,
   "File::Copy::Recursive" => 0,
   "JSON" => 0,
   "Module::CPANfile" => "1.1000",
   "Module::CoreList" => 0,
   "Module::Metadata" => "1.000003",
+  "Module::Runtime" => "0.014",
   "Path::Tiny" => "0.068",
   "Test::More" => "0.96"
 );

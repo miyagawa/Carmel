@@ -2,6 +2,10 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.12  2015-04-22 16:42:10 PDT
+        - Implemented Carmel::Runtime->require_all
+        - Save and restore cpanfile prereqs in Runtime
+
 v0.1.11  2015-04-22 12:03:03 PDT
         - Big performance optimization in carmel exec, about 20 times less overhead
         - Do not use PERL5LIB env var anymore, rather use PERL5OPT and bootstrap .pm file
