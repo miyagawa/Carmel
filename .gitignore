@@ -6,3 +6,4 @@ MYMETA.*
 !META.json
 /.prove
 /blib
+/.carmel

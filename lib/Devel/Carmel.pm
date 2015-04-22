@@ -4,30 +4,9 @@ use Module::CoreList;
 
 sub DB::DB {} # allow -d:Carmel
 
-sub _find_border {
-    my($re, @entry) = @_;
-
-    my $in = 0;
-    for my $index (0..$#entry) {
-        my $entry = $entry[$index];
-        next if ref $entry;
-
-        if ($entry =~ $re) {
-            $in = 1, next;
-        } elsif ($in) {
-            return $index;
-        }
-    }
-
-    return;
-}
-
-# This assumes it's run under carmel exec
-my $base = $ENV{PERL_CARMEL_REPO} || "$ENV{HOME}/.carmel/$Config{version}-$Config{archname}/builds";
-my $index = _find_border qr!$base/.*?/blib/(lib|arch)?$!, @INC;
-
-if ($index) {
-    splice @INC, $index, 0, __PACKAGE__->new(@INC[0..$index-1]);
+sub bootstrap {
+    my($class, $inc) = @_;
+    unshift @INC, @$inc, __PACKAGE__->new($inc);
 }
 
 sub _package {
@@ -38,9 +17,9 @@ sub _package {
 }
 
 sub new {
-    my($class, @inc) = @_;
+    my($class, $inc) = @_;
     bless {
-        inc => \@inc,
+        inc => $inc,
         corelist => {},
     }, $class;
 }
@@ -57,7 +36,8 @@ sub Devel::Carmel::INC {
     # eval { require Module }
     return if $caller[3] =~ /^\(eval/ or defined $caller[6];
 
-    # FIXME: Updated core module calls a new package
+    # core module calling another module is considered core, too.
+    # FIXME: Updated core module might call a non-core package
     if ($self->{corelist}{$caller[0]}) {
         $self->{corelist}{$mod} = 1;
         return;

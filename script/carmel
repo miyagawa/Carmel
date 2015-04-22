@@ -1,7 +1,13 @@
 #!perl
 use strict;
-use Carmel::App;
 
+# fastboot
+if ($ARGV[0] eq 'exec') {
+    require Carmel::Runtime;
+    exit Carmel::Runtime->new->execute(@ARGV[1..$#ARGV]);
+}
+
+require Carmel::App;
 exit Carmel::App->new->run(@ARGV);
 
 __END__

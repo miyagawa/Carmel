@@ -69,6 +69,16 @@ sub libs {
     ($self->blib->child("arch"), $self->blib->child("lib"));
 }
 
+sub nonempty_paths {
+    my $self = shift;
+    grep $self->_nonempty($_), $self->paths;
+}
+
+sub nonempty_libs {
+    my $self = shift;
+    grep $self->_nonempty($_), $self->libs;
+}
+
 sub meta {
     my $self = shift;
     CPAN::Meta->load_file($self->path->child("MYMETA.json"));
@@ -77,6 +87,23 @@ sub meta {
 sub requirements {
     my $self = shift;
     $self->meta->effective_prereqs->merged_requirements(['runtime'], ['requires']);
+}
+
+sub _nonempty {
+    my($self, $path) = @_;
+
+    my $files = $path->visit(
+        sub {
+            my($path, $state) = @_;
+            if ($path->is_file && $path !~ /\.exists$/) {
+                $state->{nonempty} = $path;
+                return \0;
+            }
+        },
+        { recurse => 1 },
+    );
+
+    return $files->{nonempty};
 }
 
 1;

@@ -3,6 +3,7 @@ use strict;
 use warnings;
 
 use Carmel;
+use Carmel::Runtime;
 use Carp ();
 use Carmel::Repository;
 use Config qw(%Config);
@@ -19,8 +20,6 @@ use Class::Tiny {
     verbose => sub { 0 },
     perl_arch => sub { "$Config{version}-$Config{archname}" },
 };
-
-our $UseSystem = 0; # unit testing
 
 sub parse_options {
     my($self, $args) = @_;
@@ -104,6 +103,8 @@ sub cmd_install {
     } else {
         $self->install_from_cpanfile(@args);
     }
+
+    $self->dump_bootstrap;
 }
 
 sub install_from_cpanfile {
@@ -180,23 +181,66 @@ sub install {
     }
 }
 
+sub dump_bootstrap {
+    my($self) = @_;
+
+    require B;
+    
+    my @artifacts;
+    $self->resolve(sub { push @artifacts, $_[0] });
+
+    my $file = Path::Tiny->new(".carmel/Carmel/Bootstrap.pm");
+    $file->parent->mkpath;
+    $file->spew(<<EOF);
+# This file serves dual purpose to load cached data in carmel exec setup phase
+# as well as on runtime to change \@INC
+package Carmel::Bootstrap;
+my(\@inc, \@path);
+BEGIN {
+  \@inc = (
+    @{[ join ",\n    ", map B::perlstring($_), map $_->nonempty_libs, @artifacts ]}
+  );
+  \@path = (
+    @{[ join ",\n    ", map B::perlstring($_), map $_->nonempty_paths, @artifacts ]}
+  );
+}
+
+# for carmel exec setup phase
+sub inc  { \@inc }
+sub path { \@path }
+sub base { @{[ B::perlstring($file->parent->parent->absolute) ]} }
+
+# for carmel exec runtime
+sub import {
+  require Devel::Carmel;
+  Devel::Carmel->bootstrap(\\\@inc);
+}
+
+1;
+EOF
+}
+
+sub cmd_perl {
+    my $self = shift;
+    exec $^X, '-I.carmel', '-MCarmel::Bootstrap', @_;
+}
+
 sub cmd_export {
     my($self) = @_;
-    my %env = $self->env;
-    print "export PATH=$env{PATH} PERL5LIB=$env{PERL5LIB}\n";
+    my %env = Carmel::Runtime->new->env;
+    print "export ", join(" ", map "$_=$env{$_}", keys %env), "\n";
 }
 
 sub cmd_env {
     my($self) = @_;
-    my %env = $self->env;
-    print "PATH=$env{PATH}\nPERL5LIB=$env{PERL5LIB}\n";
+    my %env = Carmel::Runtime->new->env;
+    print join "", map "$_=$env{$_}\n", keys %env;
 }
 
+# TODO remove. just here for testing
 sub cmd_exec {
     my($self, @args) = @_;
-    my %env = $self->env;
-    %ENV = (%ENV, %env);
-    $UseSystem ? system(@args) : exec @args;
+    Carmel::Runtime->new->execute(@args);
 }
 
 sub cmd_find {
@@ -374,23 +418,6 @@ sub resolve {
         die "Could not find an artifact for $module => $want_version\nYou need to run `carmel install` first to get the modules installed and artifacts built.\n";
     };
     $self->resolve_recursive($self->requirements, $self->requirements->clone, {}, $cb, $missing_cb, 0);
-}
-
-sub env {
-    my($self) = @_;
-
-    my @artifacts;
-    $self->resolve(sub { push @artifacts, $_[0] });
-    return (
-        _join(PATH => map $_->paths, @artifacts),
-        _join(PERL5LIB => map $_->libs, @artifacts),
-    );
-}
-
-sub _join {
-    my($env, @list) = @_;
-    push @list, $ENV{$env} if $ENV{$env};
-    return ($env => join(":", @list));
 }
 
 1;
