@@ -189,12 +189,12 @@ sub dump_bootstrap {
     my @artifacts;
     $self->resolve(sub { push @artifacts, $_[0] });
 
-    my $file = Path::Tiny->new(".carmel/Carmel/Bootstrap.pm");
+    my $file = Path::Tiny->new(".carmel/MyBootstrap.pm");
     $file->parent->mkpath;
     $file->spew(<<EOF);
 # This file serves dual purpose to load cached data in carmel exec setup phase
 # as well as on runtime to change \@INC
-package Carmel::Bootstrap;
+package MyBootstrap;
 my(\@inc, \@path);
 BEGIN {
   \@inc = (
@@ -205,15 +205,18 @@ BEGIN {
   );
 }
 
-# for carmel exec setup phase
-sub inc  { \@inc }
-sub path { \@path }
-sub base { @{[ B::perlstring($file->parent->parent->absolute) ]} }
+use Carmel::Bootstrap;
+
+# for carmel exec setup
+Carmel::Bootstrap->environment(
+  inc  => \\\@inc,
+  path => \\\@path,
+  base => @{[ B::perlstring($file->parent->absolute) ]}
+);
 
 # for carmel exec runtime
 sub import {
-  require Devel::Carmel;
-  Devel::Carmel->bootstrap(\\\@inc);
+  Carmel::Bootstrap->bootstrap;
 }
 
 1;

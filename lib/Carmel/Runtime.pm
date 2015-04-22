@@ -7,7 +7,13 @@ sub new {
     my $class = shift;
 
     # FIXME absolute path
-    require ".carmel/Carmel/Bootstrap.pm";
+    local $@;
+    eval {
+        require ".carmel/MyBootstrap.pm";
+    };
+    if ($@ && $@ =~ /Can't locate \.carmel\/MyBootstrap\.pm/) {
+        die "Could not locate .carmel/MyBootstrap.pm. You need to run `carmel install` first.\n";
+    }
         
     bless {}, $class;
 }
@@ -17,14 +23,13 @@ sub env {
     my $self = shift;
     return (
         _join(PATH => Carmel::Bootstrap->path),
-        PERL5OPT => "-I" . Carmel::Bootstrap->base . " -MCarmel::Bootstrap",
+        PERL5OPT => "-I" . Carmel::Bootstrap->base . " -MMyBootstrap",
     );
 }
 
 sub execute {
     my($self, @args) = @_;
-    my %env = $self->env;
-    %ENV = (%ENV, %env);
+    %ENV = (%ENV, $self->env);
     $UseSystem ? system(@args) : exec @args;
 }
 

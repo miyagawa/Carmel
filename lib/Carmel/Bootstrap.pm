@@ -1,10 +1,20 @@
-package Devel::Carmel;
+package Carmel::Bootstrap;
 use Config;
 use Module::CoreList;
 
+my %environment;
+sub inc  { @{$environment{inc}} }
+sub path { @{$environment{path}} }
+sub base { $environment{base} }
+
+sub environment {
+    my($class, %args) = @_;
+    %environment = %args;
+}
+
 sub bootstrap {
-    my($class, $inc) = @_;
-    unshift @INC, @$inc, __PACKAGE__->new($inc);
+    my $class = shift;
+    unshift @INC, $class->inc, __PACKAGE__->new;
 }
 
 sub _package {
@@ -15,14 +25,14 @@ sub _package {
 }
 
 sub new {
-    my($class, $inc) = @_;
+    my $class = shift;
     bless {
-        inc => $inc,
+        inc => [ $class->inc ],
         corelist => {},
     }, $class;
 }
 
-sub Devel::Carmel::INC {
+sub Carmel::Bootstrap::INC {
     my($self, $file) = @_;
 
     # Config_heavy.pl etc.
