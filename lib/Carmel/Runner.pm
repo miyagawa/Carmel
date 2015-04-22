@@ -1,4 +1,4 @@
-package Carmel::Runtime;
+package Carmel::Runner;
 use strict;
 
 our $UseSystem = 0;
@@ -20,7 +20,6 @@ sub new {
 
 # Note: can't capture carmel exec perl -MModule because it's loaded earlier than PERL5OPT
 sub env {
-    my $self = shift;
     return (
         _join(PATH => Carmel::Bootstrap->path),
         PERL5OPT => "-I" . Carmel::Bootstrap->base . " -MMyBootstrap",

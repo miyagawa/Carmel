@@ -3,8 +3,8 @@ use strict;
 
 # fastboot
 if ($ARGV[0] eq 'exec') {
-    require Carmel::Runtime;
-    exit Carmel::Runtime->new->execute(@ARGV[1..$#ARGV]);
+    require Carmel::Runner;
+    exit Carmel::Runner->new->execute(@ARGV[1..$#ARGV]);
 }
 
 require Carmel::App;

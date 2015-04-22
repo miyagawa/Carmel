@@ -3,7 +3,7 @@ use strict;
 use warnings;
 
 use Carmel;
-use Carmel::Runtime;
+use Carmel::Runner;
 use Carp ();
 use Carmel::Repository;
 use Config qw(%Config);
@@ -19,6 +19,7 @@ use Try::Tiny;
 use Class::Tiny {
     verbose => sub { 0 },
     perl_arch => sub { "$Config{version}-$Config{archname}" },
+    runner => sub { Carmel::Runner->new },
 };
 
 sub parse_options {
@@ -239,20 +240,20 @@ sub cmd_perl {
 
 sub cmd_export {
     my($self) = @_;
-    my %env = Carmel::Runtime->new->env;
+    my %env = $self->runner->env;
     print "export ", join(" ", map qq($_="$env{$_}"), keys %env), "\n";
 }
 
 sub cmd_env {
     my($self) = @_;
-    my %env = Carmel::Runtime->new->env;
+    my %env = $self->runner->env;
     print join "", map qq($_="$env{$_}"\n), keys %env;
 }
 
 # TODO remove. just here for testing
 sub cmd_exec {
     my($self, @args) = @_;
-    Carmel::Runtime->new->execute(@args);
+    $self->runner->execute(@args);
 }
 
 sub cmd_find {
