@@ -353,7 +353,7 @@ sub resolve_recursive {
 
         # FIXME there's a chance different version of the same module can be loaded here
         if (my $artifact = $self->repo->find($module, $want_version)) {
-            warn sprintf "=> %s (%s) in %s\n", $module, $artifact->version_for($module), $artifact->path if $self->verbose;
+            warn sprintf "   %s (%s) in %s\n", $module, $artifact->version_for($module), $artifact->path if $self->verbose;
             next if $seen->{$artifact->path}++;
             $cb->($artifact, $depth);
 
