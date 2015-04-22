@@ -4,11 +4,12 @@ use Config;
 use Module::CoreList;
 
 my %environment;
-sub modules { %{$environment{modules}} }
-sub inc     { @{$environment{inc}} }
-sub path    { @{$environment{path}} }
-sub base    { $environment{base} }
-sub prereqs { $environment{prereqs} }
+sub inc      { @{$environment{inc}} }
+sub sharedir { @{$environment{sharedir}} }
+sub path     { @{$environment{path}} }
+sub base     { $environment{base} }
+sub modules  { %{$environment{modules}} }
+sub prereqs  { $environment{prereqs} }
 
 sub environment {
     my($class, %args) = @_;
@@ -19,7 +20,7 @@ sub bootstrap {
     my $class = shift;
     unshift @INC,
       Carmel::Runtime::FastINC->new($class->modules),
-      $class->inc,
+      $class->sharedir,
       Carmel::Runtime::Guard->new;
 }
 

@@ -213,7 +213,8 @@ sub dump_bootstrap {
     my @artifacts;
     $self->resolve(sub { push @artifacts, $_[0] });
 
-    my @inc  = map $_->sharedir_libs, @artifacts;
+    my @inc = map $_->nonempty_libs, @artifacts;
+    my @share = map $_->sharedir_libs, @artifacts;
     my @path = map $_->nonempty_paths, @artifacts;
 
     my %modules;
@@ -236,11 +237,12 @@ use Carmel::Runtime;
 
 # for carmel exec setup
 my %environment = (
-inc => @{[ quote \@inc ]},
-path => @{[ quote \@path ]},
-base => @{[ quote $file->parent->absolute ]},
-modules => @{[ quote \%modules ]},
-prereqs => @{[ quote $prereqs ]},
+inc      => @{[ quote \@inc ]},
+sharedir => @{[ quote \@share ]},
+path     => @{[ quote \@path ]},
+base     => @{[ quote $file->parent->absolute ]},
+modules  => @{[ quote \%modules ]},
+prereqs  => @{[ quote $prereqs ]},
 );
 
 Carmel::Runtime->environment(%environment);
