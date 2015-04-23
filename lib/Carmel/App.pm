@@ -425,6 +425,21 @@ sub build_requirements {
     $requirements;
 }
 
+sub merge_requirements {
+    my($self, $reqs, $new_reqs, $where) = @_;
+
+    for my $module ($new_reqs->required_modules) {
+        my $new = $new_reqs->requirements_for_module($module);
+        try {
+            $reqs->add_string_requirement($module, $new);
+        } catch {
+            my($err) = /illegal requirements: (.*) at/;
+            my $old = $reqs->requirements_for_module($module);
+            die "Found conflicting requirement for $module: '$old' <=> '$new' ($where): $err";
+        };
+    }
+}
+
 sub apply_snapshot {
     my($self, $requirements, $snapshot) = @_;
     $snapshot->load;
@@ -439,7 +454,7 @@ sub apply_snapshot_recursively {
         my $version = $dist->version_for($module);
         # FIXME in carmel update, conflicting version requirement should be ignored
         $requirements->exact_version($module, $version);
-        $requirements->add_requirements($dist->requirements);
+        $self->merge_requirements($requirements, $dist->requirements, $dist->name);
         $self->apply_snapshot_recursively($requirements, $snapshot, [$dist->requirements->required_modules]);
     }
 }
@@ -464,7 +479,7 @@ sub resolve_recursive {
             $cb->($artifact, $depth);
 
             my $reqs = $artifact->requirements;
-            $root_reqs->add_requirements($reqs);
+            $self->merge_requirements($root_reqs, $reqs, $artifact->distname);
 
             $self->resolve_recursive($root_reqs, $reqs, $seen, $cb, $missing_cb, $depth + 1);
         } else {
