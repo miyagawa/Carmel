@@ -28,7 +28,7 @@ sub require_all {
     my($class, @phase) = @_;
 
     require Module::Runtime;
-    my $modules = Carmel::Runtime->required_modules(@phase);
+    my $modules = $class->required_modules(@phase);
     while (my($module, $version) = each %$modules) {
         next if $module eq 'perl';
         Module::Runtime::use_module($module, $version);
