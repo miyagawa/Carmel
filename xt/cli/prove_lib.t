@@ -1,0 +1,31 @@
+use strict;
+use Test::More;
+use xt::CLI;
+
+subtest 'prove -l' => sub {
+    my $app = cli();
+
+    $app->write_cpanfile(<<EOF);
+requires 'Test::More';
+EOF
+
+    $app->path("lib", "MyApp.pm")->spew(<<EOF);
+package MyApp;
+1;
+EOF
+
+    $app->path("t", "basic.t")->spew(<<EOF);
+use strict;
+use MyApp;
+use Test::More tests => 1;
+
+ok 1, \$INC{"MyApp.pm"};
+EOF
+
+    $app->run("install");
+    $app->run("exec", "prove", "-l", "t");
+
+    like $app->stdout, qr/All tests successful/ or diag $app->stderr;
+};
+
+done_testing;

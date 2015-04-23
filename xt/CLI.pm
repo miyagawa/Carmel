@@ -37,6 +37,13 @@ sub write_cpanfile {
     $self->write_file(cpanfile => @args);
 }
 
+sub path {
+    my($self, @args) = @_;
+    my $path = $self->dir->child(@args);
+    $path->parent->mkpath unless $path->parent->exists;
+    $path;
+}
+
 sub run_in_dir {
     my($self, $dir, @args) = @_;
     local $self->{dir} = $self->dir->child($dir);

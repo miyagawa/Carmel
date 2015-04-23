@@ -16,12 +16,29 @@ sub environment {
     %environment = %args;
 }
 
+my %lib = map { $_ => 1 } @Config{qw(sitearchexp archlibexp)};
+
+sub _insert_before_sitelib {
+    my($inc) = @_;
+
+    my $index;
+    for my $i (0..$#INC) {
+        $index = $i, last if $lib{$INC[$i]};
+    }
+
+    if ($index) {
+        splice @INC, $index, 0, $inc;
+    } else {
+        warn "Can't find \@INC entry for $Config{sitearchexp}";
+    }
+}
+
 sub bootstrap {
     my $class = shift;
+    _insert_before_sitelib(Carmel::Runtime::Guard->new);
     unshift @INC,
       Carmel::Runtime::FastINC->new($class->modules),
-      $class->sharedir,
-      Carmel::Runtime::Guard->new;
+      $class->sharedir;
 }
 
 sub require_all {
