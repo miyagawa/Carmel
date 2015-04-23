@@ -11,7 +11,7 @@ before_install:
 install:
   - (cpanm --installdeps --with-develop -nq .) || cat ~/.cpanm/build.log
 script:
-  - prove -lr xt
+  - prove -lr xt -j9
 env:
   - TEST_CLEAN=
   - TEST_CLEAN=1
