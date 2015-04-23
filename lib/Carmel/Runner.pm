@@ -22,7 +22,7 @@ sub new {
 sub env {
     return (
         _join(PATH => Carmel::Runtime->path),
-        PERL5OPT => "-I" . Carmel::Runtime->base . " -MMyBootstrap",
+        PERL5OPT => "-Mlib=" . Carmel::Runtime->base . " -MMyBootstrap",
     );
 }
 
