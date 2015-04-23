@@ -31,8 +31,10 @@
       },
       "develop" : {
          "requires" : {
+            "Capture::Tiny" : "0",
             "Dist::Milla" : "v1.0.15",
-            "Test::Pod" : "1.41"
+            "Test::Pod" : "1.41",
+            "Test::Requires" : "0"
          }
       },
       "runtime" : {
@@ -74,7 +76,7 @@
          "web" : "https://github.com/miyagawa/Carmel"
       }
    },
-   "version" : "v0.1.14",
+   "version" : "v0.1.15",
    "x_contributors" : [
       "Syohei YOSHIDA <syohex@gmail.com>"
    ]
