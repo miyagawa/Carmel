@@ -35,6 +35,9 @@ Carmel - CPAN Artifact Repository Manager
   # Requires all your modules in cpanfile in one shot
   carmel exec perl -e 'Carmel::Runtime->require_all'
 
+  # Roll out the currently selected modules into ./local
+  carmel rollout
+
   # prints export PATH=... etc for shell scripting
   carmel export
 

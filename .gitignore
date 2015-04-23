@@ -7,3 +7,4 @@ MYMETA.*
 /.prove
 /blib
 /.carmel
+/local

@@ -14,6 +14,7 @@ use Module::CPANfile;
 use Module::Metadata;
 use Path::Tiny ();
 use Pod::Usage ();
+use File::pushd;
 use Try::Tiny;
 
 use Class::Tiny {
@@ -256,6 +257,19 @@ sub import {
 EOF
 }
 
+sub atomic_rename {
+    my($self, $src, $dest) = @_;
+
+    my $old;
+    if ($dest->exists) {
+        $old = Path::Tiny->new("$dest.old");
+        $dest->move($old);
+    }
+
+    $src->move($dest);
+    $old->remove_tree({ safe => 0 }) if $old;
+}
+
 sub cmd_export {
     my($self) = @_;
     my %env = $self->runner->env;
@@ -328,7 +342,37 @@ sub cmd_tree {
         my($artifact, $depth) = @_;
         printf "%s%s (%s)\n", (" " x $depth), $artifact->package, $artifact->version || '0';
     });
+}
 
+sub cmd_rollout {
+    my $self = shift;
+
+    require ExtUtils::Install;
+    require ExtUtils::InstallPaths;
+
+    my @artifacts;
+    $self->resolve(sub { push @artifacts, $_[0] });
+
+    my $install_base = Path::Tiny->new("local." . time)->absolute;
+    my $install_dest = Path::Tiny->new("local")->absolute;
+
+    for my $artifact (@artifacts) {
+        my $dir = pushd $artifact->path;
+
+        my $paths = ExtUtils::InstallPaths->new(install_base => $install_base);
+        my %result;
+        ExtUtils::Install::install([
+            from_to => $paths->install_map,
+            verbose => 0,
+            dry_run => 0,
+            uninstall_shadows => 0,
+            skip => undef,
+            always_copy => 1,
+            result => \%result,
+        ]);
+    }
+
+    $self->atomic_rename($install_base, $install_dest);
 }
 
 sub cmd_index {

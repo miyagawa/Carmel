@@ -12,6 +12,10 @@ requires 'Module::Metadata', '1.000003';
 requires 'Path::Tiny', '0.068';
 requires 'File::Copy::Recursive';
 
+requires 'File::pushd', '1.009';
+requires 'ExtUtils::Install', '1.47';
+requires 'ExtUtils::InstallPaths';
+
 requires 'App::cpanminus', '1.7030';
 
 requires 'Carton', 'v1.0.13';
