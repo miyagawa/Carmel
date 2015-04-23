@@ -101,7 +101,7 @@ sub cmd_install {
     my($self, @args) = @_;
 
     if (@args) {
-        $self->install(@args);
+        $self->install("--reinstall", @args);
     } else {
         $self->install_from_cpanfile(@args);
     }
