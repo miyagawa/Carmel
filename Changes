@@ -2,6 +2,9 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.13  2015-04-22 19:25:53 PDT
+        - Implemented experimental carmel rollout command to install artifacts into ./local
+
 v0.1.12  2015-04-22 16:42:10 PDT
         - Implemented Carmel::Runtime->require_all
         - Save and restore cpanfile prereqs in Runtime

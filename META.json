@@ -43,7 +43,10 @@
             "Carton" : "v1.0.13",
             "Class::Tiny" : "1.001",
             "Data::Dump" : "0",
+            "ExtUtils::Install" : "1.47",
+            "ExtUtils::InstallPaths" : "0",
             "File::Copy::Recursive" : "0",
+            "File::pushd" : "1.009",
             "JSON" : "0",
             "Module::CPANfile" : "1.1000",
             "Module::CoreList" : "0",
@@ -71,7 +74,7 @@
          "web" : "https://github.com/miyagawa/Carmel"
       }
    },
-   "version" : "v0.1.12",
+   "version" : "v0.1.13",
    "x_contributors" : [
       "Syohei YOSHIDA <syohex@gmail.com>"
    ]
