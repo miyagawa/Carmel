@@ -3,8 +3,6 @@ use strict;
 use base qw(Exporter);
 our @EXPORT = qw(run cli);
 
-use Test::Requires qw( Capture::Tiny File::pushd );
-
 sub cli {
     my $cli = TestCLI->new(clean => $ENV{TEST_CLEAN}, @_);
     $cli->dir( Path::Tiny->tempdir(CLEANUP => !$ENV{NO_CLEANUP}) );

@@ -23,3 +23,8 @@ requires 'Carton', 'v1.0.13';
 on test => sub {
     requires 'Test::More', '0.96';
 };
+
+on develop => sub {
+    requires 'Test::Requires';
+    requires 'Capture::Tiny';
+};
