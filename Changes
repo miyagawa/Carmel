@@ -2,6 +2,11 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.16  2015-04-23 16:54:27 PDT
+        - Better error message when there's a conflicting version requirement in cpanfile and
+          META prereqs in dependencies
+        - Change the output of carmel env slightly
+
 v0.1.15  2015-04-23 11:02:35 PDT
         - Fix a bug in artifact search where a package with same versions do not return newer
           dists correctly. Also simplified the logic behind that search.
