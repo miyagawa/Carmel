@@ -1,5 +1,6 @@
 use strict;
 use Test::More;
+use lib ".";
 use xt::CLI;
 
 subtest 'dependency on subdep with version 0' => sub {

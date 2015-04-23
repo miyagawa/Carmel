@@ -1,5 +1,6 @@
 use strict;
 use Test::More;
+use lib ".";
 use xt::CLI;
 
 subtest 'carmel install with cpanfile requirements count' => sub {

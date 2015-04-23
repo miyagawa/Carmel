@@ -1,5 +1,6 @@
 use strict;
 use Test::More;
+use lib ".";
 use xt::CLI;
 
 subtest 'install count is wrong if "perl" is in the cpanfile' => sub {
