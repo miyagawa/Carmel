@@ -266,7 +266,7 @@ sub cmd_export {
 sub cmd_env {
     my($self) = @_;
     my %env = $self->runner->env;
-    print join "", map qq($_="$env{$_}"\n), keys %env;
+    print join "", map qq($_=$env{$_}\n), keys %env;
 }
 
 # TODO remove. just here for testing
