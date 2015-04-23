@@ -47,7 +47,6 @@ Carmel - CPAN Artifact Repository Manager
   # find a module matching the version query
   carmel find Plack ">= 1.0000, < 1.1000"
 
-
 =head1 DESCRIPTION
 
 B<THIS IS EXPERIMENTAL!>
