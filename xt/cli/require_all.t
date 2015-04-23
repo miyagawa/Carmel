@@ -12,7 +12,7 @@ EOF
     $app->run("install");
     $app->run("exec", "perl", "-e", 'Carmel::Runtime->require_all; print $INC{"JSON.pm"}');
 
-    like $app->stdout, qr!/JSON-.*/blib/lib/JSON\.pm!;
+    like $app->stdout, qr!/JSON-.*/blib/lib/JSON\.pm! or diag $app->stderr;
 };
 
 done_testing;

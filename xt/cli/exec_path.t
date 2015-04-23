@@ -11,7 +11,7 @@ EOF
 
     $app->run("install");
     $app->run("exec", "which", "mojo");
-    like$app->stdout, qr!Mojolicious-.*/blib/script/mojo!;
+    like$app->stdout, qr!Mojolicious-.*/blib/script/mojo! or diag $app->stderr;
 };
 
 done_testing;

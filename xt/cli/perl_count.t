@@ -12,7 +12,7 @@ EOF
 
 
     $app->run("install");
-    like $app->stdout, qr/1 cpanfile dependencies/;
+    like $app->stdout, qr/1 cpanfile dependencies/ or diag $app->stderr;
 };
 
 done_testing;

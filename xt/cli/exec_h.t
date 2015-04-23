@@ -12,7 +12,7 @@ EOF
     $app->run("install");
     $app->run("exec", "carton", "-h");
 
-    like $app->stdout, qr/carton install/;
+    like $app->stdout, qr/carton install/ or diag $app->stderr;
     unlike $app->stdout, qr/Carmel/;
 };
 

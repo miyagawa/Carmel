@@ -10,7 +10,7 @@ requires 'HTTP::Server::Simple';
 EOF
 
     $app->run("install");
-    like $app->stdout, qr/Complete! 1 cpanfile dependencies\./;
+    like $app->stdout, qr/Complete! 1 cpanfile dependencies\./ or diag $app->stderr;
 };
 
 done_testing;

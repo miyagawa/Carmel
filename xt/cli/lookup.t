@@ -10,7 +10,7 @@ requires 'CPAN::Test::Dummy::Perl5::VersionQV', 'v0.1.0';
 EOF
 
     $app->run("install");
-    like $app->stdout, qr/Successfully installed CPAN-Test-Dummy-Perl5/;
+    like $app->stdout, qr/Successfully installed CPAN-Test-Dummy-Perl5/ or diag $app->stderr;
     is $app->stderr, '';
 
     $app->run("list");

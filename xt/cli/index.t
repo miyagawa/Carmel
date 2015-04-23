@@ -11,8 +11,8 @@ EOF
 
     $app->run("install");
     $app->run("index");
-    like $app->stdout, qr/^Written-By: *Carmel v.*$/m;
-    like $app->stdout, qr/^Path::Tiny *\S+ *.*\/Path-Tiny-.*\.tar\.gz$/m;
+    like $app->stdout, qr/^Written-By: *Carmel v.*$/m or diag $app->stderr;
+    like $app->stdout, qr/^Path::Tiny *\S+ *.*\/Path-Tiny-.*\.tar\.gz$/m or diag $app->stderr;
 };
 
 done_testing;

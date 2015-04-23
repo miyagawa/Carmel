@@ -13,7 +13,7 @@ EOF
 
     $app->run("install");
     $app->run("list");
-    like $app->stdout, qr/Try::Tiny \(/;
+    like $app->stdout, qr/Try::Tiny \(/ or diag $app->stderr;
 
     $app->write_cpanfile(<<EOF);
 requires 'Try::Tiny', '< 0.22';
@@ -23,7 +23,7 @@ EOF
 
     $app->run("install");
     $app->run("show", "Try::Tiny");
-    like $app->stdout, qr/Try-Tiny-0\.21/;
+    like $app->stdout, qr/Try-Tiny-0\.21/ or diag $app->stderr;
 
     $app->run("find", "Try::Tiny");
     my @lines = grep length, split /\n/, $app->stdout;
@@ -33,10 +33,10 @@ EOF
 requires 'Try::Tiny', '0.22';
 EOF
     $app->run("install");
-    like $app->stdout, qr/Using Try::Tiny/;
+    like $app->stdout, qr/Using Try::Tiny/ or diag $app->stderr;
 
     $app->run("show", "Try::Tiny");
-    like $app->stdout, qr/Try-Tiny-0/;
+    like $app->stdout, qr/Try-Tiny-0/ or diag $app->stderr;
 };
 
 done_testing;
