@@ -257,19 +257,6 @@ sub import {
 EOF
 }
 
-sub atomic_rename {
-    my($self, $src, $dest) = @_;
-
-    my $old;
-    if ($dest->exists) {
-        $old = Path::Tiny->new("$dest.old");
-        $dest->move($old);
-    }
-
-    $src->move($dest);
-    $old->remove_tree({ safe => 0 }) if $old;
-}
-
 sub cmd_export {
     my($self) = @_;
     my %env = $self->runner->env;
@@ -353,8 +340,8 @@ sub cmd_rollout {
     my @artifacts;
     $self->resolve(sub { push @artifacts, $_[0] });
 
-    my $install_base = Path::Tiny->new("local." . time)->absolute;
-    my $install_dest = Path::Tiny->new("local")->absolute;
+    my $install_base = Path::Tiny->new("local")->absolute;
+    $install_base->remove_tree({ safe => 0 }) if $install_base->exists;
 
     for my $artifact (@artifacts) {
         my $dir = pushd $artifact->path;
@@ -371,8 +358,6 @@ sub cmd_rollout {
             result => \%result,
         ]);
     }
-
-    $self->atomic_rename($install_base, $install_dest);
 }
 
 sub cmd_index {
