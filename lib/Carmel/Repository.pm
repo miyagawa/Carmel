@@ -56,15 +56,7 @@ sub load {
 
 sub add {
     my($self, $package, $artifact) = @_;
-
-    my $version = $artifact->version_for($package);
-    if (my $found = $self->lookup($package, $version)) {
-        if ($self->_compare($version, $found->version_for($package)) > 0) {
-            $self->{$package}{$version->numify} = $artifact;
-        }
-    } else {
-        $self->{$package}{$version->numify} = $artifact;
-    }
+    push @{$self->{$package}}, $artifact;
 }
 
 sub find {
@@ -79,11 +71,6 @@ sub find_all {
 
 sub _find {
     my($self, $package, $want_version, $all) = @_;
-
-    # shortcut exact requirement
-    if ($want_version =~ s/^==\s*//) {
-        return $self->lookup($package, $want_version);
-    }
 
     my $reqs = CPAN::Meta::Requirements->from_string_hash({ $package => $want_version });
     my @artifacts;
@@ -104,28 +91,10 @@ sub _find {
 
 sub list {
     my($self, $package) = @_;
-    map { $_->[1] }
-      sort { $b->[0] <=> $a->[0] }
-        map { [ $_->version_for($package), $_ ] }
-          values %{$self->{$package}};
-}
-
-sub lookup {
-    my($self, $package, $version) = @_;
-    $version = version::->parse($version)->numify;
-    $self->{$package}{$version}
-}
-
-sub _compare {
-    my($self, $ver_a, $ver_b) = @_;
-
-    my $ret = eval { version::->parse($ver_a) <=> version::->parse($ver_b) };
-    if ($@) {
-        # FIXME I'm sure there's a better/more correct way
-        $ret = "$ver_a" cmp "$ver_b";
-    }
-
-    $ret;
+    map { $_->[2] }
+      sort { $b->[0] <=> $a->[0] || $b->[1] <=> $a->[1] } # sort by the package version, then the main package version
+        map { [ $_->version_for($package), $_->version, $_ ] }
+          @{$self->{$package}};
 }
 
 1;
