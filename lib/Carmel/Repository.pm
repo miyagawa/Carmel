@@ -60,10 +60,10 @@ sub add {
     my $version = $artifact->version_for($package);
     if (my $found = $self->lookup($package, $version)) {
         if ($self->_compare($version, $found->version_for($package)) > 0) {
-            $self->{$package}{$version} = $artifact;
+            $self->{$package}{$version->numify} = $artifact;
         }
     } else {
-        $self->{$package}{$version} = $artifact;
+        $self->{$package}{$version->numify} = $artifact;
     }
 }
 
@@ -106,7 +106,7 @@ sub list {
     my($self, $package) = @_;
     map { $_->[1] }
       sort { $b->[0] <=> $a->[0] }
-        map { [ version::->parse($_->version_for($package)), $_ ] }
+        map { [ $_->version_for($package), $_ ] }
           values %{$self->{$package}};
 }
 

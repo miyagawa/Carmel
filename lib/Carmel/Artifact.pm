@@ -65,7 +65,7 @@ sub version {
 
 sub version_for {
     my($self, $package) = @_;
-    $self->provides->{$package}{version} || '0';
+    version::->parse( $self->provides->{$package}{version} || '0' );
 }
 
 sub distname {
