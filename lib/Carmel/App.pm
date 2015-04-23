@@ -49,7 +49,7 @@ sub run {
 
     my $cmd = shift @args || 'install';
     my $call = $self->can("cmd_$cmd")
-      or die "Could not find command '$cmd'";
+      or die "Could not find command '$cmd': run `carmel help` to see the list of commands.\n";
 
     try {
         $self->$call(@args);
