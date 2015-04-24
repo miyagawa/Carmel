@@ -10,12 +10,12 @@ subtest 'prove -l' => sub {
 requires 'Test::More';
 EOF
 
-    $app->path("lib", "MyApp.pm")->spew(<<EOF);
+    $app->path("lib/MyApp.pm")->spew(<<EOF);
 package MyApp;
 1;
 EOF
 
-    $app->path("t", "basic.t")->spew(<<EOF);
+    $app->path("t/basic.t")->spew(<<EOF);
 use strict;
 use MyApp;
 use Test::More tests => 1;

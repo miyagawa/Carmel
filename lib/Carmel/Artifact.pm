@@ -19,7 +19,7 @@ sub install {
 sub _build_install {
     my $self = shift;
 
-    my $file = $self->path->child("blib", "meta", "install.json");
+    my $file = $self->path->child("blib/meta/install.json");
     if ($file->exists) {
         return JSON::decode_json($file->slurp);
     }
@@ -102,7 +102,7 @@ sub nonempty_libs {
 
 sub sharedir_libs {
     my $self = shift;
-    grep $_->child('auto', 'share')->exists, $self->libs;
+    grep $_->child('auto/share')->exists, $self->libs;
 }
 
 sub meta {

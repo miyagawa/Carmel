@@ -178,7 +178,7 @@ sub install {
       @args;
 
     for my $ent ($dir->child("latest-build")->children) {
-        next unless $ent->is_dir && $ent->child("blib", "meta", "install.json")->exists;
+        next unless $ent->is_dir && $ent->child("blib/meta/install.json")->exists;
         $self->repo->import_artifact($ent);
     }
 }

@@ -13,8 +13,8 @@ EOF
     $app->run("install");
     $app->run("rollout");
 
-    ok $app->path("local", "lib", "perl5", "Module", "CPANfile.pm")->exists;
-    ok $app->path("local", "bin", "cpanfile-dump")->exists;
+    ok $app->path("local/lib/perl5/Module/CPANfile.pm")->exists;
+    ok $app->path("local/bin/cpanfile-dump")->exists;
 };
 
 done_testing;
