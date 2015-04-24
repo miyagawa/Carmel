@@ -351,7 +351,7 @@ sub cmd_rollout {
 
         # ExtUtils::Install writes to STDOUT
         open my $fh, ">", \my $output;
-        my $old; $old = select $fh unless $self->{verbose};
+        my $old; $old = select $fh unless $self->verbose;
 
         my %result;
         ExtUtils::Install::install([
@@ -364,7 +364,7 @@ sub cmd_rollout {
             result => \%result,
         ]);
 
-        select $old unless $self->{verbose};
+        select $old unless $self->verbose;
     }
 
     Path::Tiny->new(".carmel/MyBootstrap.pm")->copy("local/lib/perl5/MyBootstrap.pm");
