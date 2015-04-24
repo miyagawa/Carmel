@@ -12,6 +12,10 @@ EOF
 
     $app->run("install");
     $app->run("rollout");
+    like $app->stdout, qr/Installing Module-CPANfile-.* to/;
+
+    $app->run("rollout", "-v");
+    like $app->stdout, qr/^Installing .*Module\/CPANfile\.pm$/m;
 
     ok $app->path("local/lib/perl5/Module/CPANfile.pm")->exists;
     ok $app->path("local/bin/cpanfile-dump")->exists;

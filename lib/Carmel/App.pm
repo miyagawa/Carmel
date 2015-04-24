@@ -346,6 +346,13 @@ sub cmd_rollout {
         my $dir = pushd $artifact->path;
 
         my $paths = ExtUtils::InstallPaths->new(install_base => $install_base);
+
+        printf "Installing %s to %s\n", $artifact->distname, $install_base;
+
+        # ExtUtils::Install writes to STDOUT
+        open my $fh, ">", \my $output;
+        my $old; $old = select $fh unless $self->{verbose};
+
         my %result;
         ExtUtils::Install::install([
             from_to => $paths->install_map,
@@ -356,6 +363,8 @@ sub cmd_rollout {
             always_copy => 1,
             result => \%result,
         ]);
+
+        select $old unless $self->{verbose};
     }
 
     Path::Tiny->new(".carmel/MyBootstrap.pm")->copy("local/lib/perl5/MyBootstrap.pm");
