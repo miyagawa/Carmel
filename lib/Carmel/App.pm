@@ -66,16 +66,6 @@ sub repository_base {
     Path::Tiny->new($ENV{PERL_CARMEL_REPO} || "$ENV{HOME}/.carmel/" . $self->perl_arch);
 }
 
-sub cache_dir {
-    my $self = shift;
-    $self->repository_base->child("cache");
-}
-
-sub build_dir {
-    my $self = shift;
-    $self->repository_base->child("builds");
-}
-
 sub repo {
     my $self = shift;
     $self->{repo} ||= $self->build_repo;
@@ -83,7 +73,7 @@ sub repo {
 
 sub build_repo {
     my $self = shift;
-    Carmel::Repository->new(path => $self->build_dir);
+    Carmel::Repository->new(path => $self->repository_base->child('builds'));
 }
 
 sub cmd_help {
@@ -174,7 +164,8 @@ sub install {
     system $^X, $self->fatscript,
       ($self->verbose ? () : "--quiet"),
       "--notest",
-      "-L", $self->cache_dir,
+      "--save-dists", $self->repository_base->child('cache'),
+      "-L", $self->repository_base->child('perl5'),
       @args;
 
     for my $ent ($dir->child("latest-build")->children) {
@@ -370,13 +361,51 @@ sub cmd_rollout {
     Path::Tiny->new(".carmel/MyBootstrap.pm")->copy("local/lib/perl5/MyBootstrap.pm");
 }
 
-sub cmd_index {
+sub cmd_package {
     my $self = shift;
-    $self->write_index(*STDOUT);
+
+    my $index = $self->build_index;
+
+    my $source_base = $self->repository_base->child('cache');
+    my $target_base = Path::Tiny->new('vendor/cache');
+
+    my %done;
+    my $success = 0;
+    for my $package ($index->packages) {
+        next if $done{$package->pathname}++;
+
+        my $source = $source_base->child('authors/id', $package->pathname);
+        my $target = $target_base->child('authors/id', $package->pathname);
+
+        if ($source->exists) {
+            print "Copying ", $package->pathname, "\n";
+            $target->parent->mkpath;
+            $source->copy($target);
+            $success++;
+        } else {
+            warn "Couldn't find ", $package->pathname, "\n";
+        }
+    }
+
+    require IO::Compress::Gzip;
+    my $index_file = $target_base->child('modules/02packages.details.txt.gz');
+    $index_file->parent->mkpath;
+
+    warn "Writing $index_file\n";
+    my $out = IO::Compress::Gzip->new($index_file->openw)
+      or die "gzip failed: $IO::Compress::Gzip::GzipError";
+    $index->write($out);
+
+    print "---> Complete! $success distributions are packaged in vendor/cache\n";
 }
 
-sub write_index {
-    my($self, $fh) = @_;
+sub cmd_index {
+    my $self = shift;
+    $self->build_index->write(*STDOUT);
+}
+
+sub build_index {
+    my $self = shift;
 
     require Carton::Index;
     require Carton::Package;
@@ -391,7 +420,7 @@ sub write_index {
         }
     });
 
-    $index->write($fh);
+    $index;
 }
 
 sub try_snapshot {

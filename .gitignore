@@ -8,3 +8,4 @@ MYMETA.*
 /blib
 /.carmel
 /local
+/vendor/cache
