@@ -1,6 +1,7 @@
 use strict;
 use Test::More;
 use Carmel;
+use Carmel::App;
 
 # replace with the actual test
 ok 1;
