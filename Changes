@@ -2,6 +2,11 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.17  2015-04-24 12:52:07 PDT
+        - add back inc entries so that some XS modules can load its objects
+        - carmel exec unknowncommand will give you the error message
+        - `carmel exec` after `carmel rollout` will use the modules from ./local
+
 v0.1.16  2015-04-23 16:54:27 PDT
         - Better error message when there's a conflicting version requirement in cpanfile and
           META prereqs in dependencies
