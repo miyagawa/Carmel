@@ -1,5 +1,6 @@
 package Carmel::Runner;
 use strict;
+use warnings;
 
 our $UseSystem = 0;
 
