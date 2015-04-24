@@ -5,7 +5,6 @@ use Module::CoreList;
 
 my %environment;
 sub inc      { @{$environment{inc}} }
-sub sharedir { @{$environment{sharedir}} }
 sub path     { @{$environment{path}} }
 sub base     { $environment{base} }
 sub modules  { %{$environment{modules}} }
@@ -38,7 +37,7 @@ sub bootstrap {
     _insert_before_sitelib(Carmel::Runtime::Guard->new);
     unshift @INC,
       Carmel::Runtime::FastINC->new($class->modules),
-      $class->sharedir;
+      $class->inc;
 }
 
 sub require_all {
