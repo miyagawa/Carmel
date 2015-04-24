@@ -226,25 +226,26 @@ sub dump_bootstrap {
       or Carp::croak "Could not locate 'cpanfile' to load module list.";
 
     my $prereqs = Module::CPANfile->load($cpanfile)->prereqs->as_string_hash;
+    my $bootstrap = "MyBootstrap"; # hide from PAUSE
 
     my $file = Path::Tiny->new(".carmel/MyBootstrap.pm");
     $file->parent->mkpath;
     $file->spew(<<EOF);
 # This file serves dual purpose to load cached data in carmel exec setup phase
 # as well as on runtime to change \@INC
-package MyBootstrap;
+package $bootstrap;
 use Carmel::Runtime;
 
 # for carmel exec setup
 my %environment = (
 inc     => @{[ quote \@inc ]},
 path    => @{[ quote \@path ]},
-base    => @{[ quote $file->parent->absolute ]},
+base    => @{[ quote(Path::Tiny->cwd) ]},
 modules => @{[ quote \%modules ]},
 prereqs => @{[ quote $prereqs ]},
 );
 
-Carmel::Runtime->environment(%environment);
+Carmel::Runtime->environment(\\\%environment);
 
 # for carmel exec runtime
 sub import {
@@ -356,6 +357,8 @@ sub cmd_rollout {
             result => \%result,
         ]);
     }
+
+    Path::Tiny->new(".carmel/MyBootstrap.pm")->copy("local/lib/perl5/MyBootstrap.pm");
 }
 
 sub cmd_index {

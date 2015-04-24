@@ -1,24 +1,33 @@
 package Carmel::Runtime;
 use strict;
-use Config;
-use Module::CoreList;
 
-my %environment;
-sub inc      { @{$environment{inc}} }
-sub path     { @{$environment{path}} }
-sub base     { $environment{base} }
-sub modules  { %{$environment{modules}} }
-sub prereqs  { $environment{prereqs} }
-
+my $environment = {};
 sub environment {
-    my($class, %args) = @_;
-    %environment = %args;
+    $environment = $_[1] if $_[1];
+    $environment;
 }
 
-my %lib = map { $_ => 1 } @Config{qw(sitearchexp archlibexp)};
+sub bootstrap_env {
+    my $class = shift;
+
+    if ($environment->{local}) {
+        return (
+            PATH => ["$environment->{local}/bin"],
+            PERL5OPT => ["-Mlib=$environment->{local}/lib/perl5", "-MMyBootstrap"],
+        );
+    } else {
+        return (
+            PATH => $environment->{path},
+            PERL5OPT => ["-Mlib=$environment->{base}/.carmel", "-MMyBootstrap"],
+        );
+    }
+}
 
 sub _insert_before_sitelib {
     my($inc) = @_;
+
+    require Config;
+    my %lib = map { $_ => 1 } @Config::Config{qw(sitearchexp archlibexp)};
 
     my $index;
     for my $i (0..$#INC) {
@@ -28,16 +37,22 @@ sub _insert_before_sitelib {
     if ($index) {
         splice @INC, $index, 0, $inc;
     } else {
-        warn "Can't find \@INC entry for $Config{sitearchexp}";
+        warn "Can't find \@INC entry for $Config::Config{sitearchexp}";
     }
 }
 
 sub bootstrap {
     my $class = shift;
+
+    if ((caller)[1] =~ m!local/lib/perl5!) {
+        # bootstrapped from rolled out local. INC is already set!
+        return;
+    }
+
     _insert_before_sitelib(Carmel::Runtime::Guard->new);
     unshift @INC,
-      Carmel::Runtime::FastINC->new($class->modules),
-      $class->inc;
+      Carmel::Runtime::FastINC->new(%{$environment->{modules}}),
+      @{$environment->{inc}};
 }
 
 sub require_all {
@@ -58,7 +73,7 @@ sub required_modules {
 
     my %modules;
     for my $phase ('runtime', @phase) {
-        %modules = (%modules, %{$class->prereqs->{$phase}{requires} || {}});
+        %modules = (%modules, %{$environment->{prereqs}{$phase}{requires} || {}});
     }
 
     \%modules
@@ -91,6 +106,7 @@ my %whitelist = (
 
 sub new {
     my $class = shift;
+    require Module::CoreList;
     bless { corelist => {} }, $class;
 }
 
