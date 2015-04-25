@@ -7,12 +7,12 @@ sub _insert_before_sitelib {
     require Config;
     my %lib = map { $_ => 1 } @Config::Config{qw(sitearchexp archlibexp)};
 
-    my $index;
+    my $index = -1;
     for my $i (0..$#INC) {
         $index = $i, last if $lib{$INC[$i]};
     }
 
-    if ($index) {
+    if ($index >= 0) {
         splice @INC, $index, 0, $inc;
     } else {
         warn "Can't find \@INC entry for $Config::Config{sitearchexp}";
