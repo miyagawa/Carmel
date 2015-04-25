@@ -120,6 +120,7 @@ sub install_from_cpanfile {
                 requires => $requirements->as_string_hash,
             },
         });
+        print "---> Installing new dependencies: ", join(", ", @missing), "\n";
         $self->install_with_cpanfile($cpanfile);
     }
 
