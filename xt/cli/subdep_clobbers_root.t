@@ -14,7 +14,7 @@ EOF
     $app->run("install");
 
     $app->run("show", "URI");
-    unlike $app->stderr, qr/Could not find a module named 'URI'/;
+    unlike $app->stderr, qr/Can't find a module named 'URI'/;
 };
 
 done_testing;

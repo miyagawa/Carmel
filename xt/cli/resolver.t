@@ -10,7 +10,7 @@ subtest 'carmel install' => sub {
 requires 'Try::Tiny';
 EOF
     $app->run("list");
-    like $app->stderr, qr/Could not find an artifact for Try::Tiny/;
+    like $app->stderr, qr/Can't find an artifact for Try::Tiny/;
 
     $app->run("install");
     $app->run("list");
@@ -20,7 +20,7 @@ EOF
 requires 'Try::Tiny', '< 0.22';
 EOF
     $app->run("list");
-    like $app->stderr, qr/Could not find an artifact for Try::Tiny => < 0\.22/;
+    like $app->stderr, qr/Can't find an artifact for Try::Tiny => < 0\.22/;
 
     $app->run("install");
     $app->run("show", "Try::Tiny");

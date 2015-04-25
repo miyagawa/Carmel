@@ -49,7 +49,7 @@ sub run {
 
     my $cmd = shift @args || 'install';
     my $call = $self->can("cmd_$cmd")
-      or die "Could not find command '$cmd': run `carmel help` to see the list of commands.\n";
+      or die "Can't find command '$cmd': run `carmel help` to see the list of commands.\n";
 
     try {
         $self->$call(@args);
@@ -215,7 +215,7 @@ sub dump_bootstrap {
     }
 
     my $cpanfile = $self->try_cpanfile
-      or Carp::croak "Could not locate 'cpanfile' to load module list.";
+      or Carp::croak "Can't locate 'cpanfile' to load module list.";
 
     my $prereqs = Module::CPANfile->load($cpanfile)->prereqs->as_string_hash;
     my $package = "Carmel::MySetup"; # hide from PAUSE
@@ -297,7 +297,7 @@ sub show_module {
                 die "__FOUND__\n";
             }
         });
-        die "Could not find a module named '$module' in the cpanfile dependencies.\n";
+        die "Can't find a module named '$module' in the cpanfile dependencies.\n";
     };
 
     die $@ if $@ && $@ ne "__FOUND__\n";
@@ -442,7 +442,7 @@ sub build_requirements {
     my($self, $skip_snapshot) = @_;
 
     my $cpanfile = $self->try_cpanfile
-      or Carp::croak "Could not locate 'cpanfile' to load module list.";
+      or Carp::croak "Can't locate 'cpanfile' to load module list.";
 
     my $requirements = Module::CPANfile->load($cpanfile)
       ->prereqs->merged_requirements(['runtime', 'test', 'develop'], ['requires']);
@@ -525,7 +525,7 @@ sub resolve {
     my($self, $cb, $missing_cb) = @_;
     $missing_cb ||= sub {
         my($module, $want_version, $depth) = @_;
-        die "Could not find an artifact for $module => $want_version\nYou need to run `carmel install` first to get the modules installed and artifacts built.\n";
+        die "Can't find an artifact for $module => $want_version\nYou need to run `carmel install` first to get the modules installed and artifacts built.\n";
     };
     $self->resolve_recursive($self->requirements, $self->requirements->clone, {}, $cb, $missing_cb, 0);
 }

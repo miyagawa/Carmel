@@ -45,7 +45,7 @@ sub Carmel::Runtime::FastINC::INC {
 
     if ($self->{$file}) {
         open my $fh, '<', $self->{$file}
-          or die "Could not load $self->{$file}: $!";
+          or die "Can't load $self->{$file}: $!";
         $INC{$file} = $self->{$file};
         return $fh;
     }

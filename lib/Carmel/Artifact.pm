@@ -24,7 +24,7 @@ sub _build_install {
         return JSON::decode_json($file->slurp);
     }
 
-    die "Could not read build artifact from ", $self->path;
+    die "Can't read build artifact from ", $self->path;
 }
 
 sub provides {
