@@ -27,3 +27,25 @@ sub required_modules {
 
 1;
 
+__END__
+
+=head1 NAME
+
+Carmel::Preload - preloads all modules declared in cpanfile
+
+=head1 SYNOPSIS
+
+  # program running under carmel exec, or after use Carmel::Setup
+  use Carmel::Preload;
+
+=head1 DESCRIPTION
+
+Carmel::Preload scans your cpanfile and preloads all the modules
+declared as C<requires>. By default, only the prereqs listed in
+C<runtime> phase will be loaded, but you can pass in other phases such
+as C<test> or C<develop> via its import arguments, i.e.
+
+  use Carmel::Preload qw(test develop);
+
+=cut
+
