@@ -218,9 +218,9 @@ sub dump_bootstrap {
       or Carp::croak "Could not locate 'cpanfile' to load module list.";
 
     my $prereqs = Module::CPANfile->load($cpanfile)->prereqs->as_string_hash;
-    my $bootstrap = "MyBootstrap"; # hide from PAUSE
+    my $bootstrap = "Carmel::MySetup"; # hide from PAUSE
 
-    my $file = Path::Tiny->new(".carmel/MyBootstrap.pm");
+    my $file = Path::Tiny->new(".carmel/MySetup.pm");
     $file->parent->mkpath;
     $file->spew(<<EOF);
 # This file serves dual purpose to load cached data in carmel exec setup phase
@@ -238,12 +238,6 @@ prereqs => @{[ quote $prereqs ]},
 );
 
 Carmel::Runtime->environment(\\\%environment);
-
-# for carmel exec runtime
-sub import {
-  Carmel::Runtime->bootstrap;
-}
-
 1;
 EOF
 }
@@ -359,7 +353,7 @@ sub cmd_rollout {
         select $old unless $self->verbose;
     }
 
-    Path::Tiny->new(".carmel/MyBootstrap.pm")->copy("local/lib/perl5/MyBootstrap.pm");
+    Path::Tiny->new("local/.carmel")->touch;
 }
 
 sub cmd_package {

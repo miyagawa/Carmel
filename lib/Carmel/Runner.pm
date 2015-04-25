@@ -7,16 +7,10 @@ our $UseSystem = 0;
 sub new {
     my $class = shift;
 
-    # FIXME absolute path
-    local $@;
-    eval {
-        require ".carmel/MyBootstrap.pm";
-    };
-    if ($@ && $@ =~ /Can't locate \.carmel\/MyBootstrap\.pm/) {
-        die "Could not locate .carmel/MyBootstrap.pm. You need to run `carmel install` first.\n";
-    }
+    require Carmel::Setup;
+    Carmel::Setup->load;
 
-    if (-d 'local' && -e 'local/lib/perl5/MyBootstrap.pm') {
+    if (-e 'local/.carmel') {
         Carmel::Runtime->environment->{local} = Carmel::Runtime->environment->{base} . '/local';
     }
 
@@ -30,6 +24,7 @@ sub env {
         _join(':', PATH => $env{PATH}),
         _join(':', PERL5LIB => $env{PERL5LIB}),
         _join(' ', PERL5OPT => $env{PERL5OPT}),
+        _value(PERL_CARMEL_PATH => $env{PERL_CARMEL_PATH}),
     );
 }
 
@@ -44,6 +39,12 @@ sub _join {
     return unless $list;
     push @$list, $ENV{$env} if $ENV{$env};
     return ($env => join($sep, @$list));
+}
+
+sub _value {
+    my($env, $value) = @_;
+    return unless defined $value;
+    return ($env => $value);
 }
 
 1;

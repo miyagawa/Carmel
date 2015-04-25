@@ -13,12 +13,14 @@ sub bootstrap_env {
     if ($environment->{local}) {
         return (
             PATH => ["$environment->{local}/bin"],
-            PERL5OPT => ["-Mlib=$environment->{local}/lib/perl5", "-MMyBootstrap"],
+            PERL5OPT => ["-MCarmel::Setup"],
+            PERL_CARMEL_PATH => $environment->{base},
         );
     } else {
         return (
             PATH => $environment->{path},
-            PERL5OPT => ["-Mlib=$environment->{base}/.carmel", "-MMyBootstrap"],
+            PERL5OPT => ["-MCarmel::Setup"],
+            PERL_CARMEL_PATH => $environment->{base},
         );
     }
 }
@@ -43,11 +45,6 @@ sub _insert_before_sitelib {
 
 sub bootstrap {
     my $class = shift;
-
-    if ((caller)[1] =~ m!local/lib/perl5!) {
-        # bootstrapped from rolled out local. INC is already set!
-        return;
-    }
 
     _insert_before_sitelib(Carmel::Runtime::Guard->new);
     unshift @INC,
