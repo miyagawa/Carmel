@@ -2,6 +2,11 @@ package Carmel::Preload;
 use strict;
 use Module::Runtime;
 
+unless (%Carmel::Setup::) {
+    require Carp;
+    Carp::croak("Can't detect Carmel environment. You have to use Carmel::Preload under `carmel exec` or after `use Carmel::Setup`");
+}
+
 sub import {
     my($class, @phase) = @_;
 
