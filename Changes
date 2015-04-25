@@ -2,6 +2,10 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.21  2015-04-25 11:25:53 PDT
+        - Fixed a bug where carmel exec fails to install the guard hook when there's no PERL5LIB
+        - Added more helpful error message when you try to load Carmel::Preload outside carmel exec
+
 v0.1.20  2015-04-25 10:21:01 PDT
         - Added Carmel::Setup to configure Carmel within a perl script
         - Removed Carmel::Runtime->require_all in favor of new Carmel::Preload
