@@ -33,7 +33,7 @@ Carmel - CPAN Artifact Repository Manager
   carmel exec perl ...
 
   # Requires all your modules in cpanfile in one shot
-  carmel exec perl -e 'Carmel::Runtime->require_all'
+  carmel exec perl -e 'use Carmel::Preload;'
 
   # Roll out the currently selected modules into ./local
   carmel rollout

@@ -13,7 +13,7 @@ sub new {
     my $self = bless {}, $class;
 
     if (Carmel::Setup->has_local) {
-        $self->{local} = Carmel::Runtime->environment->{base} . '/local';
+        $self->{local} = Carmel::Setup->environment->{base} . '/local';
     }
 
     $self;
@@ -23,7 +23,7 @@ sub new {
 sub env {
     my $self = shift;
 
-    my $environment = Carmel::Runtime->environment;
+    my $environment = Carmel::Setup->environment;
 
     if ($self->{local}) {
         return (

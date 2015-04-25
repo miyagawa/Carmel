@@ -1,11 +1,14 @@
 package Carmel::Setup;
 use strict;
+use Carmel;
 
-my $path;
+my($path, $environment);
 
 sub has_local {
     -e "$path/local/.carmel";
 }
+
+sub environment { $environment }
 
 sub load {
     # TODO look for cpanfile?
@@ -23,6 +26,8 @@ sub load {
     }
     
     die $err if $err;
+
+    $environment = \%Carmel::MySetup::environment;
 }
 
 sub import {
@@ -35,7 +40,8 @@ sub import {
         require lib;
         lib->import("$path/local/lib/perl5");
     } else {
-        Carmel::Runtime->bootstrap;
+        require Carmel::Runtime;
+        Carmel::Runtime->bootstrap($environment->{modules}, $environment->{inc});
     }
 }
 

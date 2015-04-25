@@ -1,12 +1,6 @@
 package Carmel::Runtime;
 use strict;
 
-my $environment = {};
-sub environment {
-    $environment = $_[1] if $_[1];
-    $environment;
-}
-
 sub _insert_before_sitelib {
     my($inc) = @_;
 
@@ -26,36 +20,17 @@ sub _insert_before_sitelib {
 }
 
 sub bootstrap {
-    my $class = shift;
+    my($class, $modules, $inc) = @_;
 
     _insert_before_sitelib(Carmel::Runtime::Guard->new);
     unshift @INC,
-      Carmel::Runtime::FastINC->new(%{$environment->{modules}}),
-      @{$environment->{inc}};
+      Carmel::Runtime::FastINC->new(%$modules),
+      @{$inc};
 }
 
 sub require_all {
     my($class, @phase) = @_;
-
-    require Module::Runtime;
-    my $modules = $class->required_modules(@phase);
-    while (my($module, $version) = each %$modules) {
-        next if $module eq 'perl';
-        Module::Runtime::use_module($module, $version);
-    }
-
-    1;
-}
-
-sub required_modules {
-    my($class, @phase) = @_;
-
-    my %modules;
-    for my $phase ('runtime', @phase) {
-        %modules = (%modules, %{$environment->{prereqs}{$phase}{requires} || {}});
-    }
-
-    \%modules
+    die "Deprecated. Use Carmel::Preload instead.";
 }
 
 package Carmel::Runtime::FastINC;
@@ -78,8 +53,9 @@ sub Carmel::Runtime::FastINC::INC {
 
 package Carmel::Runtime::Guard;
 
-# called in runtime via ->require_all
+# called in runtime via Carmel::Preload
 my %whitelist = (
+    'Carmel/Preload' => 1,
     'Module/Runtime.pm' => 1,
 );
 
