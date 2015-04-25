@@ -7,13 +7,13 @@ subtest 'carmel exec cmd -h' => sub {
     my $app = cli();
 
     $app->write_cpanfile(<<EOF);
-requires 'Carton';
+requires 'Module::CPANfile';
 EOF
 
     $app->run("install");
-    $app->run("exec", "carton", "-h");
+    $app->run("exec", "cpanfile-dump", "-h");
 
-    like $app->stdout, qr/carton install/ or diag $app->stderr;
+    like $app->stdout, qr/cpanfile-dump/ or diag $app->stderr;
     unlike $app->stdout, qr/Carmel/;
 };
 
