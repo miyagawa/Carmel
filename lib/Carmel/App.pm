@@ -525,7 +525,8 @@ sub resolve {
     my($self, $cb, $missing_cb) = @_;
     $missing_cb ||= sub {
         my($module, $want_version, $depth) = @_;
-        die "Can't find an artifact for $module => $want_version\nYou need to run `carmel install` first to get the modules installed and artifacts built.\n";
+        die "Can't find an artifact for $module => $want_version\n" .
+            "You need to run `carmel install` first to get the modules installed and artifacts built.\n";
     };
     $self->resolve_recursive($self->requirements, $self->requirements->clone, {}, $cb, $missing_cb, 0);
 }
