@@ -383,7 +383,10 @@ sub cmd_package {
             $source->copy($target);
             $success++;
         } else {
-            warn "Couldn't find ", $package->pathname, "\n";
+            require File::Fetch;
+            print "Fetching ", $package->pathname, " from CPAN.\n";
+            my $fetch = File::Fetch->new(uri => "http://www.cpan.org/authors/id/" . $package->pathname);
+            $fetch->fetch(to => $target->parent) or warn $fetch->error;
         }
     }
 
