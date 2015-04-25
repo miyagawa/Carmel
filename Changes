@@ -2,6 +2,12 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.20  2015-04-25 10:21:01 PDT
+        - Added Carmel::Setup to configure Carmel within a perl script
+        - Removed Carmel::Runtime->require_all in favor of new Carmel::Preload
+        - Documentation
+        - Refactored Carmel::Runtime and split them into Runner/Setup/Preload
+
 v0.1.19  2015-04-25 06:22:59 PDT
         - Display which dependencies are being installed in `carmel install`
         - Added an experimental `carton package` command
