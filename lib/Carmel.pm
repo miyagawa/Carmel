@@ -38,6 +38,12 @@ Carmel - CPAN Artifact Repository Manager
   # Roll out the currently selected modules into ./local
   carmel rollout
 
+  # package modules tarballs and index into ./vendor/cache
+  carmel package
+
+  # use Carmel packages inside a script (without carmel exec)
+  perl -e 'use Carmel::Setup; ...'
+
   # prints export PATH=... etc for shell scripting
   carmel export
 

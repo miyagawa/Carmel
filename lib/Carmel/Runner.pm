@@ -10,22 +10,34 @@ sub new {
     require Carmel::Setup;
     Carmel::Setup->load;
 
-    if (-e 'local/.carmel') {
-        Carmel::Runtime->environment->{local} = Carmel::Runtime->environment->{base} . '/local';
+    my $self = bless {}, $class;
+
+    if (Carmel::Setup->has_local) {
+        $self->{local} = Carmel::Runtime->environment->{base} . '/local';
     }
 
-    bless {}, $class;
+    $self;
 }
 
 # Note: can't capture carmel exec perl -MModule because it's loaded earlier than PERL5OPT
 sub env {
-    my %env = Carmel::Runtime->bootstrap_env;
-    return (
-        _join(':', PATH => $env{PATH}),
-        _join(':', PERL5LIB => $env{PERL5LIB}),
-        _join(' ', PERL5OPT => $env{PERL5OPT}),
-        _value(PERL_CARMEL_PATH => $env{PERL_CARMEL_PATH}),
-    );
+    my $self = shift;
+
+    my $environment = Carmel::Runtime->environment;
+
+    if ($self->{local}) {
+        return (
+            _join(':', PATH => ["$self->{local}/bin"]),
+            _join(' ', PERL5OPT => ["-MCarmel::Setup"]),
+            PERL_CARMEL_PATH => $environment->{base},
+        );
+    } else {
+        return (
+            _join(':', PATH => $environment->{path}),
+            _join(' ', PERL5OPT => ["-MCarmel::Setup"]),
+            PERL_CARMEL_PATH => $environment->{base},
+        );
+    }
 }
 
 sub execute {
@@ -39,12 +51,6 @@ sub _join {
     return unless $list;
     push @$list, $ENV{$env} if $ENV{$env};
     return ($env => join($sep, @$list));
-}
-
-sub _value {
-    my($env, $value) = @_;
-    return unless defined $value;
-    return ($env => $value);
 }
 
 1;

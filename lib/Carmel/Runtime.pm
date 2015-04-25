@@ -7,24 +7,6 @@ sub environment {
     $environment;
 }
 
-sub bootstrap_env {
-    my $class = shift;
-
-    if ($environment->{local}) {
-        return (
-            PATH => ["$environment->{local}/bin"],
-            PERL5OPT => ["-MCarmel::Setup"],
-            PERL_CARMEL_PATH => $environment->{base},
-        );
-    } else {
-        return (
-            PATH => $environment->{path},
-            PERL5OPT => ["-MCarmel::Setup"],
-            PERL_CARMEL_PATH => $environment->{base},
-        );
-    }
-}
-
 sub _insert_before_sitelib {
     my($inc) = @_;
 

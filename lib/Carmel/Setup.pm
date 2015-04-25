@@ -3,6 +3,10 @@ use strict;
 
 my $path;
 
+sub has_local {
+    -e "$path/local/.carmel";
+}
+
 sub load {
     # TODO look for cpanfile?
     $path = $ENV{PERL_CARMEL_PATH} || '.';
@@ -26,7 +30,7 @@ sub import {
 
     $class->load;
 
-    if (-e "$path/local/.carmel") {
+    if ($class->has_local) {
         # after rollout, either via carmel exec or use Carmel::Setup
         require lib;
         lib->import("$path/local/lib/perl5");
