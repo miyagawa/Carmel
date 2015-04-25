@@ -32,7 +32,28 @@ sub provides {
     $self->install->{provides};
 }
 
-# "Foo/Bar.pm" => "blib/lib/Foo/Bar.pm"
+# "cpanm" => ".../blib/script/cpanm"
+sub executables {
+    my $self = shift;
+
+    my %execs;
+    for my $bin ($self->paths) {
+        $bin->visit(
+            sub {
+                my($path, $state) = @_;
+                if ($path->is_file && $path !~ /\.exists$/) {
+                    $execs{$path->relative($bin)->stringify} = $path;
+                }
+                return; # continue
+            },
+            { recurse => 1 },
+        );
+    }
+
+    %execs;
+}
+
+# "Foo/Bar.pm" => ".../blib/lib/Foo/Bar.pm"
 sub module_files {
     my $self = shift;
 
@@ -50,7 +71,7 @@ sub module_files {
         );
     }
 
-    \%modules;
+    %modules;
 }
 
 sub package {

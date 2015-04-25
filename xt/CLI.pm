@@ -64,5 +64,15 @@ sub run {
     $self->stderr($capture[1]);
 }
 
+sub run_any {
+    my($self, @args) = @_;
+
+    my $pushd = File::pushd::pushd $self->dir;
+    my @capture = capture { system @args };
+
+    $self->stdout($capture[0]);
+    $self->stderr($capture[1]);
+}
+
 1;
 

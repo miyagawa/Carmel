@@ -10,6 +10,22 @@ sub has_local {
 
 sub environment { $environment }
 
+sub bin_path {
+    my($class, $module, $bin) = @_;
+    $environment->{execs}{$module}{$bin};
+}
+
+sub execute {
+    my($class, $module, $bin) = @_;
+    my $exec = $class->bin_path($module, $bin);
+    if ($exec && -f $exec) {
+        my $ret = do $exec;
+        if (!defined $ret and my $err = $@ || $!) { die $err };
+    } else {
+        die "Can't find executable '$bin' in '$module'";
+    }
+}
+
 sub load {
     # TODO look for cpanfile?
     $path = $ENV{PERL_CARMEL_PATH} || '.';
