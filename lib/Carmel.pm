@@ -1,7 +1,7 @@
 package Carmel;
 use strict;
 use 5.010_001;
-use version; our $VERSION = version->declare('v0.1.18');
+use version; our $VERSION = version->declare('v0.1.19');
 
 1;
 __END__

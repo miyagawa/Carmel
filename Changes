@@ -2,6 +2,10 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.19  2015-04-25 06:22:59 PDT
+        - Display which dependencies are being installed in `carmel install`
+        - Added an experimental `carton package` command
+
 v0.1.18  2015-04-24 14:23:25 PDT
         - Silence ExtUtils::Install output in carmel rollout
 
