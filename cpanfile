@@ -10,6 +10,7 @@ requires 'Module::CPANfile', '1.1000';
 requires 'Module::Runtime', '0.014';
 requires 'Module::Metadata', '1.000003';
 requires 'Path::Tiny', '0.068';
+requires 'Try::Tiny', '0.20';
 requires 'File::Copy::Recursive';
 
 requires 'File::pushd', '1.009';
