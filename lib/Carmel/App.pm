@@ -431,6 +431,8 @@ sub build_index {
 sub cmd_binstubs {
     my($self, @package) = @_;
 
+    die "Usage: carmel binstubs Module [...]\n" unless @package;
+
     for my $package (@package) {
         my $artifact = $self->artifact_for($package);
         my %execs = $artifact->executables;
