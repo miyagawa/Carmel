@@ -30,7 +30,7 @@ sub load {
             require "$path/.carmel/MySetup.pm";
         };
         if ($@ && $@ =~ /Can't locate .*\.carmel\/MySetup\.pm/) {
-            $err = "Can't locate .carmel/MySetup.pm in $path. You need to run `carmel install` first.\n";
+            $err = "Can't locate .carmel/MySetup.pm in '$path'. You need to run `carmel install` first.\n";
         }
     }
     
