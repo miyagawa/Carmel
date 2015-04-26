@@ -1,4 +1,4 @@
-requires 'perl', '5.010001';
+requires 'perl', '5.012000';
 
 requires 'Data::Dump';
 requires 'JSON';
