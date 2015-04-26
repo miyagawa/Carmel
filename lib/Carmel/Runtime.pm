@@ -18,11 +18,6 @@ sub bootstrap {
       @{$inc};
 }
 
-sub require_all {
-    my($class, @phase) = @_;
-    die "Deprecated. Use Carmel::Preload instead.";
-}
-
 package Carmel::Runtime::SiteINC;
 
 sub new {
