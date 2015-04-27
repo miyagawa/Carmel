@@ -2,6 +2,13 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.22  2015-04-27 10:04:19 PDT
+        - Added experimental carmel binstubs command
+        - The minimum perl version requirement is now 5.12 because of the INC ordering
+        - Stop installing "Guard" INC since runtime Module::CoreList is a bad idea. Instead,
+          replace site_perl INC entry with a dumbed down version that only allows loading
+          Carmel::Preload and its dependencies. This is like lib::core::only.
+
 v0.1.21  2015-04-25 11:25:53 PDT
         - Fixed a bug where carmel exec fails to install the guard hook when there's no PERL5LIB
         - Added more helpful error message when you try to load Carmel::Preload outside carmel exec

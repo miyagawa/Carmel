@@ -55,7 +55,8 @@
             "Module::Metadata" : "1.000003",
             "Module::Runtime" : "0.014",
             "Path::Tiny" : "0.068",
-            "perl" : "5.010001"
+            "Try::Tiny" : "0.20",
+            "perl" : "5.012000"
          }
       },
       "test" : {
@@ -76,7 +77,7 @@
          "web" : "https://github.com/miyagawa/Carmel"
       }
    },
-   "version" : "v0.1.21",
+   "version" : "v0.1.22",
    "x_contributors" : [
       "Syohei YOSHIDA <syohex@gmail.com>"
    ]

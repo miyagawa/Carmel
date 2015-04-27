@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use 5.010001;
+use 5.012000;
 
 use ExtUtils::MakeMaker;
 
@@ -17,7 +17,7 @@ my %WriteMakefileArgs = (
     "script/carmel"
   ],
   "LICENSE" => "perl",
-  "MIN_PERL_VERSION" => "5.010001",
+  "MIN_PERL_VERSION" => "5.012000",
   "NAME" => "Carmel",
   "PREREQ_PM" => {
     "App::cpanminus" => "1.7030",
@@ -35,12 +35,13 @@ my %WriteMakefileArgs = (
     "Module::CoreList" => 0,
     "Module::Metadata" => "1.000003",
     "Module::Runtime" => "0.014",
-    "Path::Tiny" => "0.068"
+    "Path::Tiny" => "0.068",
+    "Try::Tiny" => "0.20"
   },
   "TEST_REQUIRES" => {
     "Test::More" => "0.96"
   },
-  "VERSION" => "v0.1.21",
+  "VERSION" => "v0.1.22",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -65,7 +66,8 @@ my %FallbackPrereqs = (
   "Module::Metadata" => "1.000003",
   "Module::Runtime" => "0.014",
   "Path::Tiny" => "0.068",
-  "Test::More" => "0.96"
+  "Test::More" => "0.96",
+  "Try::Tiny" => "0.20"
 );
 
 
