@@ -43,7 +43,12 @@ sub env {
 sub execute {
     my($self, @args) = @_;
     %ENV = (%ENV, $self->env);
-    $UseSystem ? system(@args) : exec @args;
+    if ($UseSystem) {
+        system @args;
+    } else {
+        exec @args;
+        exit 127; # command not found
+    }
 }
 
 sub _join {
