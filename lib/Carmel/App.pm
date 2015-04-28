@@ -176,14 +176,17 @@ sub install {
 }
 
 sub quote {
-    require Data::Dump;
+    my $indent = shift;
+    $indent = " " x $indent;
 
-    my $value = transform(@_);
-    if (ref $value) {
-        Data::Dump::dump($value);
-    } else {
-        Data::Dump::quote($value);
-    }
+    require Data::Dumper;
+    my $val = Data::Dumper->new([transform(@_)], [])
+      ->Sortkeys(1)->Terse(1)->Indent(1)->Dump;
+
+    chomp $val;
+    $val =~ s/^/$indent/mg if $indent;
+    $val =~ s/^ *//;
+    $val;
 }
 
 sub transform {
@@ -233,12 +236,12 @@ sub dump_bootstrap {
 package $package;
 
 our %environment = (
-inc     => @{[ quote \@inc ]},
-path    => @{[ quote \@path ]},
-execs   => @{[ quote \%execs ]},
-base    => @{[ quote(Path::Tiny->cwd) ]},
-modules => @{[ quote \%modules ]},
-prereqs => @{[ quote $prereqs ]},
+  'inc' => @{[ quote 2, \@inc ]},
+  'path' => @{[ quote 2, \@path ]},
+  'execs' => @{[ quote 2, \%execs ]},
+  'base' => @{[ quote(2, Path::Tiny->cwd) ]},
+  'modules' => @{[ quote 2, \%modules ]},
+  'prereqs' => @{[ quote 2, $prereqs ]},
 );
 
 1;

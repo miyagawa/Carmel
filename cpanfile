@@ -1,6 +1,5 @@
 requires 'perl', '5.012000';
 
-requires 'Data::Dump';
 requires 'JSON';
 requires 'Class::Tiny', '1.001';
 requires 'CPAN::Meta::Requirements', '2.129';
