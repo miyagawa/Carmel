@@ -35,35 +35,25 @@ sub provides {
 # "cpanm" => ".../blib/script/cpanm"
 sub executables {
     my $self = shift;
-
-    my %execs;
-    for my $bin ($self->paths) {
-        $bin->visit(
-            sub {
-                my($path, $state) = @_;
-                if ($path->is_file && $path !~ /\.exists$/) {
-                    $execs{$path->relative($bin)->stringify} = $path;
-                }
-                return; # continue
-            },
-            { recurse => 1 },
-        );
-    }
-
-    %execs;
+    $self->_find_files(sub { shift !~ /\.exists$/ }, $self->paths);
 }
 
 # "Foo/Bar.pm" => ".../blib/lib/Foo/Bar.pm"
 sub module_files {
     my $self = shift;
+    $self->_find_files(sub { shift =~ /\.pm$/ }, $self->libs);
+}
 
-    my %modules;
-    for my $lib ($self->libs) {
-        $lib->visit(
+sub _find_files {
+    my($self, $what, @dirs) = @_;
+
+    my %found;
+    for my $dir (@dirs) {
+        $dir->visit(
             sub {
                 my($path, $state) = @_;
-                if ($path->is_file && $path =~ /\.pm$/) {
-                    $modules{$path->relative($lib)->stringify} = $path;
+                if ($path->is_file && $what->($path)) {
+                    $found{$path->relative($dir)->stringify} = $path;
                 }
                 return; # continue
             },
@@ -71,7 +61,7 @@ sub module_files {
         );
     }
 
-    %modules;
+    %found;
 }
 
 sub package {
