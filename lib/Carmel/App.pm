@@ -150,24 +150,24 @@ sub install_with_cpanfile {
     $self->install("--installdeps", "--cpanfile", $path, ".");
 }
 
-sub fatscript {
-    my $self = shift;
-    Module::Metadata->find_module_by_name("App::cpanminus::fatscript")
-        or die "Can't locate App::cpanminus::fatscript";
-}
-
 sub install {
     my($self, @args) = @_;
 
     my $dir = Path::Tiny->tempdir;
     local $ENV{PERL_CPANM_HOME} = $dir;
     local $ENV{PERL_CPANM_OPT};
-    system $^X, $self->fatscript,
-      ($self->verbose ? () : "--quiet"),
-      "--notest",
-      "--save-dists", $self->repository_base->child('cache'),
-      "-L", $self->repository_base->child('perl5'),
-      @args;
+
+    require Menlo::CLI;
+
+    my $cli = Menlo::CLI->new;
+    $cli->parse_options(
+        ($self->verbose ? () : "--quiet"),
+        "--notest",
+        "--save-dists", $self->repository_base->child('cache'),
+        "-L", $self->repository_base->child('perl5'),
+        @args,
+    );
+    $cli->doit;
 
     for my $ent ($dir->child("latest-build")->children) {
         next unless $ent->is_dir && $ent->child("blib/meta/install.json")->exists;

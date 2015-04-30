@@ -16,9 +16,11 @@ requires 'File::pushd', '1.009';
 requires 'ExtUtils::Install', '1.47';
 requires 'ExtUtils::InstallPaths';
 
-requires 'App::cpanminus', '1.7030';
-
 requires 'Carton', 'v1.0.13';
+
+# vendor
+# requires 'Menlo', 'v1.0.0';
+# requires 'CPAN::Common::Index', '0.006';
 
 on test => sub {
     requires 'Test::More', '0.96';
