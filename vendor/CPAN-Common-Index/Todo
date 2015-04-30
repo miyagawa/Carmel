@@ -1,0 +1,5 @@
+# Todo for CPAN::Common::Index
+
+- base class needs support for logging callbacks: log_debug,
+log_info, log_warn
+

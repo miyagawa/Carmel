@@ -1,0 +1,44 @@
+# DAGOLDEN .perltidyrc file
+
+-se     # Errors to STDERR
+
+-l=85   # Max line width target
+-vmll   # variable maximum line length
+-wc=10  # depth to reduce indentation levels
+-i=4    # Indent level
+-ci=2   # Continuation
+
+-vt=0   # vertical tightness
+-cti=0  # extra indentation for closing brackets
+-vtc=0  # close parens on own line if possible
+
+-nsot   # stack opening
+-nsct   # stack closing
+
+-notr    # opening tokens on right of a line
+-pt=1   # parenthesis tightness
+-bt=1   # brace tightness
+-sbt=1  # square bracket tightness
+-bbt=0  # block brace tightness
+#-boc    # break at old comma breakpoints
+-cab=1
+
+-nsfp   # no space after function
+-nsfs   # No space before semicolons in for loops
+
+-nolq   # Don't outdent long quoted strings
+-nola   # Don't outdent labels
+-nolc   # Don't outdent long comments
+-nokw   # Don't outdent keywords
+-nhsc   # Don't expect hanging side comments
+-nbbc   # No blank before comments
+-tso    # Tight secret operators
+
+-msc=1  # Space to side comment
+
+#-wbb="% + - * / x != == >= <= =~ !~ < > | & = **= += *= &= <<= &&= -= /= |= >>= ||= //= .= %= ^= x="
+-wbb="% + - * / x != == >= <= =~ !~ < > | &"
+        # Break before all operators except assignment
+
+-ole=unix # line endings
+
