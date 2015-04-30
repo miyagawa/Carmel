@@ -1,0 +1,18 @@
+File:         02packages.details.txt
+URL:          http://www.perl.com/CPAN/modules/02packages.details.txt
+Description:  Package names found in directory $CPAN/authors/id/
+Columns:      package name, version, path
+Intended-For: Automated fetch routines, namespace documentation.
+Written-By:   PAUSE version 1.14
+Line-Count:   129178
+Last-Updated: Sun, 14 Apr 2013 13:29:02 GMT
+
+Acme::Samurai                      0.02  L/LO/LOCAL/Acme-Samurai-0.02.tar.gz
+attributes                          0.2  F/FL/FLORA/perl-5.17.4.tar.bz2
+Dist::Zilla                    4.300034  R/RJ/RJBS/Dist-Zilla-4.300034.tar.gz
+File::Marker                       0.13  D/DA/DAGOLDEN/File-Marker-0.13.tar.gz
+If                                undef  F/FG/FGLOCK/v6-0.044.tar.gz
+if                               0.0601  I/IL/ILYAZ/modules/if-0.0601.tar.gz
+Moo::Role                         undef  M/MS/MSTROUT/Moo-1.001000.tar.gz
+Parse::CPAN::Meta                1.4404  D/DA/DAGOLDEN/Parse-CPAN-Meta-1.4404.tar.gz
+ZZZ::Custom                         1.2  L/LO/LOCAL/ZZZ-Custom-1.2.tar.gz
