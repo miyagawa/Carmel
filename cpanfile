@@ -20,7 +20,7 @@ requires 'Carton', 'v1.0.13';
 
 # vendor
 # requires 'Menlo', 'v1.0.0';
-# requires 'CPAN::Common::Index', '0.006';
+requires 'CPAN::Common::Index', '0.006';
 
 on test => sub {
     requires 'Test::More', '0.96';
