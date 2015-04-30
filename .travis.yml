@@ -8,6 +8,7 @@ perl:
 before_install:
   - perlbrew install-cpanm -f
 install:
+  - (cpanm --installdeps --with-develop -nq ./vendor/Menlo) || cat ~/.cpanm/build.log
   - (cpanm --installdeps --with-develop -nq .) || cat ~/.cpanm/build.log
 script:
   - prove -lr -Ivendor/CPAN-Common-Index/lib -Ivendor/Menlo/lib xt
