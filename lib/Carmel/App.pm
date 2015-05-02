@@ -157,17 +157,16 @@ sub install {
     local $ENV{PERL_CPANM_HOME} = $dir;
     local $ENV{PERL_CPANM_OPT};
 
-    require Menlo::CLI;
+    require Menlo::CLI::Compat;
 
-    my $cli = Menlo::CLI->new;
-    $cli->parse_options(
+    my $cli = Menlo::CLI::Compat->new(
         ($self->verbose ? () : "--quiet"),
         "--notest",
         "--save-dists", $self->repository_base->child('cache'),
         "-L", $self->repository_base->child('perl5'),
         @args,
     );
-    $cli->doit;
+    $cli->run;
 
     for my $ent ($dir->child("latest-build")->children) {
         next unless $ent->is_dir && $ent->child("blib/meta/install.json")->exists;
