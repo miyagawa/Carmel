@@ -11,7 +11,7 @@ install:
   - (cpanm --installdeps -nq ./vendor/Menlo) || cat ~/.cpanm/build.log
   - (cpanm --installdeps --with-develop -nq .) || cat ~/.cpanm/build.log
 script:
-  - prove -lr -Ivendor/CPAN-Common-Index/lib -Ivendor/Menlo/lib xt
+  - prove -lr -Ivendor/Menlo/lib xt
 env:
   - TEST_CLEAN=
   - TEST_CLEAN=1
