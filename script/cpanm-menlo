@@ -17,16 +17,12 @@
 # __FATPACK__
 
 use strict;
-use FindBin qw($Bin);                                      # For dev -- Auto-removed
-use lib "$Bin/../lib", "$Bin/../fatlib", "$Bin/../vendor"; # For dev -- Auto-removed
-use Menlo::CLI;
+use Menlo::CLI::Compat;
 
+my $cli = Menlo::CLI::Compat->new(@ARGV);
+$cli->run;
 
-unless (caller) {
-    my $app = Menlo::CLI->new;
-    $app->parse_options(@ARGV);
-    exit $app->doit;
-}
+exit $cli->status;
 
 __END__
 
