@@ -1,21 +1,21 @@
-package Menlo::CLI;
+package Menlo::CLI::Compat;
 use strict;
 use Config;
 use Cwd ();
 use Menlo;
 use Menlo::Dependency;
+use Menlo::Util qw(WIN32);
 use File::Basename ();
 use File::Find ();
 use File::Path ();
 use File::Spec ();
 use File::Copy ();
 use File::Temp ();
+use File::Which qw(which);
 use Getopt::Long ();
 use Symbol ();
-use String::ShellQuote ();
 use version ();
 
-use constant WIN32 => $^O eq 'MSWin32';
 use constant BAD_TAR => ($^O eq 'solaris' || $^O eq 'hpux');
 use constant CAN_SYMLINK => eval { symlink("", ""); 1 };
 
@@ -24,8 +24,6 @@ our $VERSION = $Menlo::VERSION;
 if ($INC{"App/FatPacker/Trace.pm"}) {
     require version::vpp;
 }
-
-my $quote = WIN32 ? q/"/ : q/'/;
 
 sub agent {
     my $self = shift;
@@ -52,7 +50,7 @@ sub determine_home {
 sub new {
     my $class = shift;
 
-    bless {
+    my $self = bless {
         home => $class->determine_home,
         cmd  => 'install',
         seen => {},
@@ -105,6 +103,9 @@ sub new {
         cpanfile_path => 'cpanfile',
         @_,
     }, $class;
+
+    $self->parse_options(@_);
+    $self;
 }
 
 sub env {
@@ -268,20 +269,14 @@ DIE
 sub check_libs {
     my $self = shift;
     return if $self->{_checked}++;
-
     $self->bootstrap_local_lib;
-    if (@{$self->{bootstrap_deps} || []}) {
-        local $self->{notest} = 1; # test failure in bootstrap should be tolerated
-        local $self->{scandeps} = 0;
-        $self->install_deps(Cwd::cwd, 0, @{$self->{bootstrap_deps}});
-    }
 }
 
 sub setup_verify {
     my $self = shift;
 
     my $has_modules = eval { require Module::Signature; require Digest::SHA; 1 };
-    $self->{cpansign} = $self->which('cpansign');
+    $self->{cpansign} = which('cpansign');
 
     unless ($has_modules && $self->{cpansign}) {
         warn "WARNING: Module::Signature and Digest::SHA is required for distribution verifications.\n";
@@ -304,7 +299,7 @@ sub parse_module_args {
     }
 }
 
-sub doit {
+sub run {
     my $self = shift;
 
     my $code;
@@ -315,7 +310,11 @@ sub doit {
         $code = 1;
     }
 
-    return $code;
+    $self->{status} = $code;
+}
+
+sub status {
+    $_[0]->{status};
 }
 
 sub _doit {
@@ -702,7 +701,6 @@ sub bootstrap_local_lib {
 
     # local::lib is configured in the shell -- yay
     if ($ENV{PERL_MM_OPT} and ($ENV{MODULEBUILDRC} or $ENV{PERL_MB_OPT})) {
-        $self->bootstrap_local_lib_deps;
         return;
     }
 
@@ -720,6 +718,27 @@ sub bootstrap_local_lib {
 !
 DIAG
     sleep 2;
+}
+
+sub upgrade_toolchain {
+    my($self, $config_deps) = @_;
+
+    my %deps = map { $_->module => $_ } @$config_deps;
+    my $reqs = CPAN::Meta::Requirements->from_string_hash({
+        'Module::Build' => '0.38',
+        'ExtUtils::MakeMaker' => '6.58',
+        'ExtUtils::Install' => '1.46',
+    });
+
+    if ($deps{"ExtUtils::MakeMaker"}) {
+        $deps{"ExtUtils::MakeMaker"}->merge_with($reqs);
+    } elsif ($deps{"Module::Build"}) {
+        $deps{"Module::Build"}->merge_with($reqs);
+        $deps{"ExtUtils::Install"} ||= Menlo::Dependency->new("ExtUtils::Install", 0, 'configure');
+        $deps{"ExtUtils::Install"}->merge_with($reqs);
+    }
+
+    @$config_deps = values %deps;
 }
 
 sub _core_only_inc {
@@ -778,15 +797,6 @@ sub setup_local_lib {
         $self->_setup_local_lib_env($base) unless $no_env;
         $self->{local_lib} = $base;
     }
-
-    $self->bootstrap_local_lib_deps;
-}
-
-sub bootstrap_local_lib_deps {
-    my $self = shift;
-    push @{$self->{bootstrap_deps}},
-        Menlo::Dependency->new('ExtUtils::MakeMaker' => 6.58),
-        Menlo::Dependency->new('ExtUtils::Install'   => 1.46);
 }
 
 sub prompt_bool {
@@ -889,13 +899,13 @@ sub log {
     print $out @_;
 }
 
-sub run {
+sub run_command {
     my($self, $cmd) = @_;
 
     if (WIN32) {
-        $cmd = $self->shell_quote(@$cmd) if ref $cmd eq 'ARRAY';
+        $cmd = Menlo::Util::shell_quote(@$cmd) if ref $cmd eq 'ARRAY';
         unless ($self->{verbose}) {
-            $cmd .= " >> " . $self->shell_quote($self->{log}) . " 2>&1";
+            $cmd .= " >> " . Menlo::Util::shell_quote($self->{log}) . " 2>&1";
         }
         !system $cmd;
     } else {
@@ -922,7 +932,7 @@ sub run_exec {
         exec @$cmd;
     } else {
         unless ($self->{verbose}) {
-            $cmd .= " >> " . $self->shell_quote($self->{log}) . " 2>&1";
+            $cmd .= " >> " . Menlo::Util::shell_quote($self->{log}) . " 2>&1";
         }
         exec $cmd;
     }
@@ -930,7 +940,7 @@ sub run_exec {
 
 sub run_timeout {
     my($self, $cmd, $timeout) = @_;
-    return $self->run($cmd) if WIN32 || $self->{verbose} || !$timeout;
+    return $self->run_command($cmd) if WIN32 || $self->{verbose} || !$timeout;
 
     my $pid = fork;
     if ($pid) {
@@ -952,7 +962,7 @@ sub run_timeout {
         $self->run_exec($cmd);
     } else {
         $self->chat("! fork failed: falling back to system()\n");
-        $self->run($cmd);
+        $self->run_command($cmd);
     }
 }
 
@@ -960,7 +970,7 @@ sub append_args {
     my($self, $cmd, $phase) = @_;
 
     if (my $args = $self->{build_args}{$phase}) {
-        $cmd = join ' ', $self->shell_quote(@$cmd), $args;
+        $cmd = join ' ', Menlo::Util::shell_quote(@$cmd), $args;
     }
 
     $cmd;
@@ -1062,7 +1072,7 @@ sub install {
 
     $cmd = $self->append_args($cmd, 'install') if $depth == 0;
 
-    $self->run($cmd);
+    $self->run_command($cmd);
 }
 
 sub look {
@@ -1091,7 +1101,7 @@ sub show_build_log {
     while (@pagers) {
         $pager = shift @pagers;
         next unless $pager;
-        $pager = $self->which($pager);
+        $pager = which($pager);
         next unless $pager;
         last;
     }
@@ -1649,7 +1659,7 @@ sub git_uri {
     my $dir = File::Temp::tempdir(CLEANUP => 1);
 
     $self->mask_output( diag_progress => "Cloning $uri" );
-    $self->run([ 'git', 'clone', $uri, $dir ]);
+    $self->run_command([ 'git', 'clone', $uri, $dir ]);
 
     unless (-e "$dir/.git") {
         $self->diag_fail("Failed cloning git repository $uri", 1);
@@ -1660,7 +1670,7 @@ sub git_uri {
         require File::pushd;
         my $dir = File::pushd::pushd($dir);
 
-        unless ($self->run([ 'git', 'checkout', $commitish ])) {
+        unless ($self->run_command([ 'git', 'checkout', $commitish ])) {
             $self->diag_fail("Failed to checkout '$commitish' in git repository $uri\n");
             return;
         }
@@ -1915,18 +1925,20 @@ sub build_stuff {
         );
     }
 
-    # workaround for bad M::B based dists with no configure_requires
-    # https://github.com/miyagawa/cpanminus/issues/273
     if (-e 'Build.PL' && !$self->should_use_mm($dist->{dist}) && !@config_deps) {
         push @config_deps, Menlo::Dependency->from_versions(
-            { 'Module::Build' => '0.36' }, 'configure',
+            { 'Module::Build' => '0.38' }, 'configure',
         );
     }
 
-    my $target = $dist->{meta}{name} ? "$dist->{meta}{name}-$dist->{meta}{version}" : $dist->{dir};
+    $self->upgrade_toolchain(\@config_deps);
 
-    $self->install_deps_bailout($target, $dist->{dir}, $depth, @config_deps)
-        or return;
+    my $target = $dist->{meta}{name} ? "$dist->{meta}{name}-$dist->{meta}{version}" : $dist->{dir};
+    {
+        local $self->{notest} = 1;
+        $self->install_deps_bailout($target, $dist->{dir}, $depth, @config_deps)
+          or return;
+    }
 
     $self->diag_progress("Configuring $target");
 
@@ -2256,7 +2268,7 @@ sub save_meta {
         '-e',
         qq[install({ 'blib/meta' => '$base/$Config{archname}/.meta/$dist->{distvname}' })],
     );
-    $self->run(\@cmd);
+    $self->run_command(\@cmd);
 }
 
 sub _merge_hashref {
@@ -2530,35 +2542,6 @@ sub DESTROY {
 
 # Utils
 
-sub shell_quote {
-    my($self, @stuff) = @_;
-    if (WIN32) {
-        join ' ', map { /^${quote}.+${quote}$/ ? $_ : ($quote . $_ . $quote) } @stuff;
-    } else {
-        String::ShellQuote::shell_quote_best_effort(@stuff);
-    }
-}
-
-sub which {
-    my($self, $name) = @_;
-    if (File::Spec->file_name_is_absolute($name)) {
-        if (-x $name && !-d _) {
-            return $name;
-        }
-    }
-    my $exe_ext = $Config{_exe};
-    for my $dir (File::Spec->path) {
-        my $fullpath = File::Spec->catfile($dir, $name);
-        if ((-x $fullpath || -x ($fullpath .= $exe_ext)) && !-d _) {
-            if ($fullpath =~ /\s/) {
-                $fullpath = $self->shell_quote($fullpath);
-            }
-            return $fullpath;
-        }
-    }
-    return;
-}
-
 sub get {
     my($self, $uri) = @_;
     if ($uri =~ /^file:/) {
@@ -2621,7 +2604,7 @@ sub init_tools {
 
     return if $self->{initialized}++;
 
-    if ($self->{make} = $self->which($Config{make})) {
+    if ($self->{make} = which($Config{make})) {
         $self->chat("You have make $self->{make}\n");
     }
 
@@ -2649,7 +2632,7 @@ sub init_tools {
             die $res->content if $res->code == 501;
             $res->code;
         };
-    } elsif ($self->{try_wget} and my $wget = $self->which('wget')) {
+    } elsif ($self->{try_wget} and my $wget = which('wget')) {
         $self->chat("You have $wget\n");
         my @common = (
             '--user-agent', $self->agent,
@@ -2668,7 +2651,7 @@ sub init_tools {
             local $/;
             <$fh>;
         };
-    } elsif ($self->{try_curl} and my $curl = $self->which('curl')) {
+    } elsif ($self->{try_curl} and my $curl = which('curl')) {
         $self->chat("You have $curl\n");
         my @common = (
             '--location',
@@ -2706,7 +2689,7 @@ sub init_tools {
         };
     }
 
-    my $tar = $self->which('tar');
+    my $tar = which('tar');
     my $tar_ver;
     my $maybe_bad_tar = sub { WIN32 || BAD_TAR || (($tar_ver = `$tar --version 2>/dev/null`) =~ /GNU.*1\.13/i) };
 
@@ -2741,8 +2724,8 @@ sub init_tools {
             return undef;
         }
     } elsif (    $tar
-             and my $gzip = $self->which('gzip')
-             and my $bzip2 = $self->which('bzip2')) {
+             and my $gzip = which('gzip')
+             and my $bzip2 = which('bzip2')) {
         $self->chat("You have $tar, $gzip and $bzip2\n");
         $self->{_backends}{untar} = sub {
             my($self, $tarfile) = @_;
@@ -2796,7 +2779,7 @@ sub init_tools {
         };
     }
 
-    if (my $unzip = $self->which('unzip')) {
+    if (my $unzip = which('unzip')) {
         $self->chat("You have $unzip\n");
         $self->{_backends}{unzip} = sub {
             my($self, $zipfile) = @_;
@@ -2841,24 +2824,16 @@ sub init_tools {
 }
 
 sub safeexec {
-    my $self = shift;
-    my $rdr = $_[0] ||= Symbol::gensym();
+    my($self, $fh, @cmd) = @_;
 
-    if (WIN32) {
-        my $cmd = $self->shell_quote(@_[1..$#_]);
-        return open( $rdr, "$cmd |" );
-    }
+    # requires Win32::ShellQuote on Win32
+    require IPC::Run3;
+    eval {
+        IPC::Run3::run3(\@cmd, \my $in, $_[1], \my $err);
+    };
+    die "Failed to execute command $cmd[0]: $@\n" if $? != 0;
 
-    if ( my $pid = open( $rdr, '-|' ) ) {
-        return $pid;
-    }
-    elsif ( defined $pid ) {
-        exec( @_[ 1 .. $#_ ] );
-        exit 1;
-    }
-    else {
-        return;
-    }
+    return 1;
 }
 
 sub mask_uri_passwords {
