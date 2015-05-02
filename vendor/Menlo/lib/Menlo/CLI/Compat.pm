@@ -425,8 +425,12 @@ sub search_mirror_index_local {
 
 sub search_mirror_index {
     my ($self, $mirror, $module, $version) = @_;
-    require CPAN::Common::Index::Mirror;
-    my $index = CPAN::Common::Index::Mirror->new({ mirror => $mirror, cache => $self->source_for($mirror) });
+    require Menlo::Index::Mirror;
+    my $index = Menlo::Index::Mirror->new({
+        mirror => $mirror,
+        cache => $self->source_for($mirror),
+        fetcher => sub { $self->mirror(@_) },
+    });
     $self->search_common($index, { package => $module }, $version);
 }
 
@@ -463,10 +467,10 @@ sub numify_ver {
 sub search_metacpan {
     my($self, $module, $version) = @_;
 
-    require CPAN::Common::Index::MetaCPAN;
+    require Menlo::Index::MetaCPAN;
     $self->chat("Searching $module ($version) on metacpan ...\n");
 
-    my $index = CPAN::Common::Index::MetaCPAN->new({ include_dev => $self->{dev_release} });
+    my $index = Menlo::Index::MetaCPAN->new({ include_dev => $self->{dev_release} });
     my $pkg = $self->search_common($index, { package => $module, version_range => $version }, $version);
     return $pkg if $pkg;
 
@@ -491,7 +495,7 @@ sub search_database {
 sub search_cpanmetadb {
     my($self, $module, $version) = @_;
 
-    require CPAN::Common::Index::MetaDB;
+    require Menlo::Index::MetaDB;
     $self->chat("Searching $module ($version) on cpanmetadb ...\n");
 
     my $args = { package => $module };
@@ -499,7 +503,7 @@ sub search_cpanmetadb {
         $args->{version_range} = $version;
     }
 
-    my $index = CPAN::Common::Index::MetaDB->new({ uri => $self->{cpanmetadb} });
+    my $index = Menlo::Index::MetaDB->new({ uri => $self->{cpanmetadb} });
     my $pkg = $self->search_common($index, $args, $version);
     return $pkg if $pkg;
 
@@ -2512,8 +2516,8 @@ sub dump_scandeps {
         require JSON::PP;
         print JSON::PP::encode_json($self->{scandeps_tree});
     } elsif ($self->{format} eq 'yaml') {
-        require YAML; # no fatpack
-        print YAML::Dump($self->{scandeps_tree});
+        require CPAN::Meta::YAML;
+        print CPAN::Meta::YAML::Dump($self->{scandeps_tree});
     } else {
         $self->diag("Unknown format: $self->{format}\n");
     }
