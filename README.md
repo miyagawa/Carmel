@@ -106,6 +106,16 @@ You have a choice to execute a subprocess from Carmel, by using the
 also use `env` or `export` command to integrate with your own shell
 script wrapper.
 
+# COMMUNITY
+
+- [https://github.com/miyagawa/Carmel](https://github.com/miyagawa/Carmel)
+
+    Code repository, Wiki and Issue Tracker
+
+- [irc://irc.perl.org/#cpanm](irc://irc.perl.org/#cpanm)
+
+    IRC chat room
+
 # AUTHOR
 
 Tatsuhiko Miyagawa <miyagawa@bulknews.net>

@@ -116,6 +116,20 @@ C<exec> sub command. If you prefer a fine grained control, you can
 also use C<env> or C<export> command to integrate with your own shell
 script wrapper.
 
+=head1 COMMUNITY
+
+=over 4
+
+=item L<https://github.com/miyagawa/Carmel>
+
+Code repository, Wiki and Issue Tracker
+
+=item L<irc://irc.perl.org/#cpanm>
+
+IRC chat room
+
+=back
+
 =head1 AUTHOR
 
 Tatsuhiko Miyagawa E<lt>miyagawa@bulknews.netE<gt>
