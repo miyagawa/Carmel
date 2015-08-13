@@ -14,7 +14,7 @@ Carmel - CPAN Artifact Repository Manager
 
 =head1 SYNOPSIS
 
-  # Run with a directory with cpanfile or cpanfile.snapshot
+  # Run with a directory with cpanfile
   carmel install
 
   # Manually pull a module if you don't have it
@@ -86,10 +86,9 @@ and your directory structure would look like:
 Carmel scans this directory and creates the mapping of which version
 of any package belongs to which build directory.
 
-Given the list of modules and requirements (using C<cpanfile> or even
-better C<cpanfile.snapshot> from L<Carton>), Carmel lists all the
-build directories and C<.pm> files you need, and then prepend the
-mappings of these files in the C<@INC> hook.
+Given the list of modules and requirements using C<cpanfile>, Carmel
+lists all the build directories and C<.pm> files you need, and then
+prepend the mappings of these files in the C<@INC> hook.
 
 For example, if you have:
 
