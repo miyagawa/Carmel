@@ -43,7 +43,7 @@ sub env {
 sub execute {
     my($self, @args) = @_;
 
-    shift @args if $args[0] eq '--';
+    shift @args if $args[0] && $args[0] eq '--';
 
     %ENV = (%ENV, $self->env);
     if ($UseSystem) {
