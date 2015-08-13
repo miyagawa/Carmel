@@ -8,10 +8,9 @@ perl:
 before_install:
   - perlbrew install-cpanm -f
 install:
-  - (cpanm --installdeps -nq ./vendor/Menlo) || cat ~/.cpanm/build.log
   - (cpanm --installdeps --with-develop -nq .) || cat ~/.cpanm/build.log
 script:
-  - prove -lr -Ivendor/Menlo/lib xt
+  - prove -lr xt
 env:
   - TEST_CLEAN=
   - TEST_CLEAN=1

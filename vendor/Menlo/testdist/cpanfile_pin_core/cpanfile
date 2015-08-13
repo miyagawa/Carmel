@@ -1,2 +1,0 @@
-requires 'Carp', '1.35';
-requires 'Exporter', '== 5.70';
