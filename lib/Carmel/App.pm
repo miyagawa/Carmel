@@ -459,8 +459,25 @@ EOF
 
 sub try_cpanfile {
     my $self = shift;
-    return $ENV{PERL_CARMEL_CPANFILE} if $ENV{PERL_CARMEL_CPANFILE};
-    return 'cpanfile' if -e 'cpanfile';
+    $self->locate_cpanfile($ENV{PERL_CARMEL_CPANFILE});
+}
+
+sub locate_cpanfile {
+    my($self, $path) = @_;
+
+    if ($path) {
+        return Path::Tiny->new($path)->absolute;
+    }
+
+    my $current  = Path::Tiny->cwd;
+    my $previous = '';
+
+    until ($current eq '/' or $current eq $previous) {
+        my $try = $current->child('cpanfile');
+        return $try->absolute if $try->is_file;
+        ($previous, $current) = ($current, $current->parent);
+    }
+
     return;
 }
 
