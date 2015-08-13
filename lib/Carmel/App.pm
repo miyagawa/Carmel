@@ -391,7 +391,11 @@ sub cmd_package {
             require File::Fetch;
             print "Fetching ", $package->pathname, " from CPAN\n";
             my $fetch = File::Fetch->new(uri => "http://backpan.perl.org/authors/id/" . $package->pathname);
-            $fetch->fetch(to => $target->parent) or warn $fetch->error;
+            if ($fetch->fetch(to => $target->parent)) {
+                $success++;
+            } else {
+                warn $fetch->error;
+            }
         }
     }
 
