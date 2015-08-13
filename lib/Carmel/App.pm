@@ -130,7 +130,7 @@ sub install_from_cpanfile {
     # $self->requirements has been upgraded at this point with the whole subreqs
     printf "---> Complete! %d cpanfile dependencies. %d modules installed.\n" .
       "---> Use `carmel show [module]` to see where a module is installed.\n",
-      scalar(grep { $_ ne 'perl' } $self->build_requirements(1)->required_modules), scalar(@artifacts);
+      scalar(grep { $_ ne 'perl' } $self->build_requirements->required_modules), scalar(@artifacts);
 }
 
 sub is_core {
@@ -457,15 +457,6 @@ EOF
     }
 }
 
-sub try_snapshot {
-    my $self = shift;
-
-    if (my $cpanfile = $self->try_cpanfile) {
-        return "$cpanfile.snapshot" if -e "$cpanfile.snapshot";
-    }
-    return;
-}
-
 sub try_cpanfile {
     my $self = shift;
     return $ENV{PERL_CARMEL_CPANFILE} if $ENV{PERL_CARMEL_CPANFILE};
@@ -479,23 +470,13 @@ sub requirements {
 }
 
 sub build_requirements {
-    my($self, $skip_snapshot) = @_;
+    my $self = shift;
 
     my $cpanfile = $self->try_cpanfile
       or Carp::croak "Can't locate 'cpanfile' to load module list.";
 
-    my $requirements = Module::CPANfile->load($cpanfile)
+    return Module::CPANfile->load($cpanfile)
       ->prereqs->merged_requirements(['runtime', 'test', 'develop'], ['requires']);
-
-    return $requirements if $skip_snapshot;
-
-    if (my $snapshot = $self->try_snapshot) {
-        require Carton::Snapshot;
-        my $snapshot = Carton::Snapshot->new(path => $snapshot);
-        $self->apply_snapshot($requirements, $snapshot);
-    }
-
-    $requirements;
 }
 
 sub merge_requirements {
@@ -510,25 +491,6 @@ sub merge_requirements {
             my $old = $reqs->requirements_for_module($module);
             die "Found conflicting requirement for $module: '$old' <=> '$new' ($where): $err";
         };
-    }
-}
-
-sub apply_snapshot {
-    my($self, $requirements, $snapshot) = @_;
-    $snapshot->load;
-    $self->apply_snapshot_recursively($requirements, $snapshot, [$requirements->required_modules]);
-}
-
-sub apply_snapshot_recursively {
-    my($self, $requirements, $snapshot, $modules) = @_;
-
-    for my $module (@$modules) {
-        my $dist = $snapshot->find($module) or next;
-        my $version = $dist->version_for($module);
-        # FIXME in carmel update, conflicting version requirement should be ignored
-        $requirements->exact_version($module, $version);
-        $self->merge_requirements($requirements, $dist->requirements, $dist->name);
-        $self->apply_snapshot_recursively($requirements, $snapshot, [$dist->requirements->required_modules]);
     }
 }
 
