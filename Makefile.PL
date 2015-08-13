@@ -20,7 +20,7 @@ my %WriteMakefileArgs = (
   "MIN_PERL_VERSION" => "5.012000",
   "NAME" => "Carmel",
   "PREREQ_PM" => {
-    "App::cpanminus" => "1.7030",
+    "CPAN::Common::Index" => "0.006",
     "CPAN::Meta::Prereqs" => "2.132830",
     "CPAN::Meta::Requirements" => "2.129",
     "Carton" => "1.0.13",
@@ -30,6 +30,7 @@ my %WriteMakefileArgs = (
     "File::Copy::Recursive" => 0,
     "File::pushd" => "1.009",
     "JSON" => 0,
+    "Menlo" => "1.9000",
     "Module::CPANfile" => "1.1000",
     "Module::CoreList" => 0,
     "Module::Metadata" => "1.000003",
@@ -40,7 +41,7 @@ my %WriteMakefileArgs = (
   "TEST_REQUIRES" => {
     "Test::More" => "0.96"
   },
-  "VERSION" => "v0.1.22",
+  "VERSION" => "v0.1.23",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -48,7 +49,7 @@ my %WriteMakefileArgs = (
 
 
 my %FallbackPrereqs = (
-  "App::cpanminus" => "1.7030",
+  "CPAN::Common::Index" => "0.006",
   "CPAN::Meta::Prereqs" => "2.132830",
   "CPAN::Meta::Requirements" => "2.129",
   "Carton" => "1.0.13",
@@ -58,6 +59,7 @@ my %FallbackPrereqs = (
   "File::Copy::Recursive" => 0,
   "File::pushd" => "1.009",
   "JSON" => 0,
+  "Menlo" => "1.9000",
   "Module::CPANfile" => "1.1000",
   "Module::CoreList" => 0,
   "Module::Metadata" => "1.000003",

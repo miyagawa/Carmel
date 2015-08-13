@@ -2,6 +2,9 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.23  2015-08-13 14:02:08 PDT
+        - Use the new dev version of Menlo CLI instead of cpanm
+
 v0.1.22  2015-04-27 10:04:19 PDT
         - Added experimental carmel binstubs command
         - The minimum perl version requirement is now 5.12 because of the INC ordering
