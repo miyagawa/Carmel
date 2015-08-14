@@ -18,7 +18,7 @@ Carmel - CPAN Artifact Repository Manager
   carmel install
 
   # Manually pull a module if you don't have it
-  carmel install DBI@1.633 Plack@1.0000
+  carmel inject DBI@1.633 Plack@1.0000
 
   # list all the modules to be loaded
   carmel list

@@ -87,15 +87,17 @@ sub cmd_version {
     print "Carmel version $Carmel::VERSION\n";
 }
 
+sub cmd_inject {
+    my($self, @args) = @_;
+    $self->install("--reinstall", @args);
+}
+
 sub cmd_install {
     my($self, @args) = @_;
 
-    if (@args) {
-        $self->install("--reinstall", @args);
-    } else {
-        $self->install_from_cpanfile(@args);
-    }
+    die "Usage: carmel install\n" if @args;
 
+    $self->install_from_cpanfile;
     $self->dump_bootstrap;
 }
 
