@@ -2,6 +2,11 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.24  2015-09-02 08:04:13 CEST
+        - Remove snapshot support for now
+        - Rename carmel install <module> to carmel inject
+        - Locate cpanfile in upper directory a la Carton
+        
 v0.1.23  2015-08-13 14:02:08 PDT
         - Use the new dev version of Menlo CLI instead of cpanm
 

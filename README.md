@@ -4,11 +4,11 @@ Carmel - CPAN Artifact Repository Manager
 
 # SYNOPSIS
 
-    # Run with a directory with cpanfile or cpanfile.snapshot
+    # Run with a directory with cpanfile
     carmel install
 
     # Manually pull a module if you don't have it
-    carmel install DBI@1.633 Plack@1.0000
+    carmel inject DBI@1.633 Plack@1.0000
 
     # list all the modules to be loaded
     carmel list
@@ -76,10 +76,9 @@ and your directory structure would look like:
 Carmel scans this directory and creates the mapping of which version
 of any package belongs to which build directory.
 
-Given the list of modules and requirements (using `cpanfile` or even
-better `cpanfile.snapshot` from [Carton](https://metacpan.org/pod/Carton)), Carmel lists all the
-build directories and `.pm` files you need, and then prepend the
-mappings of these files in the `@INC` hook.
+Given the list of modules and requirements using `cpanfile`, Carmel
+lists all the build directories and `.pm` files you need, and then
+prepend the mappings of these files in the `@INC` hook.
 
 For example, if you have:
 
@@ -118,7 +117,7 @@ script wrapper.
 
 # AUTHOR
 
-Tatsuhiko Miyagawa <miyagawa@bulknews.net>
+Tatsuhiko Miyagawa &lt;miyagawa@bulknews.net>
 
 # COPYRIGHT
 
