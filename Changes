@@ -2,6 +2,9 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.25  2015-09-02 08:15:07 CEST
+        - Make this a non-dev release
+
 v0.1.24  2015-09-02 08:04:13 CEST
         - Remove snapshot support for now
         - Rename carmel install <module> to carmel inject
