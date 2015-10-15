@@ -2,7 +2,7 @@ package Carmel::Runner;
 use strict;
 use warnings;
 
-our $UseSystem = 0;
+our $UseSystem = ($^O eq 'MSWin32');
 
 sub new {
     my $class = shift;
