@@ -155,7 +155,11 @@ sub install_with_cpanfile {
 sub install {
     my($self, @args) = @_;
 
-    my $dir = Path::Tiny->tempdir;
+    my %file_temp = ();
+    $file_temp{CLEANUP} = $ENV{PERL_FILE_TEMP_CLEANUP}
+      if exists $ENV{PERL_FILE_TEMP_CLEANUP};
+
+    my $dir = Path::Tiny->tempdir(%file_temp);
     local $ENV{PERL_CPANM_HOME} = $dir;
     local $ENV{PERL_CPANM_OPT};
 
