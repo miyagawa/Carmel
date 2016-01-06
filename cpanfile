@@ -21,6 +21,7 @@ requires 'Carton', 'v1.0.13';
 # vendor
 requires 'Menlo', '1.9000';
 requires 'CPAN::Common::Index', '0.006';
+requires 'File::HomeDir', '1.00';
 
 on test => sub {
     requires 'Test::More', '0.96';

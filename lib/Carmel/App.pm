@@ -16,6 +16,7 @@ use Path::Tiny ();
 use Pod::Usage ();
 use File::pushd;
 use Try::Tiny;
+use File::HomeDir;
 
 use Class::Tiny {
     verbose => sub { 0 },
@@ -63,7 +64,9 @@ sub run {
 
 sub repository_base {
     my $self = shift;
-    Path::Tiny->new($ENV{PERL_CARMEL_REPO} || "$ENV{HOME}/.carmel/" . $self->perl_arch);
+
+    my $home = File::HomeDir->my_home;
+    Path::Tiny->new($ENV{PERL_CARMEL_REPO} || "$home/.carmel/" . $self->perl_arch);
 }
 
 sub repo {
