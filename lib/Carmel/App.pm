@@ -63,7 +63,9 @@ sub run {
 
 sub repository_base {
     my $self = shift;
-    Path::Tiny->new($ENV{PERL_CARMEL_REPO} || "$ENV{HOME}/.carmel/" . $self->perl_arch);
+
+    my $home = $ENV{HOME} || $ENV{HOMEPATH};
+    Path::Tiny->new($ENV{PERL_CARMEL_REPO} || "$home/.carmel/" . $self->perl_arch);
 }
 
 sub repo {
