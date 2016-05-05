@@ -2,6 +2,11 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.26  2016-05-05 10:52:46 PDT
+        - Add PERL_FILE_TEMP_CLEANUP environment variable to keep build files (#21)
+        - Support HOMEPATH in addition to HOME (#25)
+        - Experimental support for saving cpanfile.snapshot
+
 v0.1.25  2015-09-02 08:15:07 CEST
         - Make this a non-dev release
 

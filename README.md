@@ -105,6 +105,13 @@ You have a choice to execute a subprocess from Carmel, by using the
 also use `env` or `export` command to integrate with your own shell
 script wrapper.
 
+## SNAPSHOT SUPPORT
+
+As of v0.1.26, Carmel supports _saving_ snapshot file in
+`cpanfile.snapshot`, in a compatible format with [Carton](https://metacpan.org/pod/Carton). Support
+for restoring the versions recorded in the snapshot file will be added
+in the future version.
+
 # COMMUNITY
 
 - [https://github.com/miyagawa/Carmel](https://github.com/miyagawa/Carmel)
@@ -117,7 +124,7 @@ script wrapper.
 
 # AUTHOR
 
-Tatsuhiko Miyagawa &lt;miyagawa@bulknews.net>
+Tatsuhiko Miyagawa <miyagawa@bulknews.net>
 
 # COPYRIGHT
 
