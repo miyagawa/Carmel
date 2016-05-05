@@ -115,6 +115,13 @@ C<exec> sub command. If you prefer a fine grained control, you can
 also use C<env> or C<export> command to integrate with your own shell
 script wrapper.
 
+=head2 SNAPSHOT SUPPORT
+
+As of v0.1.26, Carmel supports I<saving> snapshot file in
+C<cpanfile.snapshot>, in a compatible format with L<Carton>. Support
+for restoring the versions recorded in the snapshot file will be added
+in the future version.
+
 =head1 COMMUNITY
 
 =over 4

@@ -100,7 +100,7 @@ sub cmd_install {
     die "Usage: carmel install\n" if @args;
 
     $self->install_from_cpanfile;
-    $self->dump_bootstrap;
+    $self->post_install;
 }
 
 sub install_from_cpanfile {
@@ -210,23 +210,53 @@ sub transform {
     }
 }
 
-sub dump_bootstrap {
-    my($self) = @_;
+sub post_install {
+    my $self = shift;
 
     my @artifacts;
     $self->resolve(sub { push @artifacts, $_[0] });
 
-    my @inc  = map $_->nonempty_libs, @artifacts;
-    my @path = map $_->nonempty_paths, @artifacts;
+    $self->dump_bootstrap(\@artifacts);
+    $self->save_snapshot(\@artifacts);
+}
+
+sub save_snapshot {
+    my($self, $artifacts) = @_;
+
+    require Carton::Dist;
+    require Carton::Snapshot;
+
+    my $cpanfile = $self->try_cpanfile;
+    my $snapshot = Carton::Snapshot->new(path => $cpanfile . ".snapshot");
+
+    for my $artifact (@$artifacts) {
+        my $dist = Carton::Dist->new(
+            name => $artifact->distname,
+            pathname => $artifact->install->{pathname},
+            provides => $artifact->provides,
+            version => $artifact->version,
+            requirements => $artifact->requirements,
+        );
+        $snapshot->add_distribution($dist);
+    }
+
+    $snapshot->save;
+}
+
+sub dump_bootstrap {
+    my($self, $artifacts) = @_;
+
+    my @inc  = map $_->nonempty_libs, @$artifacts;
+    my @path = map $_->nonempty_paths, @$artifacts;
 
     my(%execs);
-    for my $artifact (@artifacts) {
+    for my $artifact (@$artifacts) {
         my %bins = $artifact->executables;
         $execs{$artifact->package} = \%bins if %bins;
     }
 
     my %modules;
-    for my $artifact (@artifacts) {
+    for my $artifact (@$artifacts) {
         %modules = (%modules, $artifact->module_files);
     }
 

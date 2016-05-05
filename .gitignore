@@ -10,3 +10,4 @@ MYMETA.*
 /local
 /vendor/cache
 /bin/
+cpanfile.snapshot
