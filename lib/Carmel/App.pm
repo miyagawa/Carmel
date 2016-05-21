@@ -559,7 +559,9 @@ sub resolve_recursive {
         my $artifact;
         if (my $dist = $self->find_in_snapshot($snapshot, $module, $want_version)) {
             my $version = $dist->version_for($module) || '0';
-            $artifact = $self->repo->find_exact($module, "== $version", $dist->name);
+            $version = '0' if $version eq 'undef';
+            $artifact = $self->repo->find_exact($module, "== $version",
+                                                sub { $self->accepts_all($_[0], $root_reqs, $dist) });
         } elsif ($self->is_core($module, $want_version)) {
             next;
         }
@@ -607,6 +609,21 @@ sub find_in_snapshot {
     }
 
     return;
+}
+
+sub accepts_all {
+    my($self, $artifact, $reqs, $dist) = @_;
+
+    return unless $artifact->distname eq $dist->name;
+
+    my @packages = keys %{$artifact->provides};
+
+    for my $pkg (@packages) {
+        my $version = $artifact->provides->{$pkg}{version} || '0';
+        return unless $reqs->accepts_module($pkg, $version);
+    }
+
+    return 1;
 }
 
 sub accepts {
