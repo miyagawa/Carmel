@@ -139,11 +139,8 @@ sub install_from_cpanfile {
 
 sub is_core {
     my($self, $module, $want_version) = @_;
-
     return unless exists $Module::CoreList::version{$]+0}{$module};
-
-    CPAN::Meta::Requirements->from_string_hash({ $module => $want_version })
-        ->accepts_module($module, $Module::CoreList::version{$]+0}{$module} || '0');
+    $self->accepts($module, $want_version, $Module::CoreList::version{$]+0}{$module});
 }
 
 sub install_with_cpanfile {
@@ -550,7 +547,7 @@ sub merge_requirements {
 }
 
 sub resolve_recursive {
-    my($self, $root_reqs, $requirements, $seen, $cb, $missing_cb, $depth) = @_;
+    my($self, $root_reqs, $requirements, $snapshot, $seen, $cb, $missing_cb, $depth) = @_;
 
     # TODO rather than mutating $root_reqs directly, we should create a new object
     # that allows accessing the result $requirements
@@ -558,12 +555,19 @@ sub resolve_recursive {
         next if $module eq 'perl';
 
         my $want_version = $root_reqs->requirements_for_module($module);
-        next if $self->is_core($module, $want_version);
 
-        warn "$depth: Resolving $module ($want_version)\n" if $self->verbose;
+        my $artifact;
+        if (my $dist = $self->find_in_snapshot($snapshot, $module, $want_version)) {
+            my $version = $dist->version_for($module) || '0';
+            $artifact = $self->repo->find_exact($module, "== $version", $dist->name);
+        } elsif ($self->is_core($module, $want_version)) {
+            next;
+        }
+
+        $artifact ||= $self->repo->find($module, $want_version);
 
         # FIXME there's a chance different version of the same module can be loaded here
-        if (my $artifact = $self->repo->find($module, $want_version)) {
+        if ($artifact) {
             warn sprintf "   %s (%s) in %s\n", $module, $artifact->version_for($module), $artifact->path if $self->verbose;
             next if $seen->{$artifact->path}++;
             $cb->($artifact, $depth);
@@ -571,7 +575,7 @@ sub resolve_recursive {
             my $reqs = $artifact->requirements;
             $self->merge_requirements($root_reqs, $reqs, $artifact->distname);
 
-            $self->resolve_recursive($root_reqs, $reqs, $seen, $cb, $missing_cb, $depth + 1);
+            $self->resolve_recursive($root_reqs, $reqs, $snapshot, $seen, $cb, $missing_cb, $depth + 1);
         } else {
             $missing_cb->($module, $want_version, $depth);
         }
@@ -585,7 +589,45 @@ sub resolve {
         die "Can't find an artifact for $module => $want_version\n" .
             "You need to run `carmel install` first to get the modules installed and artifacts built.\n";
     };
-    $self->resolve_recursive($self->requirements, $self->requirements->clone, {}, $cb, $missing_cb, 0);
+    $self->resolve_recursive($self->requirements, $self->requirements->clone, $self->snapshot,
+                             {}, $cb, $missing_cb, 0);
+}
+
+sub find_in_snapshot {
+    my($self, $snapshot, $module, $want_version) = @_;
+
+    return unless $snapshot;
+
+    if (my $dist = $snapshot->find($module)) {
+        my $version = $dist->version_for($module);
+        if (defined $version && $self->accepts($module, $want_version, $version)) {
+            warn "Found $module $version in snapshot: satisfies $want_version\n" if $self->verbose;
+            return $dist;
+        }
+    }
+
+    return;
+}
+
+sub accepts {
+    my($self, $module, $want_version, $version) = @_;
+
+    CPAN::Meta::Requirements->from_string_hash({ $module => $want_version })
+        ->accepts_module($module, $version || '0');
+}
+
+sub snapshot {
+    my $self = shift;
+
+    my $cpanfile = $self->try_cpanfile;
+    if (-e "$cpanfile.snapshot") {
+        require Carton::Snapshot;
+        my $snapshot = Carton::Snapshot->new(path => "$cpanfile.snapshot");
+        $snapshot->load;
+        return $snapshot;
+    }
+
+    return undef;
 }
 
 1;
