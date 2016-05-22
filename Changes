@@ -2,6 +2,9 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.28  2016-05-21 22:51:49 PDT
+        - Fix bugs locating modules with undef versions in snapshot
+
 v0.1.27  2016-05-21 22:31:27 PDT
         - Support loading versions from cpanfile.snapshot
 
