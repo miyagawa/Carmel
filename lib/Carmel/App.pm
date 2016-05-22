@@ -99,6 +99,12 @@ sub cmd_update {
 
     die "Usage: carmel update\n" if @args; # TODO supprot args
 
+    # reinstall everything in cpanfile to build artifacts
+    my $cpanfile = $self->try_cpanfile
+      or Carp::croak "Can't locate 'cpanfile' to load module list.";
+    $self->install_with_cpanfile(Module::CPANfile->load($cpanfile));
+
+    # then rebuild the snapshot
     my @artifacts = $self->install_from_cpanfile(1);
     $self->dump_bootstrap(\@artifacts);
     $self->save_snapshot(\@artifacts);
