@@ -375,16 +375,24 @@ sub cmd_tree {
 sub cmd_rollout {
     my $self = shift;
 
-    require ExtUtils::Install;
-    require ExtUtils::InstallPaths;
-
     my @artifacts;
     $self->resolve(sub { push @artifacts, $_[0] });
 
     my $install_base = Path::Tiny->new("local")->absolute;
     $install_base->remove_tree({ safe => 0 }) if $install_base->exists;
 
-    for my $artifact (@artifacts) {
+    $self->rollout_to($install_base, \@artifacts);
+
+    Path::Tiny->new("local/.carmel")->touch;
+}
+
+sub rollout_to {
+    my($self, $install_base, $artifacts) = @_;
+
+    require ExtUtils::Install;
+    require ExtUtils::InstallPaths;
+
+    for my $artifact (@$artifacts) {
         my $dir = pushd $artifact->path;
 
         my $paths = ExtUtils::InstallPaths->new(install_base => $install_base);
@@ -408,8 +416,6 @@ sub cmd_rollout {
 
         select $old unless $self->verbose;
     }
-
-    Path::Tiny->new("local/.carmel")->touch;
 }
 
 sub cmd_package {
