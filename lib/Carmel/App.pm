@@ -94,6 +94,16 @@ sub cmd_inject {
     $self->install("--reinstall", @args);
 }
 
+sub cmd_update {
+    my($self, @args) = @_;
+
+    die "Usage: carmel update\n" if @args; # TODO supprot args
+
+    my @artifacts = $self->install_from_cpanfile(1);
+    $self->dump_bootstrap(\@artifacts);
+    $self->save_snapshot(\@artifacts);
+}
+
 sub cmd_install {
     my($self, @args) = @_;
 
@@ -105,7 +115,7 @@ sub cmd_install {
 }
 
 sub install_from_cpanfile {
-    my $self = shift;
+    my($self, $no_snapshot) = @_;
 
     my $requirements = CPAN::Meta::Requirements->new;
     $self->resolve(
@@ -123,6 +133,7 @@ sub install_from_cpanfile {
             $requirements->add_string_requirement($module => $want_version);
         },
         1, # strict
+        $no_snapshot,
     );
 
     if (my @missing = $requirements->required_modules) {
@@ -136,7 +147,7 @@ sub install_from_cpanfile {
     }
 
     my @artifacts;
-    $self->resolve(sub { push @artifacts, $_[0] });
+    $self->resolve(sub { push @artifacts, $_[0] }, undef, 0, $no_snapshot);
 
     # $self->requirements has been upgraded at this point with the whole subreqs
     printf "---> Complete! %d cpanfile dependencies. %d modules installed.\n" .
@@ -585,13 +596,16 @@ sub resolve_recursive {
 }
 
 sub resolve {
-    my($self, $cb, $missing_cb, $strict) = @_;
+    my($self, $cb, $missing_cb, $strict, $no_snapshot) = @_;
     $missing_cb ||= sub {
         my($module, $want_version, $dist, $depth) = @_;
         die "Can't find an artifact for $module => $want_version\n" .
             "You need to run `carmel install` first to get the modules installed and artifacts built.\n";
     };
-    $self->resolve_recursive($self->requirements, $self->requirements->clone, $self->snapshot,
+
+    my $snapshot = $no_snapshot ? undef : $self->snapshot;
+
+    $self->resolve_recursive($self->requirements, $self->requirements->clone, $snapshot,
                              {}, $cb, $missing_cb, $strict, 0);
 }
 
@@ -643,7 +657,7 @@ sub snapshot {
         return $snapshot;
     }
 
-    return undef;
+    return;
 }
 
 1;

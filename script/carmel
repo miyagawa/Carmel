@@ -22,7 +22,7 @@ carmel - CPAN Artifact Repository Manager
   carmel install
 
   # Manually pull a module if you don't have it
-  carmel install DBI@1.633 Plack@1.0000
+  carmel inject DBI@1.633 Plack@1.0000
 
   # list all the modules to be loaded
   carmel list
@@ -32,6 +32,9 @@ carmel - CPAN Artifact Repository Manager
 
   # show a location where a module is installed
   carmel show Plack
+
+  # update snapshot
+  carmel update
 
   # Runs your perl script with modules from artifacts
   carmel exec perl ...
