@@ -28,13 +28,19 @@ EOF
     $app->run("install");
     like $app->stdout, qr/Using Class::Tiny \(1\.003\)/, "Use the version in snapshot";
 
+    my $artifact = $app->repo->find('Class::Tiny', '== 1.003');
+    $artifact->path->remove_tree({ safe => 0 });
+
+    $app->run("install");
+    like $app->stdout, qr/installed Class-Tiny-1\.003/;
+
     $app->write_cpanfile(<<EOF);
 requires 'Class::Tiny', '1.004';
 EOF
 
     $app->run("install");
     $app->run("list");
-    like $app->stdout, qr/Class::Tiny \(1\.004\)/, "Do not use the version in snapshot";
+    like $app->stdout, qr/Class::Tiny \(1\.004\)/, "Bump the version";
 
     $snapshot = Carton::Snapshot->new(path => $app->dir->child("cpanfile.snapshot"));
     $snapshot->load;
