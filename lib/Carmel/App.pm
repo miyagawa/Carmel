@@ -99,8 +99,8 @@ sub cmd_install {
 
     die "Usage: carmel install\n" if @args;
 
-    $self->install_from_cpanfile;
-    $self->post_install;
+    my @artifacts = $self->install_from_cpanfile;
+    $self->post_install(\@artifacts);
 }
 
 sub install_from_cpanfile {
@@ -140,6 +140,8 @@ sub install_from_cpanfile {
     printf "---> Complete! %d cpanfile dependencies. %d modules installed.\n" .
       "---> Use `carmel show [module]` to see where a module is installed.\n",
       scalar(grep { $_ ne 'perl' } $self->build_requirements->required_modules), scalar(@artifacts);
+
+    return @artifacts;
 }
 
 sub is_core {
@@ -215,13 +217,10 @@ sub transform {
 }
 
 sub post_install {
-    my $self = shift;
+    my($self, $artifacts) = @_;
 
-    my @artifacts;
-    $self->resolve(sub { push @artifacts, $_[0] });
-
-    $self->dump_bootstrap(\@artifacts);
-    $self->save_snapshot(\@artifacts);
+    $self->dump_bootstrap($artifacts);
+    $self->save_snapshot($artifacts);
 }
 
 sub save_snapshot {
