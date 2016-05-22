@@ -2,6 +2,13 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.29  2016-05-22 13:02:57 PDT
+        - Fixes various corner cases to preserve snapshot versions
+        - Added a workaround with optimistic snapshot upgrade in case submodules have
+          non-changing versions across distribution updates
+        - Make sure build cache (~/.carmel/perl-<ver>-<arch>/perl5) is blown away
+        - Implemented experimental carmel update command
+
 v0.1.28  2016-05-21 22:51:49 PDT
         - Fix bugs locating modules with undef versions in snapshot
 

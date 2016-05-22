@@ -19,6 +19,9 @@ Carmel - CPAN Artifact Repository Manager
     # show a location where a module is installed
     carmel show Plack
 
+    # update snapshot
+    carmel update
+
     # Runs your perl script with modules from artifacts
     carmel exec perl ...
 
@@ -95,11 +98,6 @@ Instead, if you have:
 it will find the latest that satisfies the (empty) requirement, which
 is in `URI-1.64/blib/lib`.
 
-The fact that it prefers the latest, rather than the oldest, might
-change in the future once a mechanism to make snapshot is introduced,
-since you will not like to upgrade one of the dependencies
-unexpectedly.
-
 You have a choice to execute a subprocess from Carmel, by using the
 `exec` sub command. If you prefer a fine grained control, you can
 also use `env` or `export` command to integrate with your own shell
@@ -107,10 +105,12 @@ script wrapper.
 
 ## SNAPSHOT SUPPORT
 
-As of v0.1.26, Carmel supports _saving_ snapshot file in
-`cpanfile.snapshot`, in a compatible format with [Carton](https://metacpan.org/pod/Carton). Support
-for restoring the versions recorded in the snapshot file will be added
-in the future version.
+As of v0.1.29, Carmel supports saving and loading snapshot file in
+`cpanfile.snapshot`, in a compatible format with [Carton](https://metacpan.org/pod/Carton). Versions
+saved in the snapshot file will be preserved across multiple runs of
+Carmel across machines, so that versions frozen in one environment can
+be committed to a source code repository, and can be reproduce in
+another box, so long as the perl version and architecture is the same.
 
 # COMMUNITY
 
