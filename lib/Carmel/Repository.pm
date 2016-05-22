@@ -69,10 +69,10 @@ sub find_all {
     $self->_find($package, $want_version, 1);
 }
 
-sub find_exact {
-    my($self, $package, $want_version, $cb) = @_;
+sub find_match {
+    my($self, $package, $cb) = @_;
 
-    for my $artifact ($self->find_all($package, $want_version)) {
+    for my $artifact ($self->list($package)) {
         return $artifact if $cb->($artifact);
     }
 

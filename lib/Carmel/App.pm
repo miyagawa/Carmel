@@ -566,8 +566,7 @@ sub resolve_recursive {
         my $artifact;
         my $dist;
         if ($dist = $self->find_in_snapshot($snapshot, $module, $root_reqs)) {
-            my $version = $dist->version_for($module) || '0';
-            $artifact = $self->repo->find_exact($module, "== $version", sub { $_[0]->distname eq $dist->name });
+            $artifact = $self->repo->find_match($module, sub { $_[0]->distname eq $dist->name });
         } elsif ($self->is_core($module, $want_version)) {
             next;
         } else {
