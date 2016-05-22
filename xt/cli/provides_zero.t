@@ -29,6 +29,15 @@ EOF
     $app->run("install");
 
     unlike $app->stderr, qr/Can't find an artifact for CPAN::Test::Dummy::Perl5::VersionBump::Undef/;
+
+ TODO: {
+        local $TODO = "Can't pass distfile to cpanm. dist 0.01 cannot be retrieved via submodule";
+        my $snapshot = Carton::Snapshot->new(path => $app->dir->child("cpanfile.snapshot"));
+        $snapshot->load;
+
+        is( ($snapshot->distributions)[0]->name, "CPAN-Test-Dummy-Perl5-VersionBump-0.01",
+            "snapshot version is restored" );
+    }
 };
 
 done_testing;
