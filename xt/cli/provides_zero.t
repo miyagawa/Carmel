@@ -9,30 +9,28 @@ subtest 'carmel install picks up the right version' => sub {
     my $app = cli();
 
     $app->write_cpanfile(<<EOF);
-requires 'Router::Simple', '== 0.16';
+requires 'CPAN::Test::Dummy::Perl5::VersionBump', '== 0.01';
 EOF
 
     $app->run("install");
 
     # blow away the artifact
     my $artifact = $app->repo->find_match(
-        'Router::Simple',
-        sub { $_[0]->distname eq 'Router-Simple-0.16' },
+        'CPAN::Test::Dummy::Perl5::VersionBump',
+        sub { $_[0]->version eq '0.01' },
     );
     $artifact->path->remove_tree({ safe => 0 });
 
     # depend on submodule with version: undef
     $app->write_cpanfile(<<EOF);
-requires 'Router::Simple::Declare';
+requires 'CPAN::Test::Dummy::Perl5::VersionBump::Undef';
 EOF
 
-    # Tries to install Router-Simple-0.16 via Router::Simple::Declare=0
-    # but CPAN has Router-Simple-0.17
     $app->run("install");
 
  TODO: {
         local $TODO = 'Cannot pass distfile to cpanm';
-        unlike $app->stderr, qr/Can't find an artifact for Router::Simple/;
+        unlike $app->stderr, qr/Can't find an artifact for CPAN::Test::Dummy::Perl5::VersionBump::Undef/;
     }
 };
 
