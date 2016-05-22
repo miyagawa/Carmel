@@ -3,8 +3,6 @@ use Test::More;
 use lib ".";
 use xt::CLI;
 
-use Carton::Snapshot;
-
 subtest 'carmel install picks up the right version' => sub {
     my $app = cli();
 
@@ -32,10 +30,8 @@ EOF
 
  TODO: {
         local $TODO = "Can't pass distfile to cpanm. dist 0.01 cannot be retrieved via submodule";
-        my $snapshot = Carton::Snapshot->new(path => $app->dir->child("cpanfile.snapshot"));
-        $snapshot->load;
 
-        is( ($snapshot->distributions)[0]->name, "CPAN-Test-Dummy-Perl5-VersionBump-0.01",
+        is( ($app->snapshot->distributions)[0]->name, "CPAN-Test-Dummy-Perl5-VersionBump-0.01",
             "snapshot version is restored" );
     }
 };

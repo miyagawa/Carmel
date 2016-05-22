@@ -42,6 +42,16 @@ sub path {
     $path;
 }
 
+sub snapshot {
+    my $self = shift;
+
+    require Carton::Snapshot;
+    my $snapshot = Carton::Snapshot->new(path => $self->dir->child("cpanfile.snapshot"));
+    $snapshot->load;
+
+    $snapshot;
+}
+
 sub repo {
     my $self = shift;
 
