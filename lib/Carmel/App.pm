@@ -607,7 +607,8 @@ sub find_in_snapshot {
 
     if (my $dist = $snapshot->find($module)) {
         my $version = $dist->version_for($module);
-        if (defined $version && $self->accepts($module, $want_version, $version)) {
+        if ($self->accepts($module, $want_version, $version)) {
+            $version = 'undef' unless defined $version;
             warn "Found $module $version in snapshot: satisfies $want_version\n" if $self->verbose;
             return $dist;
         }
