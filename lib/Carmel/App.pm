@@ -182,6 +182,8 @@ sub install {
         next unless $ent->is_dir && $ent->child("blib/meta/install.json")->exists;
         $self->repo->import_artifact($ent);
     }
+
+    $self->repository_base->child('perl5')->remove_tree({ safe => 0 });
 }
 
 sub quote {
