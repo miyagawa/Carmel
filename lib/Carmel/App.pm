@@ -100,7 +100,8 @@ sub cmd_install {
     die "Usage: carmel install\n" if @args;
 
     my @artifacts = $self->install_from_cpanfile;
-    $self->post_install(\@artifacts);
+    $self->dump_bootstrap(\@artifacts);
+    $self->save_snapshot(\@artifacts);
 }
 
 sub install_from_cpanfile {
@@ -214,13 +215,6 @@ sub transform {
     } else {
         "$data";
     }
-}
-
-sub post_install {
-    my($self, $artifacts) = @_;
-
-    $self->dump_bootstrap($artifacts);
-    $self->save_snapshot($artifacts);
 }
 
 sub save_snapshot {
