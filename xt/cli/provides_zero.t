@@ -28,10 +28,7 @@ EOF
 
     $app->run("install");
 
- TODO: {
-        local $TODO = 'Cannot pass distfile to cpanm';
-        unlike $app->stderr, qr/Can't find an artifact for CPAN::Test::Dummy::Perl5::VersionBump::Undef/;
-    }
+    unlike $app->stderr, qr/Can't find an artifact for CPAN::Test::Dummy::Perl5::VersionBump::Undef/;
 };
 
 done_testing;

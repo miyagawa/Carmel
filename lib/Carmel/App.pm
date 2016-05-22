@@ -122,6 +122,7 @@ sub install_from_cpanfile {
             }
             $requirements->add_string_requirement($module => $want_version);
         },
+        1, # strict
     );
 
     if (my @missing = $requirements->required_modules) {
@@ -547,7 +548,7 @@ sub merge_requirements {
 }
 
 sub resolve_recursive {
-    my($self, $root_reqs, $requirements, $snapshot, $seen, $cb, $missing_cb, $depth) = @_;
+    my($self, $root_reqs, $requirements, $snapshot, $seen, $cb, $missing_cb, $strict, $depth) = @_;
 
     # TODO rather than mutating $root_reqs directly, we should create a new object
     # that allows accessing the result $requirements
@@ -560,6 +561,7 @@ sub resolve_recursive {
         my $dist;
         if ($dist = $self->find_in_snapshot($snapshot, $module, $root_reqs)) {
             $artifact = $self->repo->find_match($module, sub { $_[0]->distname eq $dist->name });
+            $artifact ||= $self->repo->find($module, $want_version) unless $strict;
         } elsif ($self->is_core($module, $want_version)) {
             next;
         } else {
@@ -575,7 +577,7 @@ sub resolve_recursive {
             my $reqs = $artifact->requirements;
             $self->merge_requirements($root_reqs, $reqs, $artifact->distname);
 
-            $self->resolve_recursive($root_reqs, $reqs, $snapshot, $seen, $cb, $missing_cb, $depth + 1);
+            $self->resolve_recursive($root_reqs, $reqs, $snapshot, $seen, $cb, $missing_cb, $strict, $depth + 1);
         } else {
             $missing_cb->($module, $want_version, $dist, $depth);
         }
@@ -583,14 +585,14 @@ sub resolve_recursive {
 }
 
 sub resolve {
-    my($self, $cb, $missing_cb) = @_;
+    my($self, $cb, $missing_cb, $strict) = @_;
     $missing_cb ||= sub {
         my($module, $want_version, $dist, $depth) = @_;
         die "Can't find an artifact for $module => $want_version\n" .
             "You need to run `carmel install` first to get the modules installed and artifacts built.\n";
     };
     $self->resolve_recursive($self->requirements, $self->requirements->clone, $self->snapshot,
-                             {}, $cb, $missing_cb, 0);
+                             {}, $cb, $missing_cb, $strict, 0);
 }
 
 sub find_in_snapshot {
