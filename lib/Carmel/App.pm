@@ -117,7 +117,7 @@ sub install_from_cpanfile {
             if ($dist) {
                 # TODO pass $dist->distfile to cpanfile
                 my $ver = $dist->version_for($module) || '0';
-                $want_version = "== $ver";
+                $want_version = $ver ? "== $ver" : $ver;
             }
             $requirements->add_string_requirement($module => $want_version);
         },
@@ -563,15 +563,14 @@ sub resolve_recursive {
 
         my $artifact;
         my $dist;
-        if ($dist = $self->find_in_snapshot($snapshot, $module, $want_version)) {
+        if ($dist = $self->find_in_snapshot($snapshot, $module, $root_reqs)) {
             my $version = $dist->version_for($module) || '0';
-            $artifact = $self->repo->find_exact($module, "== $version",
-                                                sub { $self->accepts_all($_[0], $root_reqs, $dist) });
+            $artifact = $self->repo->find_exact($module, "== $version", sub { $_[0]->distname eq $dist->name });
         } elsif ($self->is_core($module, $want_version)) {
             next;
+        } else {
+            $artifact = $self->repo->find($module, $want_version);
         }
-
-        $artifact ||= $self->repo->find($module, $want_version);
 
         # FIXME there's a chance different version of the same module can be loaded here
         if ($artifact) {
@@ -601,31 +600,29 @@ sub resolve {
 }
 
 sub find_in_snapshot {
-    my($self, $snapshot, $module, $want_version) = @_;
+    my($self, $snapshot, $module, $reqs) = @_;
 
     return unless $snapshot;
 
     if (my $dist = $snapshot->find($module)) {
-        my $version = $dist->version_for($module);
-        if ($self->accepts($module, $want_version, $version)) {
-            $version = 'undef' unless defined $version;
-            warn "Found $module $version in snapshot: satisfies $want_version\n" if $self->verbose;
+        warn "@{[$dist->name]} found in snapshot for $module\n" if $self->verbose;
+        if ($self->accepts_all($reqs, $dist)) {
             return $dist;
         }
     }
+
+    warn "$module not found in snapshot\n" if $self->verbose;
 
     return;
 }
 
 sub accepts_all {
-    my($self, $artifact, $reqs, $dist) = @_;
+    my($self, $reqs, $dist) = @_;
 
-    return unless $artifact->distname eq $dist->name;
-
-    my @packages = keys %{$artifact->provides};
+    my @packages = keys %{$dist->provides};
 
     for my $pkg (@packages) {
-        my $version = $artifact->provides->{$pkg}{version} || '0';
+        my $version = $dist->provides->{$pkg}{version} || '0';
         return unless $reqs->accepts_module($pkg, $version);
     }
 
