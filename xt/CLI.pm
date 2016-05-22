@@ -42,6 +42,16 @@ sub path {
     $path;
 }
 
+sub repo {
+    my $self = shift;
+
+    my $pushd = File::pushd::pushd $self->dir;
+    local $ENV{PERL_CARMEL_REPO} = $self->dir->child(".carmel")
+      if $self->{clean};
+
+    Carmel::App->new->build_repo;
+}
+
 sub run_in_dir {
     my($self, $dir, @args) = @_;
     local $self->{dir} = $self->dir->child($dir);
