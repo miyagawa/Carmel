@@ -3,14 +3,14 @@ use Test::More;
 use lib ".";
 use xt::CLI;
 
-subtest 'depends on submodules' => sub {
+subtest 'depends on submodules with version undef' => sub {
     my $app = cli();
 
-    # HTTP::Async requires HTTP::Server::Simple::CGI
+    # Dep::UndefModule depend on VersionBump::Undef
 
     $app->write_cpanfile(<<EOF);
-requires 'HTTP::Server::Simple', '== 0.50';
-requires 'Net::Server::SS::PreFork';
+requires 'CPAN::Test::Dummy::Perl5::VersionBump', '== 0.01';
+requires 'CPAN::Test::Dummy::Dep::UndefModule';
 EOF
 
     $app->run("install");
@@ -21,8 +21,9 @@ EOF
         local $TODO = "Artifact provides are not compared with root cpanfile requirement";
         for (1..2) {
             $app->run("install");
-            like $app->stdout, qr/Using HTTP::Server::Simple \(0\.50\)/;
-            unlike $app->stdout, qr/Using HTTP::Server::Simple \(0\.51\)/;
+            like $app->stdout, qr/Using CPAN::Test::Dummy::Dep::UndefModule/;
+            like $app->stdout, qr/Using CPAN::Test::Dummy::Perl5::VersionBump \(0\.01\)/;
+            unlike $app->stdout, qr/Using CPAN::Test::Dummy::Perl5::VersionBump \(0\.02\)/;
         }
     }
 };
