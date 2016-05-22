@@ -46,6 +46,18 @@ EOF
     $snapshot->load;
 
     like( ($snapshot->distributions)[0]->name, qr/Class-Tiny-1\.004/ );
+
+    $app->write_cpanfile(<<EOF);
+requires 'Hash::MultiValue';
+EOF
+
+    $app->run("install");
+
+    $snapshot = Carton::Snapshot->new(path => $app->dir->child("cpanfile.snapshot"));
+    $snapshot->load;
+
+    like( ($snapshot->distributions)[0]->name, qr/Hash-MultiValue-/,
+          "snapshot does not have modules not used anymore" );
 };
 
 done_testing;
