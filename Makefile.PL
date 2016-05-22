@@ -23,7 +23,7 @@ my %WriteMakefileArgs = (
     "CPAN::Common::Index" => "0.006",
     "CPAN::Meta::Prereqs" => "2.132830",
     "CPAN::Meta::Requirements" => "2.129",
-    "Carton" => "1.0.13",
+    "Carton" => "1.0.26",
     "Class::Tiny" => "1.001",
     "ExtUtils::Install" => "1.47",
     "ExtUtils::InstallPaths" => 0,
@@ -41,7 +41,7 @@ my %WriteMakefileArgs = (
   "TEST_REQUIRES" => {
     "Test::More" => "0.96"
   },
-  "VERSION" => "v0.1.26",
+  "VERSION" => "v0.1.27",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -52,7 +52,7 @@ my %FallbackPrereqs = (
   "CPAN::Common::Index" => "0.006",
   "CPAN::Meta::Prereqs" => "2.132830",
   "CPAN::Meta::Requirements" => "2.129",
-  "Carton" => "1.0.13",
+  "Carton" => "1.0.26",
   "Class::Tiny" => "1.001",
   "ExtUtils::Install" => "1.47",
   "ExtUtils::InstallPaths" => 0,
