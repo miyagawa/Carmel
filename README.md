@@ -124,7 +124,7 @@ another box, so long as the perl version and architecture is the same.
 
 # AUTHOR
 
-Tatsuhiko Miyagawa <miyagawa@bulknews.net>
+Tatsuhiko Miyagawa &lt;miyagawa@bulknews.net>
 
 # COPYRIGHT
 

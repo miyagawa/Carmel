@@ -2,6 +2,9 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.30  2016-05-23 13:32:48 PDT
+        - Store configure/build requirements in snapshot as well for a compatibility with Carton
+
 v0.1.29  2016-05-22 13:02:57 PDT
         - Fixes various corner cases to preserve snapshot versions
         - Added a workaround with optimistic snapshot upgrade in case submodules have
