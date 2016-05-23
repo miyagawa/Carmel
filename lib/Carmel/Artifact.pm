@@ -123,7 +123,12 @@ sub meta {
 
 sub requirements {
     my $self = shift;
-    $self->meta->effective_prereqs->merged_requirements(['runtime'], ['requires']);
+    $self->requirements_for(['runtime'], ['requires']);
+}
+
+sub requirements_for {
+    my($self, $phases, $types) = @_;
+    $self->meta->effective_prereqs->merged_requirements($phases, $types);
 }
 
 sub _nonempty {

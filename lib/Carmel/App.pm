@@ -250,7 +250,8 @@ sub save_snapshot {
             pathname => $artifact->install->{pathname},
             provides => $artifact->provides,
             version => $artifact->version,
-            requirements => $artifact->requirements,
+            # compatibility with Carton snapshot
+            requirements => $artifact->requirements_for([qw( configure build runtime )], ['requires']), 
         );
         $snapshot->add_distribution($dist);
     }
