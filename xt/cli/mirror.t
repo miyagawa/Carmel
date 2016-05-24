@@ -17,7 +17,8 @@ requires 'HTTP::Tinyish';
 EOF
 
     $app->run("install");
-    like $app->stdout, qr/Successfully installed HTTP-Tiny-0\.056/;
+    like $app->stdout, qr/Successfully installed HTTP-Tiny-0\.056/
+      or diag $app->stderr;
 
     $app->write_cpanfile(<<EOF);
 mirror 'file://$cwd/xt/mirror';
