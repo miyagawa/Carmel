@@ -180,7 +180,10 @@ sub install_with_cpanfile {
     if ($snapshot) {
         my $path = Path::Tiny->tempfile;
         $snapshot->write_index($path);
-        push @options, "--mirror-index", $path, "--cascade-search";
+        push @options,
+          "--mirror-index", $path,
+          "--cascade-search",
+          "--mirror", "http://backpan.perl.org";
     }
 
     $self->install("--installdeps", @options, ".");
