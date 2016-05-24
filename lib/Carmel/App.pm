@@ -188,10 +188,17 @@ sub install {
     local $ENV{PERL_CPANM_HOME} = $dir;
     local $ENV{PERL_CPANM_OPT};
 
+    my $cpanfile = $self->try_cpanfile
+      or Carp::croak "Can't locate 'cpanfile' to load module list.";
+
+    # one mirror for now
+    my $mirror = Module::CPANfile->load($cpanfile)->mirrors->[0];
+
     require Menlo::CLI::Compat;
 
     my $cli = Menlo::CLI::Compat->new(
         ($self->verbose ? () : "--quiet"),
+        ($mirror ? ("-M", $mirror) : ()),
         "--notest",
         "--save-dists", $self->repository_base->child('cache'),
         "-L", $self->repository_base->child('perl5'),
