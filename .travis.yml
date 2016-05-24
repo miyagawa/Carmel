@@ -13,6 +13,9 @@ install:
   - (cpanm --installdeps --with-develop -nq .) || cat ~/.cpanm/build.log
 script:
   - prove -lr xt
+cache:
+  directories:
+    - $HOME/.carmel
 env:
   - TEST_CLEAN=
   - TEST_CLEAN=1
