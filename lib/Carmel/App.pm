@@ -149,7 +149,7 @@ sub install_from_cpanfile {
             },
         });
         print "---> Installing new dependencies: ", join(", ", @missing), "\n";
-        $self->install_with_cpanfile($cpanfile);
+        $self->install_with_cpanfile($cpanfile, $no_snapshot ? () : $self->snapshot );
     }
 
     my @artifacts;
@@ -170,11 +170,20 @@ sub is_core {
 }
 
 sub install_with_cpanfile {
-    my($self, $cpanfile) = @_;
+    my($self, $cpanfile, $snapshot) = @_;
 
     my $path = Path::Tiny->tempfile;
     $cpanfile->save($path);
-    $self->install("--installdeps", "--cpanfile", $path, ".");
+
+    my @options = ("--cpanfile", $path);
+
+    if ($snapshot) {
+        my $path = Path::Tiny->tempfile;
+        $snapshot->write_index($path);
+        push @options, "--mirror-index", $path, "--cascade-search";
+    }
+
+    $self->install("--installdeps", @options, ".");
 }
 
 sub install {
