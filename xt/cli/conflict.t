@@ -8,7 +8,10 @@ subtest 'conflicts in cpanfile and sub-dependencies' => sub {
 
     # FIXME: should install it first so that merge happens inside Carmel
     # FIXME: otherwise cpanm will give the errors from CMR
-    $app->run("inject", "Path::Tiny");
+    $app->write_cpanfile(<<EOF);
+requires 'Path::Tiny';
+EOF
+    $app->run("install");
 
     $app->write_cpanfile(<<EOF);
 requires 'Path::Tiny';
