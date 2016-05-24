@@ -101,7 +101,7 @@ sub cmd_update {
 
     # reinstall everything in cpanfile to build artifacts
     my $cpanfile = $self->try_cpanfile
-      or Carp::croak "Can't locate 'cpanfile' to load module list.";
+      or die "Can't locate 'cpanfile' to load module list.\n";
     $self->install_with_cpanfile(Module::CPANfile->load($cpanfile));
 
     # then rebuild the snapshot
@@ -198,7 +198,7 @@ sub install {
     local $ENV{PERL_CPANM_OPT};
 
     my $cpanfile = $self->try_cpanfile
-      or Carp::croak "Can't locate 'cpanfile' to load module list.";
+      or die "Can't locate 'cpanfile' to load module list.\n";
 
     # one mirror for now
     my $mirror = Module::CPANfile->load($cpanfile)->mirrors->[0];
@@ -293,7 +293,7 @@ sub dump_bootstrap {
     }
 
     my $cpanfile = $self->try_cpanfile
-      or Carp::croak "Can't locate 'cpanfile' to load module list.";
+      or die "Can't locate 'cpanfile' to load module list.\n";
 
     my $prereqs = Module::CPANfile->load($cpanfile)->prereqs->as_string_hash;
     my $package = "Carmel::MySetup"; # hide from PAUSE
@@ -566,7 +566,7 @@ sub build_requirements {
     my $self = shift;
 
     my $cpanfile = $self->try_cpanfile
-      or Carp::croak "Can't locate 'cpanfile' to load module list.";
+      or die "Can't locate 'cpanfile' to load module list.\n";
 
     return Module::CPANfile->load($cpanfile)
       ->prereqs->merged_requirements(['runtime', 'test', 'develop'], ['requires']);
@@ -679,7 +679,7 @@ sub snapshot {
     my $self = shift;
 
     my $cpanfile = $self->try_cpanfile;
-    if (-e "$cpanfile.snapshot") {
+    if ($cpanfile && -e "$cpanfile.snapshot") {
         require Carton::Snapshot;
         my $snapshot = Carton::Snapshot->new(path => "$cpanfile.snapshot");
         $snapshot->load;
