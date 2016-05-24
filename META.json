@@ -77,7 +77,7 @@
          "web" : "https://github.com/miyagawa/Carmel"
       }
    },
-   "version" : "v0.1.31",
+   "version" : "v0.1.32",
    "x_contributors" : [
       "Jan Seidl <seidl@avast.com>",
       "Scott Wiersdorf <scott@perlcode.org>",

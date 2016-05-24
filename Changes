@@ -2,6 +2,9 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.32  2016-05-24 10:37:10 PDT
+        - Allow falling back to backpan when restoring from snapshot
+
 v0.1.31  2016-05-24 01:37:11 PDT
         - Experimental support for mirror in cpanfile
         - Support restoring exact snapshot versions via mirror-index for Menlo
