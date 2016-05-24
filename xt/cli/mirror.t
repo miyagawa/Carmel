@@ -4,6 +4,7 @@ use lib ".";
 use xt::CLI;
 
 plan skip_all => "only test with TEST_CLEAN" unless $ENV{TEST_CLEAN};
+plan skip_all => "skip on perl 5.22+" if $] >= 5.022;
 
 subtest 'install from mirror' => sub {
     my $app = cli();
