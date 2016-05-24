@@ -55,30 +55,19 @@ subtest 'backpan snapshot modules' => sub {
     $app->write_file('cpanfile.snapshot', <<EOF);
 # carton snapshot format: version 1.0
 DISTRIBUTIONS
-  Carp-1.36
-    pathname: R/RJ/RJBS/Carp-1.36.tar.gz
+  Parse-PMFile-0.37
+    pathname: I/IS/ISHIGAKI/Parse-PMFile-0.37.tar.gz
     provides:
-      Carp 1.36
-      Carp::Heavy 1.36
-    requirements:
-      Config 0
-      Exporter 0
-      ExtUtils::MakeMaker 0
-      IPC::Open3 1.0103
-      Test::More 0
-      overload 0
-      parent 0
-      strict 0
-      warnings 0
+      Parse::PMFile: 0.37
 EOF
 
     $app->write_cpanfile(<<EOF);
-requires 'Carp';
+requires 'Parse::PMFile';
 EOF
 
     $app->run("install");
 
-    unlike $app->stderr, qr/Can't find an artifact for Carp/;
+    unlike $app->stderr, qr/Can't find an artifact for Parse::PMFile/;
 };
 
 
