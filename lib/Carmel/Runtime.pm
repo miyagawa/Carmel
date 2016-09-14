@@ -5,7 +5,7 @@ use Config;
 sub bootstrap {
     my($class, $modules, $inc) = @_;
 
-    my %allows = map { $_ => 1 } qw( Carmel/Preload.pm Module/Runtime.pm );
+    my %allows = map { $_ => 1 } qw( Carmel/Preload.pm Carmel/Runner.pm Module/Runtime.pm );
     my %site   = map { $_ => 1 } @Config{qw(sitearchexp sitelibexp)};
 
     for (@INC) {
