@@ -5,7 +5,18 @@ use Config;
 sub bootstrap {
     my($class, $modules, $inc) = @_;
 
-    my %allows = map { $_ => 1 } qw( Carmel/Preload.pm Carmel/Runner.pm Module/Runtime.pm );
+    my %allows = map { $_ => 1 } qw(
+        Carmel.pm
+        Carmel/App.pm
+        Carmel/Artifact.pm
+        Carmel/Preload.pm
+        Carmel/Repository.pm
+        Carmel/Runner.pm
+        Carmel/Runtime.pm
+        Carmel/Setup.pm
+        Module/Runtime.pm
+    );
+
     my %site   = map { $_ => 1 } @Config{qw(sitearchexp sitelibexp)};
 
     for (@INC) {
@@ -17,6 +28,7 @@ sub bootstrap {
       Carmel::Runtime::FastINC->new(%$modules),
       @{$inc};
 }
+
 
 package Carmel::Runtime::SiteINC;
 
