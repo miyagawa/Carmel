@@ -6,13 +6,8 @@ sub bootstrap {
     my($class, $modules, $inc) = @_;
 
     my %allows = map { $_ => 1 } qw(
-        Carmel.pm
-        Carmel/App.pm
-        Carmel/Artifact.pm
         Carmel/Preload.pm
-        Carmel/Repository.pm
         Carmel/Runner.pm
-        Carmel/Runtime.pm
         Carmel/Setup.pm
         Module/Runtime.pm
     );
@@ -28,7 +23,6 @@ sub bootstrap {
       Carmel::Runtime::FastINC->new(%$modules),
       @{$inc};
 }
-
 
 package Carmel::Runtime::SiteINC;
 
