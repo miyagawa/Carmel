@@ -22,10 +22,10 @@ EOF
 
     $app->run("update");
 
-    like( ($app->snapshot->distributions)[0]->name, qr/Class-Tiny-1\.004/ );
+    like( ($app->snapshot->distributions)[0]->name, qr/Class-Tiny-1\.00[6-9]/ );
 
     $app->run("list");
-    like $app->stdout, qr/Class::Tiny \(1\.004\)/, "Bump the version";
+    like $app->stdout, qr/Class::Tiny \(1\.00[6-9]\)/, "Bump the version";
 };
 
 done_testing;

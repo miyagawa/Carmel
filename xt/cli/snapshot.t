@@ -30,7 +30,7 @@ EOF
     like $app->stdout, qr/installed Class-Tiny-1\.003/;
 
     $app->write_cpanfile(<<EOF);
-requires 'Class::Tiny', '1.004';
+requires 'Class::Tiny', '== 1.004';
 EOF
 
     $app->run("install");
