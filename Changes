@@ -2,6 +2,10 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.34  2016-09-25 15:24:53 PDT
+        - Use cpan.metacpan.org as a default fast/backpan mirror
+        - Fix SiteINC to run nested carmel exec #28
+
 v0.1.33  2016-05-25 22:39:03 PDT
         - Same as v0.1.32
 
