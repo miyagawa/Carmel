@@ -183,7 +183,7 @@ sub install_with_cpanfile {
         push @options,
           "--mirror-index", $path,
           "--cascade-search",
-          "--mirror", "http://backpan.perl.org";
+          "--mirror", "http://cpan.metacpan.org";
     }
 
     $self->install("--installdeps", @options, ".");
@@ -468,7 +468,7 @@ sub cmd_package {
         } else {
             require File::Fetch;
             print "Fetching ", $package->pathname, " from CPAN\n";
-            my $fetch = File::Fetch->new(uri => "http://backpan.perl.org/authors/id/" . $package->pathname);
+            my $fetch = File::Fetch->new(uri => "http://cpan.metacpan.org/authors/id/" . $package->pathname);
             if ($fetch->fetch(to => $target->parent)) {
                 $success++;
             } else {
