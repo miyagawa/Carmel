@@ -3,6 +3,11 @@ use Test::More;
 use lib ".";
 use xt::CLI;
 
+use Module::CoreList;
+
+plan skip_all => "perl $] has HTTP::Tiny 0.056"
+  if $Module::CoreList::version{$]}{"HTTP::Tiny"} eq "0.056";
+
 subtest 'core modules in snapshots' => sub {
     my $app = cli();
 
