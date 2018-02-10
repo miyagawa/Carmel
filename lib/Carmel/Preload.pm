@@ -13,7 +13,7 @@ sub import {
     my $modules = $class->required_modules(@phase);
     while (my($module, $version) = each %$modules) {
         next if $module eq 'perl';
-        Module::Runtime::use_module($module, $version);
+        Module::Runtime::use_module($module);
     }
 
     1;
