@@ -208,7 +208,8 @@ sub install {
 
     require Menlo::CLI::Compat;
 
-    my $cli = Menlo::CLI::Compat->new(
+    my $cli = Menlo::CLI::Compat->new;
+    $cli->parse_options(
         ($self->verbose ? () : "--quiet"),
         ($mirror ? ("-M", $mirror) : ()),
         "--notest",
