@@ -2,6 +2,9 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.36  2018-04-20 14:54:38 CEST
+        - Fix the usage of Menlo::CLI::Compat to follow the change in Menlo
+
 v0.1.35  2018-02-10 01:14:53 PST
         - Fix Carmel::Preload failing to load a module when cpanfile contains specific version
           requirements #31
