@@ -19,7 +19,7 @@ requires 'ExtUtils::InstallPaths';
 requires 'Carton', 'v1.0.26';
 
 # vendor
-requires 'Menlo', '1.9011';
+requires 'Menlo::CLI::Compat', '1.9018';
 requires 'CPAN::Common::Index', '0.006';
 
 on test => sub {
