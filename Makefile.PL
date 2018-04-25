@@ -30,7 +30,7 @@ my %WriteMakefileArgs = (
     "File::Copy::Recursive" => 0,
     "File::pushd" => "1.009",
     "JSON" => 0,
-    "Menlo" => "1.9011",
+    "Menlo::CLI::Compat" => "1.9018",
     "Module::CPANfile" => "1.1000",
     "Module::CoreList" => 0,
     "Module::Metadata" => "1.000003",
@@ -41,7 +41,7 @@ my %WriteMakefileArgs = (
   "TEST_REQUIRES" => {
     "Test::More" => "0.96"
   },
-  "VERSION" => "v0.1.36",
+  "VERSION" => "v0.1.37",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -59,7 +59,7 @@ my %FallbackPrereqs = (
   "File::Copy::Recursive" => 0,
   "File::pushd" => "1.009",
   "JSON" => 0,
-  "Menlo" => "1.9011",
+  "Menlo::CLI::Compat" => "1.9018",
   "Module::CPANfile" => "1.1000",
   "Module::CoreList" => 0,
   "Module::Metadata" => "1.000003",

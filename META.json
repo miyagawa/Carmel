@@ -4,7 +4,7 @@
       "Tatsuhiko Miyagawa <miyagawa@bulknews.net>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Milla version v1.0.18, Dist::Zilla version 6.009, CPAN::Meta::Converter version 2.150010",
+   "generated_by" : "Dist::Milla version v1.0.20, Dist::Zilla version 6.009, CPAN::Meta::Converter version 2.150010",
    "license" : [
       "perl_5"
    ],
@@ -32,7 +32,7 @@
       "develop" : {
          "requires" : {
             "Capture::Tiny" : "0",
-            "Dist::Milla" : "v1.0.18",
+            "Dist::Milla" : "v1.0.20",
             "Test::Pod" : "1.41",
             "Test::Requires" : "0"
          }
@@ -49,7 +49,7 @@
             "File::Copy::Recursive" : "0",
             "File::pushd" : "1.009",
             "JSON" : "0",
-            "Menlo" : "1.9011",
+            "Menlo::CLI::Compat" : "1.9018",
             "Module::CPANfile" : "1.1000",
             "Module::CoreList" : "0",
             "Module::Metadata" : "1.000003",
@@ -77,7 +77,7 @@
          "web" : "https://github.com/miyagawa/Carmel"
       }
    },
-   "version" : "v0.1.36",
+   "version" : "v0.1.37",
    "x_contributors" : [
       "Jan Seidl <seidl@avast.com>",
       "Jarrod Funnell <jfunnell@multiservice.com>",
@@ -85,6 +85,7 @@
       "Syohei YOSHIDA <syohex@gmail.com>",
       "Tatsuhiko Miyagawa <miyagawa@gmail.com>"
    ],
-   "x_serialization_backend" : "Cpanel::JSON::XS version 3.0233"
+   "x_serialization_backend" : "Cpanel::JSON::XS version 3.0233",
+   "x_static_install" : 1
 }
 

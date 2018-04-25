@@ -2,6 +2,9 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.37  2018-04-25 02:43:30 PDT
+        - Update Menlo dependency
+
 v0.1.36  2018-04-20 14:54:38 CEST
         - Fix the usage of Menlo::CLI::Compat to follow the change in Menlo
 
