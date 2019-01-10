@@ -123,7 +123,7 @@ sub meta {
 
 sub requirements {
     my $self = shift;
-    $self->requirements_for(['runtime'], ['requires']);
+    $self->requirements_for([qw( configure build runtime )], ['requires']);
 }
 
 sub requirements_for {
