@@ -2,6 +2,9 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.38  2019-01-10 13:38:17 PST
+        - Include configure/runtime dependencies for artifacts to include in cpanfile.snapshot
+
 v0.1.37  2018-04-25 02:43:30 PDT
         - Update Menlo dependency
 
