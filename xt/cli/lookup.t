@@ -15,14 +15,14 @@ EOF
     is $app->stderr, '';
 
     $app->run("list");
-    is $app->stdout, "CPAN::Test::Dummy::Perl5::VersionQV (0.001000)\n";
+    like $app->stdout, qr/CPAN::Test::Dummy::Perl5::VersionQV \(0\.001000\)/;
 
     $app->write_cpanfile(<<EOF);
 requires 'CPAN::Test::Dummy::Perl5::VersionQV', '== v0.1.0';
 EOF
 
     $app->run("list");
-    is $app->stdout, "CPAN::Test::Dummy::Perl5::VersionQV (0.001000)\n";
+    like $app->stdout, qr/CPAN::Test::Dummy::Perl5::VersionQV \(0\.001000\)/;
 };
 
 done_testing;
