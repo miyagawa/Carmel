@@ -58,8 +58,6 @@ Carmel - CPAN Artifact Repository Manager
 
 =head1 DESCRIPTION
 
-B<THIS IS EXPERIMENTAL!>
-
 Carmel is yet another CPAN module manager.
 
 Unlike traditional CPAN module installer, Carmel keeps the build of
