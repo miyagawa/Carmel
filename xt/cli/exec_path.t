@@ -7,12 +7,12 @@ subtest 'carmel exec overwrites ENV' => sub {
     my $app = cli();
 
     $app->write_cpanfile(<<EOF);
-requires 'Mojolicious';
+requires 'App::Ack';
 EOF
 
     $app->run("install");
-    $app->run("exec", "which", "mojo");
-    like$app->stdout, qr!Mojolicious-.*/blib/script/mojo! or diag $app->stderr;
+    $app->run("exec", "which", "ack");
+    like$app->stdout, qr!ack-.*/blib/script/ack! or diag $app->stderr;
 };
 
 done_testing;
