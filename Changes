@@ -2,6 +2,9 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.39  2022-02-12 21:20:22 PST
+        - updated docs
+
 v0.1.38  2019-01-10 13:38:17 PST
         - Include configure/runtime dependencies for artifacts to include in cpanfile.snapshot
 

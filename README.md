@@ -48,8 +48,6 @@ Carmel - CPAN Artifact Repository Manager
 
 # DESCRIPTION
 
-**THIS IS EXPERIMENTAL!**
-
 Carmel is yet another CPAN module manager.
 
 Unlike traditional CPAN module installer, Carmel keeps the build of
@@ -137,4 +135,4 @@ it under the same terms as Perl itself.
 
 # SEE ALSO
 
-[App::cpanminus](https://metacpan.org/pod/App::cpanminus) [Carton](https://metacpan.org/pod/Carton)
+[App::cpanminus](https://metacpan.org/pod/App%3A%3Acpanminus) [Carton](https://metacpan.org/pod/Carton)
