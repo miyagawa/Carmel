@@ -7,14 +7,13 @@ subtest 'distribution with ShareDir' => sub {
     my $app = cli();
 
     $app->write_cpanfile(<<EOF);
-requires 'Plack';
+requires 'File::ShareDir';
 EOF
 
     $app->run("install");
-    warn $app->stderr;
-    $app->run("exec", "perl", "-e", "use File::ShareDir; print File::ShareDir::dist_dir('Plack')");
+    $app->run("exec", "perl", "-e", "use File::ShareDir; print File::ShareDir::dist_dir('File-ShareDir')");
 
-    like $app->stdout, qr!builds/Plack-.*/blib/lib/auto/share/dist/Plack! or diag $app->stderr;
+    like $app->stdout, qr!builds/File-ShareDir-.*/blib/lib/auto/share/dist/File-ShareDir! or diag $app->stderr;
 };
 
 done_testing;
