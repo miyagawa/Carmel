@@ -2,6 +2,9 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.41  2022-05-06 14:35:01 PDT
+        - Add support for carmel update Module
+
 v0.1.40  2022-05-06 01:51:17 PDT
         - Remove the unnecessary pinning of versions restored from the snapshot (#33)
 

@@ -19,7 +19,10 @@ Carmel - CPAN Artifact Repository Manager
     # show a location where a module is installed
     carmel show Plack
 
-    # update snapshot
+    # update Plack to the latest
+    carmel update Plack
+
+    # update all the modules in the snapshot
     carmel update
 
     # Runs your perl script with modules from artifacts
