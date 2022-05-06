@@ -131,11 +131,6 @@ sub install_from_cpanfile {
         },
         sub {
             my($module, $want_version, $dist) = @_;
-            if ($dist) {
-                # TODO pass $dist->distfile to cpanfile
-                my $ver = version::->parse($dist->version_for($module));
-                $want_version = $ver > 0 ? "== $ver" : $ver;
-            }
             $requirements->add_string_requirement($module => $want_version);
         },
         1, # strict

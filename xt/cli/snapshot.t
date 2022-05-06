@@ -70,5 +70,44 @@ EOF
     unlike $app->stderr, qr/Can't find an artifact for Parse::PMFile/;
 };
 
+subtest 'carmel install on the first run with empty build cache' => sub {
+    my $app = cli();
+
+    $app->write_cpanfile(<<EOF);
+requires 'Try::Tiny', '== 0.06';
+EOF
+
+    $app->run("install");
+    like( ($app->snapshot->distributions)[0]->name, qr/Try-Tiny-0\.06/ );
+
+    for my $v (['Try::Tiny', '0.06'], ['Test::Fatal', '0.016']) {
+        my $artifact = $app->repo->find($v->[0], "== $v->[1]");
+        $artifact->path->remove_tree({ safe => 0 }) if $artifact;
+    }
+
+    # FIXME: this test fails 50% of the time because of hash randomization:
+    # if Try::Tiny is installed first, the version in the snapshot (0.06) gets installed
+    # and Test::Fatal requires newer version, and cpanm will fail. Re-running carmel
+    # until it tries to install Test::Fatal first would work around the issue.
+    $app->write_cpanfile(<<EOF);
+requires 'Try::Tiny';
+requires 'Test::Fatal', '== 0.016'; # requires Try::Tiny 0.07
+EOF
+    $app->run("install");
+    unlike $app->stderr, qr/Can't merge requirement/;
+    like $app->stdout, qr/Successfully installed Try-Tiny-/;
+
+ TODO: {
+        local $TODO = "This test fails 50% of the time due to perl hash randomization";
+        like $app->stdout, qr/Successfully installed Test-Fatal-/ or diag $app->stderr;
+        
+        my($dist) = grep { $_->name =~ /Try-Tiny/ } $app->snapshot->distributions;
+        if ($dist && $dist->name =~ /^Try-Tiny-(.*)/) {
+            cmp_ok $1, '>', '0.07';
+        } else {
+            fail 'Try-Tiny not found in the snapshot';
+        }
+    }
+};
 
 done_testing;
