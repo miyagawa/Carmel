@@ -65,7 +65,11 @@ Carmel is yet another CPAN module manager.
 
 Unlike traditional CPAN module installer, Carmel keeps the build of
 your dependencies in a central repository, then select the library
-paths to include upon runtime.
+paths to include upon runtime in development.
+
+Carmel also allows you to rollout all the files in a traditional perl INC
+directory structure, which is useful to use in a production environment, such as
+containers.
 
 =head1 HOW IT WORKS
 
@@ -90,29 +94,35 @@ and your directory structure would look like:
 Carmel scans this directory and creates the mapping of which version
 of any package belongs to which build directory.
 
-Given the list of modules and requirements using C<cpanfile>, Carmel
-lists all the build directories and C<.pm> files you need, and then
-prepend the mappings of these files in the C<@INC> hook.
+Given the list of modules and requirements from C<cpanfile>, C<carmel install>
+computes which versions satisfy the requirements best, and if there isn't,
+installs the modules from CPAN to put it to the artifact repository. The
+computed mappings are preserved as a snapshot in C<cpanfile.snapshot>.
 
-For example, if you have:
+Once the snapshot is created, each following C<carmel> command runs uses both
+C<cpanfile> and C<cpanfile.snapshot> to determine the best versions to satisfy
+the requirements. When you update C<cpanfile> to bump a version or add a new
+module, C<carmel> will install the new dependencies and update the snapshot
+accordingly.
 
-  requires 'URI', '== 1.63';
+C<carmel exec> command, like C<install> command, lists the build directories and
+C<.pm> files you need from the repository, and then prepend the mappings of
+these files in the C<@INC> hook. This is a handy way to run a perl program using
+the dependencies pinned by Carmel, without changing any include path.
 
-Carmel finds URI package with C<$VERSION> set to 1.63 in
-C<URI-1.63/blib/lib> so it will let perl load C<URI.pm> from that
-directory.
+C<carmel update> command allows you to selectively update a dependency while
+preserving other dependencies in the snapshot. C<carmel update Plack> for
+example pulls the latest version of Plack from CPAN (and its dependencies, if it
+needs a newer version than pinned in the snapshot), and updates the snapshot
+properly. Running C<carmel update> without any arguments would update all the
+modules in C<cpanfile>, including its dependencies.
 
-Instead, if you have:
-
-  requires 'URI';
-
-it will find the latest that satisfies the (empty) requirement, which
-is in C<URI-1.64/blib/lib>.
-
-You have a choice to execute a subprocess from Carmel, by using the
-C<exec> sub command. If you prefer a fine grained control, you can
-also use C<env> or C<export> command to integrate with your own shell
-script wrapper.
+On a production environment, you might want to use the C<carmel rollout>
+command, which saves all the files included in the C<cpanfile>, pinned with
+C<cpanfile.snapshot>, to the C<local> directory. This directory can be included
+like a regular perl's library path, with C<PERL5LIB=/path/to/local/lib/perl5>,
+or with C<use lib>, and you don't need to use C<carmel> command in production
+this way.
 
 =head2 SNAPSHOT SUPPORT
 
