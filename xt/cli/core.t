@@ -11,9 +11,6 @@ plan skip_all => "perl $] has HTTP::Tiny 0.056"
 subtest 'core modules in snapshots' => sub {
     my $app = cli();
 
-    # pull the artifact
-    $app->run('inject', 'HTTP::Tiny@0.056');
-
     $app->write_file('cpanfile.snapshot', <<EOF);
 # carton snapshot format: version 1.0
 DISTRIBUTIONS
@@ -38,6 +35,9 @@ EOF
     $app->write_cpanfile(<<EOF);
 requires 'Perl::Build';
 EOF
+
+    # pull the artifact
+    $app->run('inject', 'HTTP::Tiny@0.056');
 
     # FIXME: we can't inject optional core dependencies properly
  TODO: {
