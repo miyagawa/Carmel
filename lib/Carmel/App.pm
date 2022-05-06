@@ -97,17 +97,45 @@ sub cmd_inject {
 sub cmd_update {
     my($self, @args) = @_;
 
-    die "Usage: carmel update\n" if @args; # TODO supprot args
+    my $current = $self->snapshot
+      or die "Can't run carmel update without snapshot. Run `carmel install` first.\n";
 
-    # reinstall everything in cpanfile to build artifacts
-    my $cpanfile = $self->try_cpanfile
-      or die "Can't locate 'cpanfile' to load module list.\n";
-    $self->install_with_cpanfile(Module::CPANfile->load($cpanfile));
+    for my $module (@args) {
+        my $dist = $current->find($module)
+          or die "$module is not found in the snapshot.\n";
+    }
 
-    # then rebuild the snapshot
-    my @artifacts = $self->install_from_cpanfile(sub { undef });
+    # create a new snapshot and copy needed dists over, since Carton::Snapshot is immutable for now
+    my $snapshot = Carton::Snapshot->new(path => $current->path);
+
+    if (@args) {
+        my @dists = grep !$self->dist_provides_any($_, \@args), $current->distributions;
+        for my $dist (@dists) {
+            $snapshot->add_distribution($dist);
+        }
+        $self->install_with_snapshot($snapshot, [], @args);
+    } else {
+        # remove everything from the snapshot
+        my $cpanfile = $self->try_cpanfile
+          or die "Can't locate 'cpanfile' to load module list.\n";
+        $self->install_with_cpanfile(Module::CPANfile->load($cpanfile), $snapshot);
+    }
+
+    # rebuild the snapshot
+    my @artifacts = $self->install_from_cpanfile(sub { $snapshot });
     $self->dump_bootstrap(\@artifacts);
     $self->save_snapshot(\@artifacts);
+}
+
+sub dist_provides_any {
+    my($self, $dist, $modules) = @_;
+
+    my $provides = $dist->provides or return;
+    for my $mod (@$modules) {
+        return 1 if $provides->{$mod};
+    }
+
+    return;
 }
 
 sub cmd_install {
@@ -173,16 +201,22 @@ sub install_with_cpanfile {
 
     my @options = ("--cpanfile", $path);
 
+    $self->install_with_snapshot($snapshot, [ "--cpanfile", $path, "--installdeps" ], ".");
+}
+
+sub install_with_snapshot {
+    my($self, $snapshot, $options, @cmd) = @_;
+
     if ($snapshot) {
         my $path = Path::Tiny->tempfile;
         $snapshot->write_index($path);
-        push @options,
+        push @$options,
           "--mirror-index", $path,
           "--cascade-search",
           "--mirror", "http://cpan.metacpan.org";
     }
 
-    $self->install("--installdeps", @options, ".");
+    $self->install(@$options, @cmd);
 }
 
 sub install {
