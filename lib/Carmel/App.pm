@@ -122,7 +122,7 @@ sub cmd_update {
     }
 
     # rebuild the snapshot
-    my @artifacts = $self->install_from_cpanfile(sub { $snapshot });
+    my @artifacts = $self->install_from_cpanfile($snapshot);
     $self->dump_bootstrap(\@artifacts);
     $self->save_snapshot(\@artifacts);
 }
@@ -143,13 +143,13 @@ sub cmd_install {
 
     die "Usage: carmel install\n" if @args;
 
-    my @artifacts = $self->install_from_cpanfile;
+    my @artifacts = $self->install_from_cpanfile($self->snapshot);
     $self->dump_bootstrap(\@artifacts);
     $self->save_snapshot(\@artifacts);
 }
 
 sub install_from_cpanfile {
-    my($self, $snapshot_cb) = @_;
+    my($self, $snapshot) = @_;
 
     my $requirements = CPAN::Meta::Requirements->new;
     $self->resolve(
@@ -162,7 +162,7 @@ sub install_from_cpanfile {
             $requirements->add_string_requirement($module => $want_version);
         },
         1, # strict
-        $snapshot_cb,
+        $snapshot,
     );
 
     if (my @missing = $requirements->required_modules) {
@@ -172,12 +172,11 @@ sub install_from_cpanfile {
             },
         });
         print "---> Installing new dependencies: ", join(", ", @missing), "\n";
-        my $snapshot = $snapshot_cb ? $snapshot_cb->() : $self->snapshot;
         $self->install_with_cpanfile($cpanfile, $snapshot);
     }
 
     my @artifacts;
-    $self->resolve(sub { push @artifacts, $_[0] }, undef, 0, $snapshot_cb);
+    $self->resolve(sub { push @artifacts, $_[0] }, undef, 0, $snapshot);
 
     # $self->requirements has been upgraded at this point with the whole subreqs
     printf "---> Complete! %d cpanfile dependencies. %d modules installed.\n" .
@@ -659,14 +658,14 @@ sub resolve_recursive {
 }
 
 sub resolve {
-    my($self, $cb, $missing_cb, $strict, $snapshot_cb) = @_;
+    my($self, $cb, $missing_cb, $strict, $snapshot) = @_;
     $missing_cb ||= sub {
         my($module, $want_version, $dist, $depth) = @_;
         die "Can't find an artifact for $module => $want_version\n" .
             "You need to run `carmel install` first to get the modules installed and artifacts built.\n";
     };
 
-    my $snapshot = $snapshot_cb ? $snapshot_cb->() : $self->snapshot;
+    $snapshot ||= $self->snapshot;
 
     $self->resolve_recursive($self->requirements, $self->requirements->clone, $snapshot,
                              {}, $cb, $missing_cb, $strict, 0);
