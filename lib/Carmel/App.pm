@@ -105,7 +105,7 @@ sub cmd_update {
     $self->install_with_cpanfile(Module::CPANfile->load($cpanfile));
 
     # then rebuild the snapshot
-    my @artifacts = $self->install_from_cpanfile(1);
+    my @artifacts = $self->install_from_cpanfile(sub { undef });
     $self->dump_bootstrap(\@artifacts);
     $self->save_snapshot(\@artifacts);
 }
@@ -121,7 +121,7 @@ sub cmd_install {
 }
 
 sub install_from_cpanfile {
-    my($self, $no_snapshot) = @_;
+    my($self, $snapshot_cb) = @_;
 
     my $requirements = CPAN::Meta::Requirements->new;
     $self->resolve(
@@ -134,7 +134,7 @@ sub install_from_cpanfile {
             $requirements->add_string_requirement($module => $want_version);
         },
         1, # strict
-        $no_snapshot,
+        $snapshot_cb,
     );
 
     if (my @missing = $requirements->required_modules) {
@@ -144,11 +144,12 @@ sub install_from_cpanfile {
             },
         });
         print "---> Installing new dependencies: ", join(", ", @missing), "\n";
-        $self->install_with_cpanfile($cpanfile, $no_snapshot ? () : $self->snapshot );
+        my $snapshot = $snapshot_cb ? $snapshot_cb->() : $self->snapshot;
+        $self->install_with_cpanfile($cpanfile, $snapshot);
     }
 
     my @artifacts;
-    $self->resolve(sub { push @artifacts, $_[0] }, undef, 0, $no_snapshot);
+    $self->resolve(sub { push @artifacts, $_[0] }, undef, 0, $snapshot_cb);
 
     # $self->requirements has been upgraded at this point with the whole subreqs
     printf "---> Complete! %d cpanfile dependencies. %d modules installed.\n" .
@@ -624,14 +625,14 @@ sub resolve_recursive {
 }
 
 sub resolve {
-    my($self, $cb, $missing_cb, $strict, $no_snapshot) = @_;
+    my($self, $cb, $missing_cb, $strict, $snapshot_cb) = @_;
     $missing_cb ||= sub {
         my($module, $want_version, $dist, $depth) = @_;
         die "Can't find an artifact for $module => $want_version\n" .
             "You need to run `carmel install` first to get the modules installed and artifacts built.\n";
     };
 
-    my $snapshot = $no_snapshot ? undef : $self->snapshot;
+    my $snapshot = $snapshot_cb ? $snapshot_cb->() : $self->snapshot;
 
     $self->resolve_recursive($self->requirements, $self->requirements->clone, $snapshot,
                              {}, $cb, $missing_cb, $strict, 0);
