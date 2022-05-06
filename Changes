@@ -2,6 +2,9 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.40  2022-05-06 01:51:17 PDT
+        - Remove the unnecessary pinning of versions restored from the snapshot (#33)
+
 v0.1.39  2022-02-12 21:20:22 PST
         - updated docs
 
