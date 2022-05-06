@@ -135,9 +135,9 @@ another box, so long as the perl version and architecture is the same.
 
 =head1 DIFFERENCES WITH CARTON
 
-Carmel shares the goal of Carton, where you can manage your dependencies by
-declaring them in C<cpanfile>, and pinning them in C<cpanfile.snapshot>. Most of
-the commands work the same way, so Carmel can most effectively a drop-in
+Carmel shares the same goal with Carton, where you can manage your dependencies
+by declaring them in C<cpanfile>, and pinning them in C<cpanfile.snapshot>. Most
+of the commands work the same way, so Carmel can most effectively be a drop-in
 replacement for Carton, if you're currently using it.
 
 Here's a few key differences between Carmel and Carton:
