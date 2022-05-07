@@ -156,10 +156,10 @@ update the dependencies across multiple machines.
 Carmel manages all the dependencies for your project in the Carmel repository
 under C<$HOME/.carmel>, and nothing is installed under your project directory on
 development. The C<local> directory is only created when you request it via
-C<carmel rollout> command, and it's very safe to run multiple times. Running
-C<carmel install> after pulling the changes to the snapshot file will always
-install the correct dependencies from the snapshot file, as compared to Carton,
-which doesn't honor the snapshot on a regular install command.
+C<carmel rollout> command, and it's safe to run multiple times. Running C<carmel
+install> after pulling the changes to the snapshot file will always install the
+correct dependencies from the snapshot file, as compared to Carton, which
+doesn't honor the snapshot on a regular install command.
 
 =item *
 
