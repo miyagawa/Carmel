@@ -235,6 +235,10 @@ sub install {
     # one mirror for now
     my $mirror = Module::CPANfile->load($cpanfile)->mirrors->[0];
 
+    # cleanup perl5 in case it was left from previous runs
+    my $lib = $self->repository_base->child('perl5');
+    $lib->remove_tree({ safe => 0 });
+
     require Menlo::CLI::Compat;
 
     my $cli = Menlo::CLI::Compat->new;
@@ -243,7 +247,7 @@ sub install {
         ($mirror ? ("-M", $mirror) : ()),
         "--notest",
         "--save-dists", $self->repository_base->child('cache'),
-        "-L", $self->repository_base->child('perl5'),
+        "-L", $lib,
         "--no-static-install",
         @args,
     );
@@ -254,7 +258,7 @@ sub install {
         $self->repo->import_artifact($ent);
     }
 
-    $self->repository_base->child('perl5')->remove_tree({ safe => 0 });
+    $lib->remove_tree({ safe => 0 });
 }
 
 sub quote {
