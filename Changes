@@ -2,6 +2,12 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.43  2022-05-06 19:17:34 PDT
+        - Dropped support for perl 5.12
+        - Removed the experimental, undocumented binstubs command
+        - Fixed so carmel command exits with non-zero upon failures
+        - Fixed `carmel show Module` to work with sub-modules in a distribution
+
 v0.1.42  2022-05-06 17:02:09 PDT
         - Documentation updates
 

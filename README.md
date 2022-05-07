@@ -61,6 +61,37 @@ Carmel also allows you to rollout all the files in a traditional perl INC
 directory structure, which is useful to use in a production environment, such as
 containers.
 
+# WORKFLOW
+
+Here's a typical workflow of using Carmel.
+
+    # On your development environment
+    > cat cpanfile
+    requires 'Plack', '0.9980';
+    requires 'Starman', '0.2000';
+
+    > carmel install
+    > echo /.carmel >> .gitignore
+    > git add cpanfile cpanfile.snapshot .gitignore
+    > git commit -m "add Plack and Starman"
+
+    # On a new setup, or another developer's machine
+    > git pull
+    > carmel install
+    > carmel exec starman -p 8080 myapp.psgi
+
+    # Add a new dependency
+    > echo "requires 'Try::Tiny';" >> cpanfile
+    > carmel install
+    > git commit -am 'Add Try::Tiny'
+
+    # Update Plack to the latest
+    > carmel update Plack
+
+    # Production environment: Roll out to ./local
+    > carmel rollout
+    > perl -Ilocal/lib/perl5 local/bin/starman -p 8080 myapp.psgi
+
 # HOW IT WORKS
 
 Carmel will keep the build directory (artifacts) after a cpanm
@@ -145,7 +176,8 @@ update the dependencies across multiple machines.
     `carmel rollout` command, and it's safe to run multiple times. Running `carmel
     install` after pulling the changes to the snapshot file will always install the
     correct dependencies from the snapshot file, as compared to Carton, which
-    doesn't honor the snapshot on a regular install command.
+    doesn't honor the snapshot on a regular install command, if whatever version in
+    `local` already satisfies the version in `cpanfile`.
 
 - Carton has no easy way to undo a change once you update a version of a module in
 `local`, because which version is actually selected is only preserved as a file
