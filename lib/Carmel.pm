@@ -71,6 +71,37 @@ Carmel also allows you to rollout all the files in a traditional perl INC
 directory structure, which is useful to use in a production environment, such as
 containers.
 
+=head1 WORKFLOW
+
+Here's a typical workflow of using Carmel.
+
+  # On your development environment
+  > cat cpanfile
+  requires 'Plack', '0.9980';
+  requires 'Starman', '0.2000';
+
+  > carmel install
+  > echo /.carmel >> .gitignore
+  > git add cpanfile cpanfile.snapshot .gitignore
+  > git commit -m "add Plack and Starman"
+
+  # On a new setup, or another developer's machine
+  > git pull
+  > carmel install
+  > carmel exec starman -p 8080 myapp.psgi
+
+  # Add a new dependency
+  > echo "requires 'Try::Tiny';" >> cpanfile
+  > carmel install
+  > git commit -am 'Add Try::Tiny'
+
+  # Update Plack to the latest
+  > carmel update Plack
+
+  # Production environment: Roll out to ./local
+  > carmel rollout
+  > perl -Ilocal/lib/perl5 local/bin/starman -p 8080 myapp.psgi
+
 =head1 HOW IT WORKS
 
 Carmel will keep the build directory (artifacts) after a cpanm
