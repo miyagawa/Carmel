@@ -130,9 +130,8 @@ sub cmd_update {
 sub dist_provides_any {
     my($self, $dist, $modules) = @_;
 
-    my $provides = $dist->provides or return;
     for my $mod (@$modules) {
-        return 1 if $provides->{$mod};
+        return 1 if $dist->provides_module($mod);
     }
 
     return;
