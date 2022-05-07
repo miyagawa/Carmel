@@ -32,8 +32,8 @@ Carmel - CPAN Artifact Repository Manager
   # update all the modules in the snapshot
   carmel update
 
-  # Manually pull a module to build artifacts
-  carmel inject DBI@1.633 Plack@1.0000
+  # pin modules tp specific versions
+  carmel pin DBI@1.633 Plack@1.0000
 
   # Runs your perl script with modules from artifacts
   carmel exec perl ...
