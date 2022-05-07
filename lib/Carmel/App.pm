@@ -358,13 +358,13 @@ EOF
 sub cmd_export {
     my($self) = @_;
     my %env = $self->runner->env;
-    print "export ", join(" ", map qq($_="$env{$_}"), keys %env), "\n";
+    print "export ", join(" ", map qq($_="$env{$_}"), sort keys %env), "\n";
 }
 
 sub cmd_env {
     my($self) = @_;
     my %env = $self->runner->env;
-    print join "", map qq($_=$env{$_}\n), keys %env;
+    print join "", map qq($_=$env{$_}\n), sort keys %env;
 }
 
 # TODO remove. just here for testing
