@@ -2,6 +2,13 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.46  2022-05-07 14:10:39 PDT
+        - New command: carmel pin to pin a module version in the snapshot without pinning it in cpanfile (#39)
+        - Improve error message when a conflict is found
+        - Fix a bug where a distribution can appear multiple times when downgrading a distribution (#38)
+        - Make artifacts search always strict after install is done
+        - Improved documentation
+
 v0.1.45  2022-05-07 01:36:08 PDT
         - Cleanup perl5 temporary library path to avoid missing artifacts when previous
           installation was cancelled
