@@ -9,6 +9,7 @@ sub acquire {
     my $self = shift;
 
     my $path = $self->path;
+    $path->parent->mkpath;
 
     my $fh = $path->opena or die "$path: $!";
     $self->_handle($fh);
