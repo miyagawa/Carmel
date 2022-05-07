@@ -407,7 +407,7 @@ sub artifact_for {
     eval {
         $self->resolve(sub {
             my $artifact = shift;
-            if ($module eq $artifact->package) {
+            if (exists $artifact->provides->{$module}) {
                 $found = $artifact;
                 die "__FOUND__\n";
             }
