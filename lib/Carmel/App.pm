@@ -103,7 +103,7 @@ sub cmd_pin {
     }
 
     my $snapshot = $self->snapshot
-      or die "Can't run carmel update without snapshot. Run `carmel install` first.\n";
+      or die "Can't run carmel pin without snapshot. Run `carmel install` first.\n";
 
     my $requirements = $self->requirements;
     for my $arg (@args) {
