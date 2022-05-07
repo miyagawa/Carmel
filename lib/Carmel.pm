@@ -205,6 +205,78 @@ Carmel across machines, so that versions frozen in one environment can
 be committed to a source code repository, and can be reproduced in
 another box, so long as the perl version and architecture is the same.
 
+=head1 CAVEATS / KNOWN ISSUES
+
+=over 4
+
+=item *
+
+If you run multiple instances of C<carmel>, or hit Ctrl-C to interrupt the cpanm
+install session, Carmel might get into a state where some modules have been
+installed properly, while some modules in the dependency chain are missing. Make
+sure you don't run multiple instances of C<carmel> at the same time, and let it
+finish the installation to get the full builds properly.
+
+=item *
+
+There're certain dependencies that get missed during the initial C<carmel
+install>, and you'll see the error message "Can't find an artifact for
+Foo".
+
+Please report it to the issue tracker if you can reliably reproduce this type of
+errors.
+
+Usually you run C<carmel install> again and the error will be gone.
+
+=item *
+
+In some situation, you might encounter conflicts in version resolutions, between
+what's pinned in the snapshot and a new version that's needed when you introduce
+a new module.
+
+For example, suppose you have:
+
+  # cpanfile
+  requires 'Foo';
+  requires 'Bar'; # which requires Foo >= 1.001
+
+Without the snapshot, Carmel has no trouble resolving the correct versions for
+this combination. But if you have:
+
+  # cpanfile.snapshot
+  Foo-1.000
+
+The first time you run C<carmel install>, Carmel will try to install Foo-1.000,
+because that's the version pinned in the snapshot, while trying to pull the
+module Bar, which would conflict with that version of Foo.
+
+This can happen 50% of the time, because if cpanm (called internally by Carmel)
+installs Bar first, then the resolution is done correctly and the version in the
+snapshot would be skipped, and the snapshot will be updated accordingly. This is
+due to perl's hash randomization after Perl 5.18.
+
+To avoid this, you're recommended to run C<carmel install> B<before making any
+changes to cpanfile>. That will put the build caches to satisfy what's in
+cpanfile and the snapshot. After that, adding a new dependency will likely reuse
+what's in the build cache, while adding a new dependency can update the
+transient dependency (for Foo) without having conflicts.
+
+If you encounter conflicts like this, you can work around it by:
+
+=over 8
+
+=item *
+
+Run C<carmel update Foo> to pull the latest version of Foo from CPAN, ignoring what's in the snapshot.
+
+=item *
+
+Update C<cpanfile> to explicitly update the version requirement for C<Foo>.
+
+=back
+
+=back
+
 =head1 DIFFERENCES WITH CARTON
 
 Carmel shares the same goal with Carton, where you can manage your dependencies
@@ -247,6 +319,36 @@ pinned in C<cpanfile.snapshot> dynamically, to create a stable dependency tree,
 without relying on anything in a directory under your project other than the
 snapshot file. Undoing the change in C<cpanfile.snapshot> file immediately
 reverts the change.
+
+=back
+
+=head1 DIFFERENCES WITH CPM
+
+L<App::cpm> is an excellent CPAN installer.
+
+=over 4
+
+=item *
+
+Like L<Carton>, cpm installs the dependencies declared in C<cpanfile> to
+C<local>. Carmel doesn't install the dependencies until you ask it with C<carmel
+rollout>.
+
+=item *
+
+cpm installs the modules in parallel, which makes the installation very
+fast. Like Carmel, cpm also manages its build artifacts cache, so a module that
+has previously been installed would very fast to install, since there's no build
+process.
+
+=item *
+
+Unlike Carton and Carmel, cpm doesn't have the ability to manage
+C<cpanfile.snapshot> file on its own. It can read the snapshot however, so it's
+possible to use Carmel in a development environment, and then use C<cpm
+install> instead of C<carmel install> and C<carmel rollout>, if all you need is
+to build out a perl5 library path out of C<cpanfile> and C<cpanfile.snapshot> in
+the source code repository.
 
 =back
 
