@@ -159,7 +159,8 @@ development. The C<local> directory is only created when you request it via
 C<carmel rollout> command, and it's safe to run multiple times. Running C<carmel
 install> after pulling the changes to the snapshot file will always install the
 correct dependencies from the snapshot file, as compared to Carton, which
-doesn't honor the snapshot on a regular install command.
+doesn't honor the snapshot on a regular install command, if whatever version in
+C<local> already satisfies the version in C<cpanfile>.
 
 =item *
 
