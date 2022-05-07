@@ -331,8 +331,9 @@ L<App::cpm> is an excellent standalone CPAN installer.
 =item *
 
 Like L<Carton>, cpm installs the dependencies declared in C<cpanfile> to
-C<local>. Carmel doesn't install the dependencies until you ask it with C<carmel
-rollout>.
+C<local>. Carmel installs them into a build cache, and doesn't use C<local>
+directory for state management. You can run C<carmel rollout> to copy the
+dependencies to C<local> directory.
 
 =item *
 
