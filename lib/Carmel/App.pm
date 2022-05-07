@@ -244,6 +244,7 @@ sub install {
         "--notest",
         "--save-dists", $self->repository_base->child('cache'),
         "-L", $self->repository_base->child('perl5'),
+        "--no-static-install",
         @args,
     );
     $cli->run;
