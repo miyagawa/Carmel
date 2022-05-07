@@ -595,9 +595,9 @@ sub merge_requirements {
         try {
             $reqs->add_string_requirement($module, $new);
         } catch {
-            my($err) = /illegal requirements: (.*) at/;
+            my($err) = /illegal requirements(?: .*?): (.*) at/;
             my $old = $reqs->requirements_for_module($module);
-            die "Found conflicting requirement for $module: '$old' <=> '$new' ($where): $err";
+            die "Found conflicting requirement for $module: '$old' <=> '$new' ($where): $err\n";
         };
     }
 }
