@@ -95,6 +95,33 @@ sub cmd_inject {
     $self->install("--reinstall", @args);
 }
 
+sub cmd_pin {
+    my($self, @args) = @_;
+
+    unless (@args) {
+        die "Usage: carmel pin Module\@version ...\n";
+    }
+
+    my $snapshot = $self->snapshot
+      or die "Can't run carmel update without snapshot. Run `carmel install` first.\n";
+
+    my $requirements = $self->requirements;
+    for my $arg (@args) {
+        my($module, $version) = split '@', $arg, 2;
+        unless (defined $version) {
+            die "Usage: carmel pin Module\@version ...\n";
+        }
+        my $dist = $snapshot->find($module)
+          or die "$module is not found in the snapshot.\n";
+        $requirements->add_string_requirement($module, "== $version");
+    }
+
+    # install with $requirements and $snapshot
+    my @artifacts = $self->install_from_cpanfile($requirements, $snapshot);
+    $self->dump_bootstrap(\@artifacts);
+    $self->save_snapshot(\@artifacts);
+}
+
 sub cmd_update {
     my($self, @args) = @_;
 
@@ -123,7 +150,7 @@ sub cmd_update {
     }
 
     # rebuild the snapshot
-    my @artifacts = $self->install_from_cpanfile($snapshot);
+    my @artifacts = $self->install_from_cpanfile($self->requirements, $snapshot);
     $self->dump_bootstrap(\@artifacts);
     $self->save_snapshot(\@artifacts);
 }
@@ -143,13 +170,13 @@ sub cmd_install {
 
     die "Usage: carmel install\n" if @args;
 
-    my @artifacts = $self->install_from_cpanfile($self->snapshot);
+    my @artifacts = $self->install_from_cpanfile($self->requirements, $self->snapshot);
     $self->dump_bootstrap(\@artifacts);
     $self->save_snapshot(\@artifacts);
 }
 
 sub install_from_cpanfile {
-    my($self, $snapshot) = @_;
+    my($self, $root_reqs, $snapshot) = @_;
 
     my $requirements = CPAN::Meta::Requirements->new;
     $self->resolve(
@@ -161,6 +188,7 @@ sub install_from_cpanfile {
             my($module, $want_version, $dist) = @_;
             $requirements->add_string_requirement($module => $want_version);
         },
+        $root_reqs,
         1, # strict
         $snapshot,
     );
@@ -176,7 +204,7 @@ sub install_from_cpanfile {
     }
 
     my @artifacts;
-    $self->resolve(sub { push @artifacts, $_[0] }, undef, 0, $snapshot);
+    $self->resolve(sub { push @artifacts, $_[0] }, undef, $root_reqs, 0, $snapshot);
 
     # $self->requirements has been upgraded at this point with the whole subreqs
     printf "---> Complete! %d cpanfile dependencies. %d modules installed.\n" .
@@ -640,7 +668,7 @@ sub resolve_recursive {
 }
 
 sub resolve {
-    my($self, $cb, $missing_cb, $strict, $snapshot) = @_;
+    my($self, $cb, $missing_cb, $requirements, $strict, $snapshot) = @_;
     $missing_cb ||= sub {
         my($module, $want_version, $dist, $depth) = @_;
         die "Can't find an artifact for $module => $want_version\n" .
@@ -648,8 +676,9 @@ sub resolve {
     };
 
     $snapshot ||= $self->snapshot;
+    $requirements ||= $self->requirements;
 
-    $self->resolve_recursive($self->requirements, $self->requirements->clone, $snapshot,
+    $self->resolve_recursive($requirements, $requirements->clone, $snapshot,
                              {}, $cb, $missing_cb, $strict, 0);
 }
 
