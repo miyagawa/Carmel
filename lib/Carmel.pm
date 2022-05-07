@@ -324,7 +324,7 @@ reverts the change.
 
 =head1 DIFFERENCES WITH CPM
 
-L<App::cpm> is an excellent CPAN installer.
+L<App::cpm> is an excellent standalone CPAN installer.
 
 =over 4
 
@@ -338,7 +338,7 @@ rollout>.
 
 cpm installs the modules in parallel, which makes the installation very
 fast. Like Carmel, cpm also manages its build artifacts cache, so a module that
-has previously been installed would very fast to install, since there's no build
+has previously been installed would be very fast to install, since there's no build
 process.
 
 =item *
