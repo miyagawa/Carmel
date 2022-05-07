@@ -63,7 +63,16 @@ containers.
 
 # WORKFLOW
 
-Here's a typical workflow of using Carmel.
+## Development
+
+During the development, run `carmel install` when you setup a new environment,
+and any time you make changes to `cpanfile`. This will update your build
+artifacts, and saves the changes to `cpanfile.snapshot`. Commit the snapshot
+file in version control system so that you can reproduce the exact same versions
+across machines.
+
+`carmel exec` makes it easy to run your application using the versions in
+`cpanfile` and `cpanfile.snapshot` dynamically.
 
     # On your development environment
     > cat cpanfile
@@ -88,9 +97,41 @@ Here's a typical workflow of using Carmel.
     # Update Plack to the latest
     > carmel update Plack
 
+## Production Deployments
+
+Carmel allows you to manage all the dependencies the same way across development
+environments and production environments. However, there might be cases where
+you want to avoid running your application with `carmel exec` in production, to
+avoid the overhead with large number of include paths, or to avoid installing
+Carmel in the production hosts.
+
+Carmel provides two easy ways to avoid depending on Carmel on the deploy target
+environments. First, `carmel rollout` rolls out the build artifacts into a
+regular perl5 library path in `local`. Once the rollout is complete, you can
+include the path just like a regular [local::lib](https://metacpan.org/pod/local%3A%3Alib) directory.
+
     # Production environment: Roll out to ./local
     > carmel rollout
     > perl -Ilocal/lib/perl5 local/bin/starman -p 8080 myapp.psgi
+
+You can run `carmel rollout`> in a CI system to create the `local` directory
+next to your application code for a linux package (e.g. deb package), or Docker
+containers.
+
+Second, `carmel package` (similar to `carton bundle`) creates a directory with
+tarballs and CPAN-style package index files, which you can pass to [cpanm](https://metacpan.org/pod/cpanm) on a
+target machine. This way, you only need `cpanm`, which is available as a
+self-contained single executable, to bootstrap the installation on a host with a
+stock perl.
+
+    # Vendor all the packages to vendor/cache
+    > carmel package
+    > git add vendor/cache
+    > git commit -m 'Vendor all the tarballs'
+
+    # Remote environment (CI etc.)
+    > git clone https://.../myapp.git && cd myapp
+    > cpanm -L /path/to/lib --from $PWD/vendor/cache -nq --installdeps .
 
 # HOW IT WORKS
 
