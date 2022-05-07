@@ -2,6 +2,9 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.42  2022-05-06 17:02:09 PDT
+        - Documentation updates
+
 v0.1.41  2022-05-06 14:35:01 PDT
         - Add support for carmel update Module
 
