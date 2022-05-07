@@ -113,7 +113,13 @@ sub cmd_pin {
         }
         my $dist = $snapshot->find($module)
           or die "$module is not found in the snapshot.\n";
-        $requirements->add_string_requirement($module, "== $version");
+        try {
+            $requirements->add_string_requirement($module, "== $version");
+        } catch {
+            my($err) = /illegal requirements(?: .*?): (.*) at/;
+            my $old = $requirements->requirements_for_module($module);
+            die "Found conflicting requirement for $module: '$old' <=> '== $version': $err\n";
+        };
     }
 
     # install with $requirements and $snapshot
