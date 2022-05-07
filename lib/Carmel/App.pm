@@ -3,6 +3,7 @@ use strict;
 use warnings;
 
 use Carmel;
+use Carmel::Lock;
 use Carmel::Runner;
 use Carp ();
 use Carmel::Repository;
@@ -235,6 +236,8 @@ sub install {
     # one mirror for now
     my $mirror = Module::CPANfile->load($cpanfile)->mirrors->[0];
 
+    my $lock = $self->acquire_lock;
+
     # cleanup perl5 in case it was left from previous runs
     my $lib = $self->repository_base->child('perl5');
     $lib->remove_tree({ safe => 0 });
@@ -259,6 +262,16 @@ sub install {
     }
 
     $lib->remove_tree({ safe => 0 });
+}
+
+sub acquire_lock {
+    my $self = shift;
+
+    my $path = $self->repository_base->child("lock");
+    my $lock = Carmel::Lock->new( path => $path );
+    $lock->acquire;
+
+    return $lock;
 }
 
 sub quote {
