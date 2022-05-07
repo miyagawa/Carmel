@@ -16,7 +16,7 @@ requires 'File::pushd', '1.009';
 requires 'ExtUtils::Install', '1.47';
 requires 'ExtUtils::InstallPaths';
 
-requires 'Carton', 'v1.0.26';
+requires 'Carton', 'v1.0.35';
 
 # vendor
 requires 'Menlo::CLI::Compat', '1.9018';

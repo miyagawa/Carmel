@@ -97,25 +97,25 @@ sub cmd_inject {
 sub cmd_update {
     my($self, @args) = @_;
 
-    my $current = $self->snapshot
+    my $snapshot = $self->snapshot
       or die "Can't run carmel update without snapshot. Run `carmel install` first.\n";
 
     for my $module (@args) {
-        my $dist = $current->find($module)
+        my $dist = $snapshot->find($module)
           or die "$module is not found in the snapshot.\n";
     }
 
-    # create a new snapshot and copy needed dists over, since Carton::Snapshot is immutable for now
-    my $snapshot = Carton::Snapshot->new(path => $current->path);
-
     if (@args) {
-        my @dists = grep !$self->dist_provides_any($_, \@args), $current->distributions;
-        for my $dist (@dists) {
-            $snapshot->add_distribution($dist);
+        for my $module (@args) {
+            $snapshot->remove_distributions(sub {
+                my $dist = shift;
+                $dist->provides_module($module);
+            });
         }
         $self->install_with_snapshot($snapshot, [], @args);
     } else {
         # remove everything from the snapshot
+        $snapshot->remove_distributions(sub { 1 });
         my $cpanfile = $self->try_cpanfile
           or die "Can't locate 'cpanfile' to load module list.\n";
         $self->install_with_cpanfile(Module::CPANfile->load($cpanfile), $snapshot);
