@@ -51,14 +51,15 @@ sub run {
     my $call = $self->can("cmd_$cmd")
       or die "Can't find command '$cmd': run `carmel help` to see the list of commands.\n";
 
+    my $code = 0;
     try {
         $self->$call(@args);
     } catch {
         warn $_;
-        return 255;
+        $code = 1;
     };
 
-    return 0;
+    return $code;
 }
 
 sub repository_base {
