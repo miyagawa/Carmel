@@ -2,6 +2,9 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.44  2022-05-06 20:39:25 PDT
+        - Fix a bug where Module::Build::Tiny is not installed on the first run (#34)
+
 v0.1.43  2022-05-06 19:17:34 PDT
         - Dropped support for perl 5.12
         - Removed the experimental, undocumented binstubs command
