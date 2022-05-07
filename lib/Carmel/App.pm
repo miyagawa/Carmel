@@ -189,7 +189,6 @@ sub install_from_cpanfile {
             $requirements->add_string_requirement($module => $want_version);
         },
         $root_reqs,
-        1, # strict
         $snapshot,
     );
 
@@ -204,7 +203,7 @@ sub install_from_cpanfile {
     }
 
     my @artifacts;
-    $self->resolve(sub { push @artifacts, $_[0] }, undef, $root_reqs, 0, $snapshot);
+    $self->resolve(sub { push @artifacts, $_[0] }, undef, $root_reqs, $snapshot);
 
     # $self->requirements has been upgraded at this point with the whole subreqs
     printf "---> Complete! %d cpanfile dependencies. %d modules installed.\n" .
@@ -631,7 +630,7 @@ sub merge_requirements {
 }
 
 sub resolve_recursive {
-    my($self, $root_reqs, $requirements, $snapshot, $seen, $cb, $missing_cb, $strict, $depth) = @_;
+    my($self, $root_reqs, $requirements, $snapshot, $seen, $cb, $missing_cb, $depth) = @_;
 
     # TODO rather than mutating $root_reqs directly, we should create a new object
     # that allows accessing the result $requirements
@@ -644,11 +643,10 @@ sub resolve_recursive {
         my $dist;
         if ($dist = $self->find_in_snapshot($snapshot, $module, $root_reqs)) {
             $artifact = $self->repo->find_match($module, sub { $_[0]->distname eq $dist->name });
-            $artifact ||= $self->repo->find($module, $want_version) unless $strict;
         } elsif ($self->is_core($module, $want_version)) {
             next;
         } else {
-            $artifact = $self->repo->find($module, $want_version);
+            $artifact = $self->repo->find_match($module, sub { $self->accepts_all($root_reqs, $_[0]) });
         }
 
         # FIXME there's a chance different version of the same module can be loaded here
@@ -660,7 +658,7 @@ sub resolve_recursive {
             my $reqs = $artifact->requirements;
             $self->merge_requirements($root_reqs, $reqs, $artifact->distname);
 
-            $self->resolve_recursive($root_reqs, $reqs, $snapshot, $seen, $cb, $missing_cb, $strict, $depth + 1);
+            $self->resolve_recursive($root_reqs, $reqs, $snapshot, $seen, $cb, $missing_cb, $depth + 1);
         } else {
             $missing_cb->($module, $want_version, $dist, $depth);
         }
@@ -668,7 +666,7 @@ sub resolve_recursive {
 }
 
 sub resolve {
-    my($self, $cb, $missing_cb, $requirements, $strict, $snapshot) = @_;
+    my($self, $cb, $missing_cb, $requirements, $snapshot) = @_;
     $missing_cb ||= sub {
         my($module, $want_version, $dist, $depth) = @_;
         die "Can't find an artifact for $module => $want_version\n" .
@@ -679,7 +677,7 @@ sub resolve {
     $requirements ||= $self->requirements;
 
     $self->resolve_recursive($requirements, $requirements->clone, $snapshot,
-                             {}, $cb, $missing_cb, $strict, 0);
+                             {}, $cb, $missing_cb, 0);
 }
 
 sub find_in_snapshot {
