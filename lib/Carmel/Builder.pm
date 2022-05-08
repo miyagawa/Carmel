@@ -1,7 +1,7 @@
 package Carmel::Builder;
 use strict;
 use warnings;
-use Class::Tiny qw( snapshot cpanfile cpanfile_path repository_base collect_artifact verbose );
+use Class::Tiny qw( snapshot cpanfile cpanfile_path repository_base collect_artifact );
 use Path::Tiny;
 use File::pushd;
 
@@ -56,7 +56,7 @@ sub install {
 
     my $cli = Menlo::CLI::Compat->new;
     $cli->parse_options(
-        ($self->verbose ? () : "--quiet"),
+        ($Carmel::DEBUG ? () : "--quiet"),
         ($mirror ? ("-M", $mirror) : ()),
         "--notest",
         "--save-dists", $self->repository_base->child('cache'),
@@ -91,7 +91,7 @@ sub search_module {
 
     my $cli = Menlo::CLI::Compat->new;
     $cli->parse_options(
-        ($self->verbose ? () : "--quiet"),
+        ($Carmel::DEBUG ? () : "--quiet"),
         ($mirror ? ("-M", $mirror) : ()),
         "--info",
         "--save-dists", $self->repository_base->child('cache'),
@@ -119,7 +119,7 @@ sub rollout {
 
         # ExtUtils::Install writes to STDOUT
         open my $fh, ">", \my $output;
-        my $old; $old = select $fh unless $self->verbose;
+        my $old; $old = select $fh unless $Carmel::DEBUG;
 
         my %result;
         ExtUtils::Install::install([
@@ -132,7 +132,7 @@ sub rollout {
             result => \%result,
         ]);
 
-        select $old unless $self->verbose;
+        select $old unless $Carmel::DEBUG;
     }
 }
 

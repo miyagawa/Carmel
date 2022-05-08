@@ -240,7 +240,6 @@ sub builder {
         repository_base => $self->repository_base,
         cpanfile_path => scalar $self->try_cpanfile,
         collect_artifact => sub { $self->repo->import_artifact(@_) },
-        verbose => $self->verbose,
         @args,
     );
 }
@@ -402,7 +401,6 @@ sub resolver {
         root     => $self->requirements,
         snapshot => scalar $self->snapshot,
         missing  => sub { $self->missing_default(@_) },
-        verbose  => $self->verbose,
         @args,
     );
 }

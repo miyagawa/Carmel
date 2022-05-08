@@ -1,7 +1,7 @@
 package Carmel::Resolver;
 use strict;
 use warnings;
-use Class::Tiny qw( repo snapshot root seen found missing verbose );
+use Class::Tiny qw( repo snapshot root seen found missing );
 
 use Module::CoreList;
 use Try::Tiny;
@@ -36,7 +36,7 @@ sub resolve_recurse {
 
         # FIXME there's a chance different version of the same module can be loaded here
         if ($artifact) {
-            warn sprintf "   %s (%s) in %s\n", $module, $artifact->version_for($module), $artifact->path if $self->verbose;
+            warn sprintf "   %s (%s) in %s\n", $module, $artifact->version_for($module), $artifact->path if $Carmel::DEBUG;
             next if $seen->{$artifact->path}++;
             $self->found->($artifact, $depth);
 
@@ -65,13 +65,13 @@ sub find_in_snapshot {
     my $snapshot = $self->snapshot or return;
 
     if (my $dist = $snapshot->find($module)) {
-        warn "@{[$dist->name]} found in snapshot for $module\n" if $self->verbose;
+        warn "@{[$dist->name]} found in snapshot for $module\n" if $Carmel::DEBUG;
         if ($self->accepts_all($self->root, $dist)) {
             return $dist;
         }
     }
 
-    warn "$module not found in snapshot\n" if $self->verbose;
+    warn "$module not found in snapshot\n" if $Carmel::DEBUG;
     return;
 }
 
