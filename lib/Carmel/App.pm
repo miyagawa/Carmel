@@ -17,6 +17,10 @@ use Path::Tiny ();
 use Pod::Usage ();
 use Try::Tiny;
 
+# prefer Parse::CPAN::Meta in XS, PP order with JSON.pm
+$ENV{PERL_JSON_BACKEND} = 1
+  unless defined $ENV{PERL_JSON_BACKEND};
+
 use Class::Tiny {
     verbose => sub { 0 },
     perl_arch => sub { "$Config{version}-$Config{archname}" },
@@ -226,8 +230,7 @@ sub install {
     )->resolve;
 
     # $root_reqs has been mutated at this point. Reload requirements
-    printf "---> Complete! %d cpanfile dependencies. %d modules installed.\n" .
-      "---> Use `carmel show [module]` to see where a module is installed.\n",
+    printf "---> Complete! %d cpanfile dependencies. %d modules installed.\n",
       scalar(grep { $_ ne 'perl' } $self->requirements->required_modules), scalar(@artifacts);
 
     return @artifacts;
