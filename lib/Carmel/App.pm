@@ -121,10 +121,7 @@ sub cmd_pin {
         };
     }
 
-    # install with $requirements and $snapshot
-    my @artifacts = $self->install_from_cpanfile($requirements, $snapshot);
-    $self->dump_bootstrap(\@artifacts);
-    $self->save_snapshot(\@artifacts);
+    $self->update_dependencies($requirements, $snapshot);
 }
 
 sub cmd_update {
@@ -161,9 +158,7 @@ sub cmd_update {
     }
 
     # rebuild the snapshot
-    my @artifacts = $self->install_from_cpanfile($self->requirements, $snapshot);
-    $self->dump_bootstrap(\@artifacts);
-    $self->save_snapshot(\@artifacts);
+    $self->update_dependencies($self->requirements, $snapshot);
 }
 
 sub cmd_install {
@@ -171,12 +166,18 @@ sub cmd_install {
 
     die "Usage: carmel install\n" if @args;
 
-    my @artifacts = $self->install_from_cpanfile($self->requirements, $self->snapshot);
+    $self->update_dependencies($self->requirements, $self->snapshot);
+}
+
+sub update_dependencies {
+    my($self, $root_reqs, $snapshot) = @_;
+
+    my @artifacts = $self->install($root_reqs, $snapshot);
     $self->dump_bootstrap(\@artifacts);
     $self->save_snapshot(\@artifacts);
 }
 
-sub install_from_cpanfile {
+sub install {
     my($self, $root_reqs, $snapshot) = @_;
 
     my $requirements = CPAN::Meta::Requirements->new;
