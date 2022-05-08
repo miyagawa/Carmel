@@ -25,7 +25,7 @@ mirror 'file://$cwd/xt/mirror';
 requires 'Class::Tiny';
 EOF
 
-    $app->run_ok("install");
+    $app->run_fails("install");
     like $app->stderr, qr/Couldn't find module .* Class::Tiny/;
 };    
 
