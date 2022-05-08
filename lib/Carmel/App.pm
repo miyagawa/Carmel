@@ -230,8 +230,6 @@ sub install_with_cpanfile {
     my $path = Path::Tiny->tempfile;
     $cpanfile->save($path);
 
-    my @options = ("--cpanfile", $path);
-
     $self->install_with_snapshot($snapshot, [ "--cpanfile", $path, "--installdeps" ], ".");
 }
 
