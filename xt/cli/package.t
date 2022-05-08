@@ -29,18 +29,11 @@ EOF
 
     $app->run_ok("install");
 
- SKIP: {
-        skip "TEST_CLEAN is not set", 4 unless $ENV{TEST_CLEAN};
-
+    if ($ENV{TEST_CLEAN}) {
         $app->dir->child('.carmel/cache')->remove_tree({ safe => 0 });
 
-        $app->run_ok("install");
-        $app->run_ok("package");
-        ok $app->stdout =~ qr!Fetching (.*Class-Tiny-.*\.tar\.gz) from CPAN!m
-          or diag $app->stdout;
-
-        ok $app->dir->child('vendor/cache/modules/02packages.details.txt.gz')->exists;
-        ok $app->dir->child('vendor/cache/authors/id', $1)->exists;
+        $app->run_fails("package");
+        like $app->stderr, qr/not found in/;
     }
 };
 

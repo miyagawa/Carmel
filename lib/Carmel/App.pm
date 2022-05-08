@@ -518,7 +518,7 @@ sub cmd_package {
     my $target_base = Path::Tiny->new('vendor/cache');
 
     my %done;
-    my $success = 0;
+    my @found;
     for my $package ($index->packages) {
         next if $done{$package->pathname}++;
 
@@ -526,20 +526,20 @@ sub cmd_package {
         my $target = $target_base->child('authors/id', $package->pathname);
 
         if ($source->exists) {
-            print "Copying ", $package->pathname, "\n";
-            $target->parent->mkpath;
-            $source->copy($target);
-            $success++;
+            push @found, sub {
+                print "Copying ", $package->pathname, "\n";
+                $target->parent->mkpath;
+                $source->copy($target);
+            };
         } else {
-            require File::Fetch;
-            print "Fetching ", $package->pathname, " from CPAN\n";
-            my $fetch = File::Fetch->new(uri => "http://cpan.metacpan.org/authors/id/" . $package->pathname);
-            if ($fetch->fetch(to => $target->parent)) {
-                $success++;
-            } else {
-                warn $fetch->error;
-            }
+            die sprintf "%s not found in %s.\n" .
+              "Run `carmel install` to fix this. If that didn't resolve the issue, try removing %s\n",
+              $package->pathname, $source_base, $self->repository_base;
         }
+    }
+
+    for my $copy (@found) {
+        $copy->();
     }
 
     require IO::Compress::Gzip;
@@ -551,7 +551,7 @@ sub cmd_package {
       or die "gzip failed: $IO::Compress::Gzip::GzipError";
     $index->write($out);
 
-    print "---> Complete! $success distributions are packaged in vendor/cache\n";
+    print "---> Complete! ", scalar(@found), "distributions are packaged in vendor/cache\n";
 }
 
 sub cmd_index {
