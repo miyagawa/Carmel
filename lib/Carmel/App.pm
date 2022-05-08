@@ -210,10 +210,10 @@ sub install_from_cpanfile {
     my @artifacts;
     $self->resolve(sub { push @artifacts, $_[0] }, undef, $root_reqs, $snapshot);
 
-    # $self->requirements has been upgraded at this point with the whole subreqs
+    # $root_reqs has been mutated at this point. Reload requirements
     printf "---> Complete! %d cpanfile dependencies. %d modules installed.\n" .
       "---> Use `carmel show [module]` to see where a module is installed.\n",
-      scalar(grep { $_ ne 'perl' } $self->build_requirements->required_modules), scalar(@artifacts);
+      scalar(grep { $_ ne 'perl' } $self->requirements->required_modules), scalar(@artifacts);
 
     return @artifacts;
 }
@@ -605,11 +605,6 @@ sub locate_cpanfile {
 }
 
 sub requirements {
-    my $self = shift;
-    $self->{requirements} ||= $self->build_requirements;
-}
-
-sub build_requirements {
     my $self = shift;
 
     my $cpanfile = $self->try_cpanfile
