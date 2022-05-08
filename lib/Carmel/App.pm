@@ -20,7 +20,6 @@ use Try::Tiny;
 use Class::Tiny {
     verbose => sub { 0 },
     perl_arch => sub { "$Config{version}-$Config{archname}" },
-    runner => sub { Carmel::Runner->new },
 };
 
 sub parse_options {
@@ -390,20 +389,20 @@ EOF
 
 sub cmd_export {
     my($self) = @_;
-    my %env = $self->runner->env;
+    my %env = Carmel::Runner->new->env;
     print "export ", join(" ", map qq($_="$env{$_}"), sort keys %env), "\n";
 }
 
 sub cmd_env {
     my($self) = @_;
-    my %env = $self->runner->env;
+    my %env = Carmel::Runner->new->env;
     print join "", map qq($_=$env{$_}\n), sort keys %env;
 }
 
 # TODO remove. just here for testing
 sub cmd_exec {
     my($self, @args) = @_;
-    $self->runner->execute(@args);
+    Carmel::Runner->new->execute(@args);
 }
 
 sub cmd_find {
