@@ -2,6 +2,9 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.49  2022-05-08 11:47:37 PDT
+        - Speed up the artifacts search and snapshot generation with lazy-loading and JSON backend
+
 v0.1.48  2022-05-08 02:44:56 PDT
         - Huge performance improvements for carmel update to avoid installation when there's no updates (#44)
 
