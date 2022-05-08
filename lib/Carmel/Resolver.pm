@@ -16,6 +16,11 @@ sub resolve {
     $self->resolve_recurse($clone, $seen, $depth);
 }
 
+sub find_artifact {
+    my($self, $module, $version) = @_;
+
+}
+
 sub resolve_recurse {
     my($self, $requirements, $seen, $depth) = @_;
 
@@ -25,13 +30,17 @@ sub resolve_recurse {
         my $want_version = $self->root->requirements_for_module($module);
 
         my $artifact;
-        my $dist;
-        if ($dist = $self->find_in_snapshot($module)) {
+        my $dist = $self->find_in_snapshot($module);
+        if ($dist) {
             $artifact = $self->repo->find_match($module, sub { $_[0]->distname eq $dist->name }, $dist->name);
         } elsif ($self->is_core($module, $want_version)) {
             next;
         } else {
             $artifact = $self->repo->find_match($module, sub { $self->accepts_all($self->root, $_[0]) });
+        }
+
+        if (!$artifact && $self->is_core($module, $want_version)) {
+            next;
         }
 
         # FIXME there's a chance different version of the same module can be loaded here
@@ -45,7 +54,7 @@ sub resolve_recurse {
 
             $self->resolve_recurse($reqs, $seen, $depth + 1);
         } else {
-            $self->missing->($module, $want_version, $dist, $depth);
+            $self->missing->($module, $want_version, $depth);
         }
     }
 }

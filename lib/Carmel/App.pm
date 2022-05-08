@@ -207,7 +207,7 @@ sub install {
             printf "Using %s (%s)\n", $artifact->package, $artifact->version || '0';
         },
         missing => sub {
-            my($module, $want_version, $dist) = @_;
+            my($module, $want_version) = @_;
             $requirements->add_string_requirement($module => $want_version);
         },
     )->resolve;
@@ -406,7 +406,7 @@ sub resolver {
 }
 
 sub missing_default {
-    my($self, $module, $want_version, $dist, $depth) = @_;
+    my($self, $module, $want_version, $depth) = @_;
     die "Can't find an artifact for $module => $want_version\n" .
       "You need to run `carmel install` first to get the modules installed and artifacts built.\n";
 }
