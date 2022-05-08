@@ -175,7 +175,7 @@ sub install_from_cpanfile {
 
     my $requirements = CPAN::Meta::Requirements->new;
 
-    $self->build_resolver(
+    $self->resolver(
         root => $root_reqs,
         snapshot => $snapshot,
         found => sub {
@@ -199,7 +199,7 @@ sub install_from_cpanfile {
     }
 
     my @artifacts;
-    $self->build_resolver(
+    $self->resolver(
         found    => sub { push @artifacts, $_[0] },
         root     => $root_reqs,
         snapshot => $snapshot,
@@ -426,10 +426,10 @@ sub cmd_list {
 
 sub resolve {
     my($self, $cb) = @_;
-    $self->build_resolver(found => $cb)->resolve;
+    $self->resolver(found => $cb)->resolve;
 }
 
-sub build_resolver {
+sub resolver {
     my($self, @args) = @_;
 
     Carmel::Resolver->new(
