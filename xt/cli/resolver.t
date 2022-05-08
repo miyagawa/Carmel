@@ -9,7 +9,7 @@ subtest 'carmel install' => sub {
     $app->write_cpanfile(<<EOF);
 requires 'Try::Tiny';
 EOF
-    $app->run("list");
+    $app->run_fails("list");
     like $app->stderr, qr/Can't find an artifact for Try::Tiny/;
 
     $app->run("install");
@@ -19,7 +19,7 @@ EOF
     $app->write_cpanfile(<<EOF);
 requires 'Try::Tiny', '< 0.22';
 EOF
-    $app->run("list");
+    $app->run_fails("list");
     like $app->stderr, qr/Can't find an artifact for Try::Tiny => < 0\.22/;
 
     $app->run("install");

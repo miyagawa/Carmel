@@ -10,8 +10,7 @@ subtest 'carmel install exit code' => sub {
 requires 'Plack', '999';
 EOF
 
-    $app->run("install");
-    is $app->exit_code, 1;
+    $app->run_fails("install");
 };
 
 done_testing;

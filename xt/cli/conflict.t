@@ -18,7 +18,7 @@ requires 'Path::Tiny';
 requires 'Digest::SHA', '< 5'; # Path::Tiny requires 5.45
 EOF
 
-    $app->run("install");
+    $app->run_fails("install");
     like $app->stderr, qr/conflicting requirement for Digest::SHA: '< 5' <=> '5\.\d+' \(Path-Tiny-/;
 };
 

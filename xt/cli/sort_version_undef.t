@@ -6,7 +6,7 @@ use xt::CLI;
 subtest 'dependency on subdep with version 0' => sub {
     my $app = cli();
 
-    $app->run('inject', 'Module::CPANfile');
+    $app->write_cpanfile('');
     $app->run('inject', 'Module::CPANfile@1.0002'); 
 
     $app->write_cpanfile(<<EOF);

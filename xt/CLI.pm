@@ -15,6 +15,7 @@ use Carmel::App;
 use Capture::Tiny qw(capture);
 use File::pushd ();
 use Path::Tiny;
+use Test::More;
 
 $Carmel::Runner::UseSystem = 1;
 
@@ -68,7 +69,7 @@ sub run_in_dir {
     $self->run(@args);
 }
 
-sub run {
+sub _run {
     my($self, @args) = @_;
 
     my $pushd = File::pushd::pushd $self->dir;
@@ -82,6 +83,26 @@ sub run {
 
     $self->stdout($capture[0]);
     $self->stderr($capture[1]);
+}
+
+sub run {
+    my($self, @args) = @_;
+
+    $self->_run(@args);
+
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    is $self->exit_code, 0
+      or diag $self->stderr;
+}
+
+sub run_fails {
+    my($self, @args) = @_;
+
+    $self->_run(@args);
+
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    is $self->exit_code, 1
+      or diag $self->stderr;
 }
 
 sub run_any {
