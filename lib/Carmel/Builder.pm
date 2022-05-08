@@ -11,11 +11,11 @@ sub tempdir {
 }
 
 sub build_tempdir {
-    my %file_temp = ();
-    $file_temp{CLEANUP} = $ENV{PERL_FILE_TEMP_CLEANUP}
+    my %opts = ();
+    $opts{CLEANUP} = $ENV{PERL_FILE_TEMP_CLEANUP}
       if exists $ENV{PERL_FILE_TEMP_CLEANUP};
 
-    Path::Tiny->tempdir(%file_temp);
+    Path::Tiny->tempdir(%opts);
 }
 
 sub install {
