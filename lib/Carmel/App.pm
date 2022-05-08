@@ -226,8 +226,7 @@ sub install {
     )->resolve;
 
     # $root_reqs has been mutated at this point. Reload requirements
-    printf "---> Complete! %d cpanfile dependencies. %d modules installed.\n" .
-      "---> Use `carmel show [module]` to see where a module is installed.\n",
+    printf "---> Complete! %d cpanfile dependencies. %d modules installed.\n",
       scalar(grep { $_ ne 'perl' } $self->requirements->required_modules), scalar(@artifacts);
 
     return @artifacts;
