@@ -5,6 +5,7 @@ use warnings;
 use Carmel;
 use Carmel::Runner;
 use Carp ();
+use Carmel::Builder;
 use Carmel::Repository;
 use Carmel::Resolver;
 use Config qw(%Config);
@@ -14,7 +15,6 @@ use Module::CPANfile;
 use Module::Metadata;
 use Path::Tiny ();
 use Pod::Usage ();
-use File::pushd;
 use Try::Tiny;
 
 use Class::Tiny {
@@ -91,7 +91,7 @@ sub cmd_version {
 
 sub cmd_inject {
     my($self, @args) = @_;
-    $self->install("--reinstall", @args);
+    $self->builder->install("--reinstall", @args);
 }
 
 sub cmd_pin {
@@ -145,13 +145,19 @@ sub cmd_update {
                 $dist->provides_module($module);
             });
         }
-        $self->install_with_snapshot($snapshot, [], @args);
+        my $builder = $self->builder(snapshot => $snapshot);
+        $builder->install(@args);
     } else {
         # remove everything from the snapshot
         $snapshot->remove_distributions(sub { 1 });
         my $cpanfile = $self->try_cpanfile
           or die "Can't locate 'cpanfile' to load module list.\n";
-        $self->install_with_cpanfile(Module::CPANfile->load($cpanfile), $snapshot);
+
+        my $builder = $self->builder(
+            cpanfile => Module::CPANfile->load($cpanfile),
+            snapshot => $snapshot,
+        );
+        $builder->install;
     }
 
     # rebuild the snapshot
@@ -195,7 +201,8 @@ sub install_from_cpanfile {
             },
         });
         print "---> Installing new dependencies: ", join(", ", @missing), "\n";
-        $self->install_with_cpanfile($cpanfile, $snapshot);
+        my $builder = $self->builder(cpanfile => $cpanfile, snapshot => $snapshot);
+        $builder->install;
     }
 
     my @artifacts;
@@ -213,28 +220,16 @@ sub install_from_cpanfile {
     return @artifacts;
 }
 
-sub install_with_cpanfile {
-    my($self, $cpanfile, $snapshot) = @_;
+sub builder {
+    my($self, @args) = @_;
 
-    my $path = Path::Tiny->tempfile;
-    $cpanfile->save($path);
-
-    $self->install_with_snapshot($snapshot, [ "--cpanfile", $path, "--installdeps" ], ".");
-}
-
-sub install_with_snapshot {
-    my($self, $snapshot, $options, @cmd) = @_;
-
-    if ($snapshot) {
-        my $path = Path::Tiny->tempfile;
-        $snapshot->write_index($path);
-        push @$options,
-          "--mirror-index", $path,
-          "--cascade-search",
-          "--mirror", "http://cpan.metacpan.org";
-    }
-
-    $self->install(@$options, @cmd);
+    Carmel::Builder->new(
+        repository_base => $self->repository_base,
+        cpanfile_path => scalar $self->try_cpanfile,
+        collect_artifact => sub { $self->repo->import_artifact(@_) },
+        verbose => $self->verbose,
+        @args,
+    );
 }
 
 sub install {
@@ -482,44 +477,13 @@ sub cmd_rollout {
     my @artifacts;
     $self->resolve(sub { push @artifacts, $_[0] });
 
+    # TODO safe atomic rename
     my $install_base = Path::Tiny->new("local")->absolute;
     $install_base->remove_tree({ safe => 0 }) if $install_base->exists;
 
-    $self->rollout_to($install_base, \@artifacts);
+    $self->builder->rollout($install_base, \@artifacts);
 
-    Path::Tiny->new("local/.carmel")->touch;
-}
-
-sub rollout_to {
-    my($self, $install_base, $artifacts) = @_;
-
-    require ExtUtils::Install;
-    require ExtUtils::InstallPaths;
-
-    for my $artifact (@$artifacts) {
-        my $dir = pushd $artifact->path;
-
-        my $paths = ExtUtils::InstallPaths->new(install_base => $install_base);
-
-        printf "Installing %s to %s\n", $artifact->distname, $install_base;
-
-        # ExtUtils::Install writes to STDOUT
-        open my $fh, ">", \my $output;
-        my $old; $old = select $fh unless $self->verbose;
-
-        my %result;
-        ExtUtils::Install::install([
-            from_to => $paths->install_map,
-            verbose => 0,
-            dry_run => 0,
-            uninstall_shadows => 0,
-            skip => undef,
-            always_copy => 1,
-            result => \%result,
-        ]);
-
-        select $old unless $self->verbose;
-    }
+    $install_base->child(".carmel")->touch;
 }
 
 sub cmd_package {
