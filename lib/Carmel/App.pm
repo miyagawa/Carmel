@@ -551,7 +551,7 @@ sub cmd_package {
       or die "gzip failed: $IO::Compress::Gzip::GzipError";
     $index->write($out);
 
-    print "---> Complete! ", scalar(@found), "distributions are packaged in vendor/cache\n";
+    print "---> Complete! ", scalar(@found), " distributions are packaged in vendor/cache\n";
 }
 
 sub cmd_index {
