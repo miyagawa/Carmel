@@ -232,49 +232,6 @@ sub builder {
     );
 }
 
-sub install {
-    my($self, @args) = @_;
-
-    my %file_temp = ();
-    $file_temp{CLEANUP} = $ENV{PERL_FILE_TEMP_CLEANUP}
-      if exists $ENV{PERL_FILE_TEMP_CLEANUP};
-
-    my $dir = Path::Tiny->tempdir(%file_temp);
-    local $ENV{PERL_CPANM_HOME} = $dir;
-    local $ENV{PERL_CPANM_OPT};
-
-    my $cpanfile = $self->try_cpanfile
-      or die "Can't locate 'cpanfile' to load module list.\n";
-
-    # one mirror for now
-    my $mirror = Module::CPANfile->load($cpanfile)->mirrors->[0];
-
-    # cleanup perl5 in case it was left from previous runs
-    my $lib = $self->repository_base->child('perl5');
-    $lib->remove_tree({ safe => 0 });
-
-    require Menlo::CLI::Compat;
-
-    my $cli = Menlo::CLI::Compat->new;
-    $cli->parse_options(
-        ($self->verbose ? () : "--quiet"),
-        ($mirror ? ("-M", $mirror) : ()),
-        "--notest",
-        "--save-dists", $self->repository_base->child('cache'),
-        "-L", $lib,
-        "--no-static-install",
-        @args,
-    );
-    $cli->run;
-
-    for my $ent ($dir->child("latest-build")->children) {
-        next unless $ent->is_dir && $ent->child("blib/meta/install.json")->exists;
-        $self->repo->import_artifact($ent);
-    }
-
-    $lib->remove_tree({ safe => 0 });
-}
-
 sub quote {
     my $indent = shift;
     $indent = " " x $indent;
