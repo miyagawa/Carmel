@@ -528,12 +528,8 @@ sub build_index {
 
 sub try_cpanfile {
     my $self = shift;
-    $self->locate_cpanfile($ENV{PERL_CARMEL_CPANFILE});
-}
 
-sub locate_cpanfile {
-    my($self, $path) = @_;
-
+    my $path = $ENV{PERL_CARMEL_CPANFILE};
     if ($path) {
         return Path::Tiny->new($path)->absolute;
     }
