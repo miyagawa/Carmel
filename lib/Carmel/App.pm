@@ -448,13 +448,26 @@ sub cmd_rollout {
     my @artifacts;
     $self->resolve(sub { push @artifacts, $_[0] });
 
-    # TODO safe atomic rename
-    my $install_base = Path::Tiny->new("local")->absolute;
+    my $install_base = Path::Tiny->new("local.tmp")->absolute;
     $install_base->remove_tree({ safe => 0 }) if $install_base->exists;
 
     $self->builder->rollout($install_base, \@artifacts);
 
     $install_base->child(".carmel")->touch;
+
+    my $dest = Path::Tiny->new("local")->absolute;
+    if ($dest->exists) {
+        # TODO atomic rename with renameat2?
+        my $tmp = Path::Tiny->new("local.old");
+        $tmp->remove_tree({ safe => 0 }) if $tmp->exists;
+        $dest->move($tmp);
+        $install_base->move($dest);
+        $tmp->remove_tree({ safe => 0 });
+    } else {
+        $install_base->move($dest);
+    }
+
+    printf "---> Complete! Installed %s distributions to %s\n", scalar(@artifacts), $dest;
 }
 
 sub cmd_package {

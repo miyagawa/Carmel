@@ -115,7 +115,7 @@ sub rollout {
 
         my $paths = ExtUtils::InstallPaths->new(install_base => $install_base);
 
-        printf "Installing %s to %s\n", $artifact->distname, $install_base;
+        printf "Installing %s\n", $artifact->distname;
 
         # ExtUtils::Install writes to STDOUT
         open my $fh, ">", \my $output;

@@ -12,7 +12,7 @@ EOF
 
     $app->run_ok("install");
     $app->run_ok("rollout");
-    like $app->stdout, qr/Installing Module-CPANfile-.* to/;
+    like $app->stdout, qr/Installing Module-CPANfile-.*/;
 
     $app->run_ok("rollout", "-v");
     like $app->stdout, qr/^Installing .*Module\/CPANfile\.pm$/m;
