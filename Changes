@@ -2,6 +2,10 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.47  2022-05-07 22:12:42 PDT
+        - Fix carmel package to not fetch from CPAN when cache is empty
+        - Internal refactoring of the code base
+
 v0.1.46  2022-05-07 14:10:39 PDT
         - New command: carmel pin to pin a module version in the snapshot without pinning it in cpanfile (#39)
         - Improve error message when a conflict is found
