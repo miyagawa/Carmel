@@ -130,31 +130,43 @@ sub cmd_update {
     my $snapshot = $self->snapshot
       or die "Can't run carmel update without snapshot. Run `carmel install` first.\n";
 
-    for my $module (@args) {
-        my $dist = $snapshot->find($module)
-          or die "$module is not found in the snapshot.\n";
-    }
+    my $target = @args ? join(", ", @args) : "all the modules in the snapshot";
+    print "---> Checking updates for $target...\n";
+
+    my $builder = $self->builder;
+
+    my @updates;
+    my $check = sub {
+        my($module, $pathname) = @_;
+
+        my $result = $builder->search_module($module);
+        if ($result && $result ne $pathname) {
+            push @updates, $module;
+        }
+    };
 
     if (@args) {
         for my $module (@args) {
+            my $dist = $snapshot->find($module)
+              or die "$module is not found in the snapshot.\n";
+            $check->($module, $dist->pathname);
+        }
+    } else {
+        $self->resolve(sub {
+            my $artifact = shift;
+            $check->($artifact->package, $artifact->install->{pathname});
+        });
+    }
+
+    if (@updates) {
+        for my $module (@updates) {
             $snapshot->remove_distributions(sub {
                 my $dist = shift;
                 $dist->provides_module($module);
             });
         }
-        my $builder = $self->builder(snapshot => $snapshot);
-        $builder->install(@args);
-    } else {
-        # remove everything from the snapshot
-        $snapshot->remove_distributions(sub { 1 });
-        my $cpanfile = $self->try_cpanfile
-          or die "Can't locate 'cpanfile' to load module list.\n";
 
-        my $builder = $self->builder(
-            cpanfile => Module::CPANfile->load($cpanfile),
-            snapshot => $snapshot,
-        );
-        $builder->install;
+        $self->builder(snapshot => $snapshot)->install(@updates);
     }
 
     # rebuild the snapshot
@@ -264,8 +276,8 @@ sub transform {
 sub save_snapshot {
     my($self, $artifacts) = @_;
 
-    require Carton::Dist;
     require Carton::Snapshot;
+    require Carton::Dist;
 
     my $cpanfile = $self->try_cpanfile;
     my $snapshot = Carton::Snapshot->new(path => $cpanfile . ".snapshot");

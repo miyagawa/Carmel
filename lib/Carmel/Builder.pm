@@ -5,6 +5,19 @@ use Class::Tiny qw( snapshot cpanfile cpanfile_path repository_base collect_arti
 use Path::Tiny;
 use File::pushd;
 
+sub tempdir {
+    my $self = shift;
+    $self->{tempdir} ||= $self->build_tempdir;
+}
+
+sub build_tempdir {
+    my %file_temp = ();
+    $file_temp{CLEANUP} = $ENV{PERL_FILE_TEMP_CLEANUP}
+      if exists $ENV{PERL_FILE_TEMP_CLEANUP};
+
+    Path::Tiny->tempdir(%file_temp);
+}
+
 sub install {
     my($self, @args) = @_;
 
@@ -26,12 +39,7 @@ sub install {
           "--mirror", "http://cpan.metacpan.org";
     }
 
-    my %file_temp = ();
-    $file_temp{CLEANUP} = $ENV{PERL_FILE_TEMP_CLEANUP}
-      if exists $ENV{PERL_FILE_TEMP_CLEANUP};
-
-    my $dir = Path::Tiny->tempdir(%file_temp);
-    local $ENV{PERL_CPANM_HOME} = $dir;
+    local $ENV{PERL_CPANM_HOME} = $self->tempdir;
     local $ENV{PERL_CPANM_OPT};
 
     my $cpanfile = $self->cpanfile_path
@@ -59,12 +67,41 @@ sub install {
 
     $cli->run;
 
-    for my $ent ($dir->child("latest-build")->children) {
+    for my $ent ($self->tempdir->child("latest-build")->children) {
         next unless $ent->is_dir && $ent->child("blib/meta/install.json")->exists;
         $self->collect_artifact->($ent);
     }
 
     $lib->remove_tree({ safe => 0 });
+}
+
+sub search_module {
+    my($self, $module) = @_;
+
+    local $ENV{PERL_CPANM_HOME} = $self->tempdir;
+    local $ENV{PERL_CPANM_OPT};
+
+    my $cpanfile = $self->cpanfile_path
+      or die "Can't locate 'cpanfile' to load module list.\n";
+
+    # one mirror for now
+    my $mirror = Module::CPANfile->load($cpanfile)->mirrors->[0];
+
+    require Menlo::CLI::Compat;
+
+    my $cli = Menlo::CLI::Compat->new;
+    $cli->parse_options(
+        ($self->verbose ? () : "--quiet"),
+        ($mirror ? ("-M", $mirror) : ()),
+        "--info",
+        "--save-dists", $self->repository_base->child('cache'),
+        ".",
+    );
+
+    my $dist = $cli->search_module($module);
+    return $dist->{pathname} if $dist;
+
+    return;
 }
 
 sub rollout {
