@@ -23,8 +23,8 @@ use Test::More tests => 1;
 ok 1, \$INC{"MyApp.pm"};
 EOF
 
-    $app->run("install");
-    $app->run("exec", "prove", "-l", "t");
+    $app->run_ok("install");
+    $app->run_ok("exec", "prove", "-l", "t");
 
     like $app->stdout, qr/All tests successful/ or diag $app->stderr;
 };

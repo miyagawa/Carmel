@@ -10,21 +10,21 @@ subtest 'carmel rollout' => sub {
 requires 'Module::CPANfile';
 EOF
 
-    $app->run("install");
-    $app->run("rollout");
+    $app->run_ok("install");
+    $app->run_ok("rollout");
     like $app->stdout, qr/Installing Module-CPANfile-.* to/;
 
-    $app->run("rollout", "-v");
+    $app->run_ok("rollout", "-v");
     like $app->stdout, qr/^Installing .*Module\/CPANfile\.pm$/m;
 
     ok $app->path("local/lib/perl5/Module/CPANfile.pm")->exists;
     ok $app->path("local/bin/cpanfile-dump")->exists;
 
-    $app->run("env");
+    $app->run_ok("env");
     my $dir = $app->dir->absolute;
     like $app->stdout, qr!PATH=.*$dir/local/bin:!;
 
-    $app->run("exec", "perl", "-V");
+    $app->run_ok("exec", "perl", "-V");
     like $app->stdout, qr!$dir/local/lib/perl5!;
     unlike $app->stdout, qr/::FastINC/;
 };

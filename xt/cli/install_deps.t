@@ -10,7 +10,7 @@ subtest 'carmel install with cpanfile requirements count' => sub {
 requires 'HTTP::Server::Simple';
 EOF
 
-    $app->run("install");
+    $app->run_ok("install");
     like $app->stdout, qr/Complete! 1 cpanfile dependencies\./ or diag $app->stderr;
 };
 

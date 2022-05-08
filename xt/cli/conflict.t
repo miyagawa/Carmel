@@ -11,7 +11,7 @@ subtest 'conflicts in cpanfile and sub-dependencies' => sub {
     $app->write_cpanfile(<<EOF);
 requires 'Path::Tiny';
 EOF
-    $app->run("install");
+    $app->run_ok("install");
 
     $app->write_cpanfile(<<EOF);
 requires 'Path::Tiny';

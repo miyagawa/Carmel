@@ -10,8 +10,8 @@ subtest 'carmel exec -- ls' => sub {
 requires 'Module::CPANfile';
 EOF
 
-    $app->run("install");
-    $app->run("exec", "--", "perl -V");
+    $app->run_ok("install");
+    $app->run_ok("exec", "--", "perl -V");
 
     like $app->stdout, qr/perl5/ or diag $app->stderr;
 };

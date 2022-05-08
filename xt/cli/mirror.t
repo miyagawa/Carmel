@@ -16,7 +16,7 @@ mirror 'file://$cwd/xt/mirror';
 requires 'HTTP::Tinyish';
 EOF
 
-    $app->run("install");
+    $app->run_ok("install");
     like $app->stdout, qr/Successfully installed HTTP-Tiny-0\.056/
       or diag $app->stderr;
 
@@ -25,7 +25,7 @@ mirror 'file://$cwd/xt/mirror';
 requires 'Class::Tiny';
 EOF
 
-    $app->run("install");
+    $app->run_ok("install");
     like $app->stderr, qr/Couldn't find module .* Class::Tiny/;
 };    
 

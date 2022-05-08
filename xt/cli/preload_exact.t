@@ -10,8 +10,8 @@ subtest 'Carmel::Preload' => sub {
 requires 'JSON', '== 2.94';
 EOF
 
-    $app->run("install");
-    $app->run("exec", "perl", "-e", 'use Carmel::Preload; print $INC{"JSON.pm"}');
+    $app->run_ok("install");
+    $app->run_ok("exec", "perl", "-e", 'use Carmel::Preload; print $INC{"JSON.pm"}');
 
     like $app->stdout, qr!/JSON-.*/blib/lib/JSON\.pm! or diag $app->stderr;
 };

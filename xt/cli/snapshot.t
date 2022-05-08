@@ -10,7 +10,7 @@ subtest 'carmel install produces snapshot' => sub {
 requires 'Class::Tiny', '== 1.003';
 EOF
 
-    $app->run("install");
+    $app->run_ok("install");
 
     ok -e $app->dir->child("cpanfile.snapshot");
 
@@ -20,21 +20,21 @@ EOF
 requires 'Class::Tiny';
 EOF
 
-    $app->run("install");
+    $app->run_ok("install");
     like $app->stdout, qr/Using Class::Tiny \(1\.003\)/, "Use the version in snapshot";
 
     my $artifact = $app->repo->find('Class::Tiny', '== 1.003');
     $artifact->path->remove_tree({ safe => 0 });
 
-    $app->run("install");
+    $app->run_ok("install");
     like $app->stdout, qr/installed Class-Tiny-1\.003/;
 
     $app->write_cpanfile(<<EOF);
 requires 'Class::Tiny', '== 1.004';
 EOF
 
-    $app->run("install");
-    $app->run("list");
+    $app->run_ok("install");
+    $app->run_ok("list");
     like $app->stdout, qr/Class::Tiny \(1\.004\)/, "Bump the version";
 
     like( ($app->snapshot->distributions)[0]->name, qr/Class-Tiny-1\.004/ );
@@ -43,7 +43,7 @@ EOF
 requires 'Hash::MultiValue';
 EOF
 
-    $app->run("install");
+    $app->run_ok("install");
 
     like( ($app->snapshot->distributions)[0]->name, qr/Hash-MultiValue-/,
           "snapshot does not have modules not used anymore" );
@@ -65,7 +65,7 @@ EOF
 requires 'Parse::PMFile';
 EOF
 
-    $app->run("install");
+    $app->run_ok("install");
 
     unlike $app->stderr, qr/Can't find an artifact for Parse::PMFile/;
 };
@@ -77,7 +77,7 @@ subtest 'carmel install on the first run with empty build cache' => sub {
 requires 'Try::Tiny', '== 0.06';
 EOF
 
-    $app->run("install");
+    $app->run_ok("install");
     like( ($app->snapshot->distributions)[0]->name, qr/Try-Tiny-0\.06/ );
 
     for my $v (['Try::Tiny', '0.06'], ['Test::Fatal', '0.016']) {

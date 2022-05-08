@@ -11,13 +11,11 @@ requires 'URI';
 requires 'URI::Escape';
 EOF
 
-    $app->run("install");
-    $app->run("show", "URI::Escape");
-    is $app->exit_code, 0 or diag $app->stderr;
+    $app->run_ok("install");
+    $app->run_ok("show", "URI::Escape");
     like $app->stdout, qr/URI \(/;
 
-    $app->run("show", "URI");
-    is $app->exit_code, 0 or diag $app->stderr;
+    $app->run_ok("show", "URI");
     like $app->stdout, qr/URI \(/;
 };
 

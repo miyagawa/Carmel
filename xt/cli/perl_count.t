@@ -12,7 +12,7 @@ requires 'Path::Tiny';
 EOF
 
 
-    $app->run("install");
+    $app->run_ok("install");
     like $app->stdout, qr/1 cpanfile dependencies/ or diag $app->stderr;
 };
 

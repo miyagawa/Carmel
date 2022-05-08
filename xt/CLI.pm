@@ -69,7 +69,7 @@ sub run_in_dir {
     $self->run(@args);
 }
 
-sub _run {
+sub run {
     my($self, @args) = @_;
 
     my $pushd = File::pushd::pushd $self->dir;
@@ -85,10 +85,10 @@ sub _run {
     $self->stderr($capture[1]);
 }
 
-sub run {
+sub run_ok {
     my($self, @args) = @_;
 
-    $self->_run(@args);
+    $self->run(@args);
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     is $self->exit_code, 0
@@ -98,7 +98,7 @@ sub run {
 sub run_fails {
     my($self, @args) = @_;
 
-    $self->_run(@args);
+    $self->run(@args);
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     is $self->exit_code, 1

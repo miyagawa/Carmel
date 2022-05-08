@@ -37,18 +37,18 @@ requires 'Perl::Build';
 EOF
 
     # pull the artifact
-    $app->run('inject', 'HTTP::Tiny@0.056');
+    $app->run_ok('inject', 'HTTP::Tiny@0.056');
 
     # FIXME: we can't inject optional core dependencies properly
  TODO: {
         local $TODO = "Can't inject core-but-frozen deps to Menlo";
         for (1..2) {
-            $app->run("install");
+            $app->run_ok("install");
             unlike $app->stderr, qr/Can't find an artifact for HTTP::Tiny/;
         }
     }
 
-    $app->run("list");
+    $app->run_ok("list");
     like $app->stdout, qr/HTTP::Tiny \(0\.056\)/;
 };
 

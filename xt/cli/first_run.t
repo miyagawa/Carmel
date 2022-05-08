@@ -10,7 +10,7 @@ subtest 'transit build dependencies not installed on the first run' => sub {
 requires 'Apache::LogFormat::Compiler';
 EOF
 
-    $app->run("install");
+    $app->run_ok("install");
     like $app->snapshot->find("Module::Build::Tiny")->name, qr/Module-Build-Tiny/;
 };
 

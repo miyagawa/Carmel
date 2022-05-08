@@ -10,8 +10,8 @@ subtest 'carmel exec overwrites ENV' => sub {
 requires 'App::Ack';
 EOF
 
-    $app->run("install");
-    $app->run("exec", "which", "ack");
+    $app->run_ok("install");
+    $app->run_ok("exec", "which", "ack");
     like$app->stdout, qr!ack-.*/blib/script/ack! or diag $app->stderr;
 };
 

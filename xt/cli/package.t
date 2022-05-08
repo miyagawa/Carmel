@@ -10,9 +10,9 @@ subtest 'carmel package' => sub {
 requires 'Class::Tiny';
 EOF
 
-    $app->run("install");
+    $app->run_ok("install");
 
-    $app->run("package");
+    $app->run_ok("package");
     ok $app->stdout =~ m!Copying (.*Class-Tiny-.*\.tar\.gz)$!m
       or diag $app->stdout;
 

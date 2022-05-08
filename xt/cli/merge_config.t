@@ -41,10 +41,10 @@ requires 'CPAN::Test::Dummy::Perl5::VersionQV';
 requires 'Module::Build::Tiny';
 EOF
 
-    $app->run("install");
+    $app->run_ok("install");
     like $app->stdout, qr/Complete/;
     
-    $app->run("list");
+    $app->run_ok("list");
 
     like $app->stdout, qr/Module::Build::Tiny \(0\.038\)/
       or diag $app->stderr;

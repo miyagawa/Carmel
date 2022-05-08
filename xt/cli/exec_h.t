@@ -10,8 +10,8 @@ subtest 'carmel exec cmd -h' => sub {
 requires 'Module::CPANfile';
 EOF
 
-    $app->run("install");
-    $app->run("exec", "cpanfile-dump", "-h");
+    $app->run_ok("install");
+    $app->run_ok("exec", "cpanfile-dump", "-h");
 
     like $app->stdout, qr/cpanfile-dump/ or diag $app->stderr;
     unlike $app->stdout, qr/Carmel/;

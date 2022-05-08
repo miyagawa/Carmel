@@ -10,8 +10,8 @@ subtest 'carmel install with exact' => sub {
 requires 'Try::Tiny', '== 0.22';
 EOF
 
-    $app->run("install");
-    $app->run("list");
+    $app->run_ok("install");
+    $app->run_ok("list");
 
     like $app->stdout, qr/Try::Tiny \(0\.22\)/ or diag $app->stderr;
 };

@@ -11,9 +11,9 @@ requires 'Cookie::Baker';
 requires 'URI';
 EOF
 
-    $app->run("install");
+    $app->run_ok("install");
 
-    $app->run("show", "URI");
+    $app->run_ok("show", "URI");
     unlike $app->stderr, qr/Can't find a module named 'URI'/;
 };
 

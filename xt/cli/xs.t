@@ -10,8 +10,8 @@ subtest 'carmel version' => sub {
 requires 'Digest::SHA1';
 EOF
 
-    $app->run("install");
-    $app->run("exec", "perl", "-e", "use Digest::SHA1; print 'ok'");
+    $app->run_ok("install");
+    $app->run_ok("exec", "perl", "-e", "use Digest::SHA1; print 'ok'");
     
     like $app->stdout, qr/ok/ or diag $app->stderr;
 };
