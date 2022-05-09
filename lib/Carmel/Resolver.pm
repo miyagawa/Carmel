@@ -23,13 +23,14 @@ sub resolve_recurse {
         next if $module eq 'perl';
 
         my $want_version = $self->root->requirements_for_module($module);
+        my $dist = $self->find_in_snapshot($module);
+
+        $self->should_handle($module, $want_version, $dist)
+          or next;
 
         my $artifact;
-        my $dist = $self->find_in_snapshot($module);
         if ($dist) {
             $artifact = $self->repo->find_dist($module, $dist->name);
-        } elsif ($self->is_core($module, $want_version)) {
-            next;
         } else {
             $artifact = $self->repo->find_match($module, sub { $self->accepts_all($self->root, $_[0]) });
         }
@@ -54,7 +55,33 @@ sub resolve_recurse {
     }
 }
 
+sub should_handle {
+    my($self, $module, $version, $dist) = @_;
+
+    # not in core
+    return 1 unless $self->is_core($module);
+
+    # core version doesn't satisfy the version
+    return 1 unless $self->core_satisfies($module, $version);
+
+    # core, pinned, and the pinned version is lower than the core version:
+    # remove it from the snapshot and upgrade (#47)
+    return $dist &&
+      version::->parse($dist->version_for($module))
+          >= version::->parse($self->core_version($module));
+}
+
+sub core_version {
+    my($self, $module) = @_;
+    return $Module::CoreList::version{$]+0}{$module} || '0';
+}
+
 sub is_core {
+    my($self, $module) = @_;
+    return exists $Module::CoreList::version{$]+0}{$module};
+}
+
+sub core_satisfies {
     my($self, $module, $want_version) = @_;
     return unless exists $Module::CoreList::version{$]+0}{$module};
 
