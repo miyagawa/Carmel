@@ -16,11 +16,6 @@ sub resolve {
     $self->resolve_recurse($clone, $seen, $depth);
 }
 
-sub find_artifact {
-    my($self, $module, $version) = @_;
-
-}
-
 sub resolve_recurse {
     my($self, $requirements, $seen, $depth) = @_;
 
