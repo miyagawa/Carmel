@@ -79,7 +79,10 @@ EOF
     like $app->stdout, qr/Class::Tiny \(1\.003\)/, "Stay the version";
 
     $app->run_fails("update", 'Class::Tiny@1.008');
-    like $app->stderr, qr/conflicting requirement/;
+    like $app->stderr, qr/conflicts with version required in cpanfile/;
+    
+    $app->run_fails("update", 'Class::Tiny');
+    like $app->stderr, qr/conflicts with version required in cpanfile/;
 };
 
 done_testing;

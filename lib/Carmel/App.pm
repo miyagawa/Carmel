@@ -117,7 +117,7 @@ sub cmd_update {
     my $requirements = $self->requirements;
 
     my $check = sub {
-        my($module, $pathname, $version) = @_;
+        my($module, $pathname, $in_args, $version) = @_;
 
         my $dist = $builder->search_module($module, $version);
         unless ($dist) {
@@ -143,14 +143,19 @@ sub cmd_update {
             } catch {
                 my($err) = /illegal requirements(?: .*?): (.*) at/;
                 my $old = $requirements->requirements_for_module($module);
-                die "Found conflicting requirement for $module: '$old' <=> '$version': $err\n";
+                die "Requested version for $module '$version' conflicts with version required in cpanfile '$old': $err\n";
             };
         } else {
-            my $want = "== " . $dist->version_for($module);
+            my $want_ver = $dist->version_for($module);
             try {
-                $requirements->add_string_requirement($module, $want);
+                $requirements->add_string_requirement($module, $want_ver);
             } catch {
                 # there's an update but it conflicts with specs in cpanfile, ignoring
+                if ($in_args) {
+                    my($err) = /illegal requirements(?: .*?): (.*) at/;
+                    my $old = $requirements->requirements_for_module($module);
+                    die "The update for $module '$want_ver' conflicts with version required in cpanfile '$old' $err\n";
+                }
             };
         }
     };
@@ -160,12 +165,12 @@ sub cmd_update {
             my($module, $version) = split '@', $arg, 2;
             my $dist = $snapshot->find($module)
               or die "$module is not found in the snapshot.\n";
-            $check->($module, $dist->pathname, $version ? "== $version" : undef);
+            $check->($module, $dist->pathname, 1, $version ? "== $version" : undef);
         }
     } else {
         $self->resolve(sub {
             my $artifact = shift;
-            $check->($artifact->package, $artifact->install->{pathname});
+            $check->($artifact->package, $artifact->install->{pathname}, 0);
         });
     }
 
