@@ -194,41 +194,72 @@ sub update_dependencies {
     $self->save_snapshot(\@artifacts);
 }
 
-sub install {
-    my($self, $root_reqs, $snapshot) = @_;
-
-    my $requirements = CPAN::Meta::Requirements->new;
-
-    $self->resolver(
-        root => $root_reqs,
-        snapshot => $snapshot,
-        found => sub {
-            my($artifact) = @_;
-            printf "Using %s (%s)\n", $artifact->package, $artifact->version || '0';
-        },
-        missing => sub {
-            my($module, $want_version) = @_;
-            $requirements->add_string_requirement($module => $want_version);
-        },
-    )->resolve;
-
-    if (my @missing = $requirements->required_modules) {
-        my $cpanfile = Module::CPANfile->from_prereqs({
-            runtime => {
-                requires => $requirements->as_string_hash,
-            },
-        });
-        print "---> Installing new dependencies: ", join(", ", @missing), "\n";
-        my $builder = $self->builder(cpanfile => $cpanfile, snapshot => $snapshot);
-        $builder->install;
-    }
+sub resolve_dependencies {
+    my($self, $root_reqs, $missing, $snapshot) = @_;
 
     my @artifacts;
     $self->resolver(
-        found    => sub { push @artifacts, $_[0] },
         root     => $root_reqs,
         snapshot => $snapshot,
+        found    => sub {
+            my $artifact = shift;
+            printf "Using %s (%s)\n", $artifact->package, $artifact->version || '0';
+            push @artifacts, $artifact;
+        },
+        missing  => sub {
+            my($module, $want_version) = @_;
+            $missing->add_string_requirement($module => $want_version);
+        },
     )->resolve;
+
+    return @artifacts;
+}
+
+sub is_identical_requirement {
+    my($self, $old, $new) = @_;
+
+    return unless $old;
+
+    # not super accurate but enough
+    join(',', sort $old->required_modules) eq join(',', sort $new->required_modules);
+}
+
+sub try_install {
+    my($self, $root_reqs, $snapshot) = @_;
+
+    my $prev;
+    while (1) {
+        my $missing = CPAN::Meta::Requirements->new;
+        my @artifacts = $self->resolve_dependencies($root_reqs, $missing, $snapshot);
+
+        if (!$missing->required_modules) {
+            return @artifacts;
+        }
+
+        if ($self->is_identical_requirement($prev, $missing)) {
+            my $prereqs = $missing->as_string_hash;
+            my $requirements = join ", ", map "$_ => @{[ $prereqs->{$_} || '0' ]}", keys %$prereqs;
+            die "Can't find an artifact for $requirements\n" .
+              "You need to run `carmel install` first to get the modules installed and artifacts built.\n";
+        }
+
+        $prev = $missing;
+
+        my $cpanfile = Module::CPANfile->from_prereqs({
+            runtime => {
+                requires => $missing->as_string_hash,
+            },
+        });
+        print "---> Installing new dependencies: ", join(", ", $missing->required_modules), "\n";
+        my $builder = $self->builder(cpanfile => $cpanfile, snapshot => $snapshot);
+        $builder->install;
+    }
+}
+
+sub install {
+    my($self, $root_reqs, $snapshot) = @_;
+
+    my @artifacts = $self->try_install($root_reqs, $snapshot);
 
     # $root_reqs has been mutated at this point. Reload requirements
     printf "---> Complete! %d cpanfile dependencies. %d modules installed.\n",
