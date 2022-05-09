@@ -101,32 +101,7 @@ sub cmd_inject {
 
 sub cmd_pin {
     my($self, @args) = @_;
-
-    unless (@args) {
-        die "Usage: carmel pin Module\@version ...\n";
-    }
-
-    my $snapshot = $self->snapshot
-      or die "Can't run carmel pin without snapshot. Run `carmel install` first.\n";
-
-    my $requirements = $self->requirements;
-    for my $arg (@args) {
-        my($module, $version) = split '@', $arg, 2;
-        unless (defined $version) {
-            die "Usage: carmel pin Module\@version ...\n";
-        }
-        my $dist = $snapshot->find($module)
-          or die "$module is not found in the snapshot.\n";
-        try {
-            $requirements->add_string_requirement($module, "== $version");
-        } catch {
-            my($err) = /illegal requirements(?: .*?): (.*) at/;
-            my $old = $requirements->requirements_for_module($module);
-            die "Found conflicting requirement for $module: '$old' <=> '== $version': $err\n";
-        };
-    }
-
-    $self->update_dependencies($requirements, $snapshot);
+    die "carmel pin is deprecated. Use `carmel update @args` instead\n";
 }
 
 sub cmd_update {
@@ -139,22 +114,40 @@ sub cmd_update {
     print "---> Checking updates for $target...\n";
 
     my $builder = $self->builder;
+    my $requirements = $self->requirements;
 
-    my @updates;
     my $check = sub {
-        my($module, $pathname) = @_;
+        my($module, $pathname, $version) = @_;
 
-        my $result = $builder->search_module($module);
-        if ($result && $result ne $pathname) {
-            push @updates, $module;
+        my $what = $version ? "$module ($version)" : $module;
+        my $dist = $builder->search_module($module, $version)
+          or die "Can't find $what on CPAN\n";
+
+        if ($dist->pathname ne $pathname) {
+            $snapshot->remove_distributions(sub {
+                my $dist = shift;
+                $dist->provides_module($module);
+            });
         }
+
+        $version = "== " . $dist->version_for($module)
+          unless defined $version;
+
+        try {
+            $requirements->add_string_requirement($module, $version);
+        } catch {
+            my($err) = /illegal requirements(?: .*?): (.*) at/;
+            my $old = $requirements->requirements_for_module($module);
+            die "Found conflicting requirement for $module: '$old' <=> '== $version': $err\n";
+        };
     };
 
     if (@args) {
-        for my $module (@args) {
+        for my $arg (@args) {
+            my($module, $version) = split '@', $arg, 2;
             my $dist = $snapshot->find($module)
               or die "$module is not found in the snapshot.\n";
-            $check->($module, $dist->pathname);
+            $check->($module, $dist->pathname, $version ? "== $version" : undef);
         }
     } else {
         $self->resolve(sub {
@@ -163,19 +156,8 @@ sub cmd_update {
         });
     }
 
-    if (@updates) {
-        for my $module (@updates) {
-            $snapshot->remove_distributions(sub {
-                my $dist = shift;
-                $dist->provides_module($module);
-            });
-        }
-
-        $self->builder(snapshot => $snapshot)->install(@updates);
-    }
-
     # rebuild the snapshot
-    $self->update_dependencies($self->requirements, $snapshot);
+    $self->update_dependencies($requirements, $snapshot);
 }
 
 sub cmd_install {
