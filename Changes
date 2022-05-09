@@ -2,6 +2,9 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.52  2022-05-09 12:51:21 PDT
+        - Fix a bug where carmel update fails when custom mirror is specified in cpanfile (#52)
+
 v0.1.51  2022-05-09 09:59:21 PDT
         - Unified carmel update/pin and deprecated the pin command.
         - carmel update now runs much faster if you already have the build artifacts for the new version.

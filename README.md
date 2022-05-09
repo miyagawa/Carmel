@@ -247,7 +247,9 @@ a new module.
     - Run `carmel update Foo` to pull the latest version of Foo from CPAN, ignoring what's in the snapshot.
     - Update `cpanfile` to explicitly update the version requirement for `Foo`.
 
-# DIFFERENCES WITH CARTON
+# COMPARISONS WITH SIMILAR TOOLS
+
+## Carton
 
 Carmel shares the same goal with Carton, where you can manage your dependencies
 by declaring them in `cpanfile`, and pinning them in `cpanfile.snapshot`. Most
@@ -284,7 +286,7 @@ remove the entire `local` directory to start over.
     snapshot file. Undoing the change in `cpanfile.snapshot` file immediately
     reverts the change.
 
-# DIFFERENCES WITH CPM
+## cpm
 
 [App::cpm](https://metacpan.org/pod/App%3A%3Acpm) is an excellent standalone CPAN installer.
 
