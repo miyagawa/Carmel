@@ -14,6 +14,16 @@ for my $version (qw( 0.056 0.078 )) {
     }
 }
 
+subtest "core modules can still be pinned" => sub {
+    my $app = cli();
+
+    $app->write_cpanfile(<<EOF);
+requires 'HTTP::Tiny', '== 0.056';
+EOF
+    $app->run_ok("install");
+    like $app->stdout, qr/HTTP::Tiny \(0\.056\)/;
+};
+
 sub test_it {
     my($version, $clean) = @_;
 
