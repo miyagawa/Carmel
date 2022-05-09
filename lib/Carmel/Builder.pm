@@ -76,7 +76,7 @@ sub install {
 }
 
 sub search_module {
-    my($self, $module) = @_;
+    my($self, $module, $version) = @_;
 
     local $ENV{PERL_CPANM_HOME} = $self->tempdir;
     local $ENV{PERL_CPANM_OPT};
@@ -88,6 +88,7 @@ sub search_module {
     my $mirror = Module::CPANfile->load($cpanfile)->mirrors->[0];
 
     require Menlo::CLI::Compat;
+    require Carton::Dist;
 
     my $cli = Menlo::CLI::Compat->new;
     $cli->parse_options(
@@ -98,8 +99,19 @@ sub search_module {
         ".",
     );
 
-    my $dist = $cli->search_module($module);
-    return $dist->{pathname} if $dist;
+    my $dist = $cli->search_module($module, $version);
+    if ($dist) {
+        return Carton::Dist->new(
+            name => $dist->{distvname},
+            pathname => $dist->{pathname},
+            provides => {
+                $dist->{module} => {
+                    version => $dist->{module_version},
+                },
+            },
+            version => $dist->{version},
+        );
+    }
 
     return;
 }

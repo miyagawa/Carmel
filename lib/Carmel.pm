@@ -33,7 +33,7 @@ Carmel - CPAN Artifact Repository Manager
   carmel update
 
   # pin modules tp specific versions
-  carmel pin DBI@1.633 Plack@1.0000
+  carmel update DBI@1.633 Plack@1.0000
 
   # Runs your perl script with modules from artifacts
   carmel exec perl ...
