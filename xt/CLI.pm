@@ -91,7 +91,7 @@ sub run_ok {
     $self->run(@args);
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
-    is $self->exit_code, 0
+    is $self->exit_code, 0, "carmel @args succeeded"
       or diag $self->stderr;
 }
 
@@ -101,7 +101,7 @@ sub run_fails {
     $self->run(@args);
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
-    is $self->exit_code, 1
+    is $self->exit_code, 1, "carmel @args failed"
       or diag $self->stderr;
 }
 
