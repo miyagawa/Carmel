@@ -66,4 +66,20 @@ EOF
     like $app->stderr, qr/HTTP::Tiny is not found in the snapshot/;
 };
 
+subtest 'carmel update with pinned cpanfile' => sub {
+    my $app = cli();
+
+    $app->write_cpanfile(<<EOF);
+requires 'Class::Tiny', '== 1.003';
+EOF
+    $app->run_ok("install");
+    $app->run_ok("update");
+
+    $app->run_ok("list");
+    like $app->stdout, qr/Class::Tiny \(1\.003\)/, "Stay the version";
+
+    $app->run_fails("update", 'Class::Tiny@1.008');
+    like $app->stderr, qr/conflicting requirement/;
+};
+
 done_testing;

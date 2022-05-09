@@ -130,16 +130,22 @@ sub cmd_update {
             });
         }
 
-        $version = "== " . $dist->version_for($module)
-          unless defined $version;
-
-        try {
-            $requirements->add_string_requirement($module, $version);
-        } catch {
-            my($err) = /illegal requirements(?: .*?): (.*) at/;
-            my $old = $requirements->requirements_for_module($module);
-            die "Found conflicting requirement for $module: '$old' <=> '== $version': $err\n";
-        };
+        if (defined $version) {
+            try {
+                $requirements->add_string_requirement($module, $version);
+            } catch {
+                my($err) = /illegal requirements(?: .*?): (.*) at/;
+                my $old = $requirements->requirements_for_module($module);
+                die "Found conflicting requirement for $module: '$old' <=> '$version': $err\n";
+            };
+        } else {
+            my $want = "== " . $dist->version_for($module);
+            try {
+                $requirements->add_string_requirement($module, $want);
+            } catch {
+                # there's an update but it conflicts with specs in cpanfile, ignoring
+            };
+        }
     };
 
     if (@args) {
