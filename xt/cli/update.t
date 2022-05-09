@@ -3,6 +3,18 @@ use Test::More;
 use lib ".";
 use xt::CLI;
 
+subtest 'carmel update with mirrors' => sub {
+    my $app = cli();
+
+    $app->write_cpanfile(<<EOF);
+mirror 'http://cpan.metacpan.org';
+requires 'Class::Tiny';
+EOF
+
+    $app->run_ok("install");
+    $app->run_ok("update");
+};
+
 subtest 'carmel update' => sub {
     my $app = cli();
 

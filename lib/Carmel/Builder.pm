@@ -99,6 +99,10 @@ sub search_module {
         ".",
     );
 
+    # This needs to be done to setup http backends for mirror #52
+    $cli->setup_home;
+    $cli->init_tools;
+
     my $dist = $cli->search_module($module, $version);
     if ($dist) {
         return Carton::Dist->new(
