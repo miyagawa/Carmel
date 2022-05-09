@@ -2,6 +2,12 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.51  2022-05-09 09:59:21 PDT
+        - Unified carmel update/pin and deprecated the pin command.
+        - carmel update now runs much faster if you already have the build artifacts for the new version.
+        - Improved the error message when carmel update conflicts with what's in cpanfile
+        - Work around a corner case where carmel update fails with bad NAME in MYMETA e.g. LWP (#51)
+
 v0.1.50  2022-05-09 00:23:17 PDT
         - Fixed a bug where core modules in the snapshot can be ignored in the fist carmel install (#47)
         - Carmel now automatically upgrades core modules specified in the snapshot if the version is
