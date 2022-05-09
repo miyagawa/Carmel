@@ -119,9 +119,16 @@ sub cmd_update {
     my $check = sub {
         my($module, $pathname, $version) = @_;
 
-        my $what = $version ? "$module ($version)" : $module;
-        my $dist = $builder->search_module($module, $version)
-          or die "Can't find $what on CPAN\n";
+        my $dist = $builder->search_module($module, $version);
+        unless ($dist) {
+            if ($version) {
+                die "Can't find $module ($version) on CPAN\n";
+            } else {
+                # workaround bad main package e.g. LWP => libwww::perl
+                warn "Can't find $module on CPAN\n";
+                return;
+            }
+        }
 
         if ($dist->pathname ne $pathname) {
             $snapshot->remove_distributions(sub {
