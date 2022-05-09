@@ -68,7 +68,7 @@ sub should_handle {
     # remove it from the snapshot and upgrade (#47)
     return $dist &&
       version::->parse($dist->version_for($module))
-          >= version::->parse($self->core_version($module));
+          > version::->parse($self->core_version($module));
 }
 
 sub core_version {
