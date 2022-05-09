@@ -2,6 +2,12 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.50  2022-05-09 00:23:17 PDT
+        - Fixed a bug where core modules in the snapshot can be ignored in the fist carmel install (#47)
+        - Carmel now automatically upgrades core modules specified in the snapshot if the version is
+          lower than what's in core, and cpanfile doesn't have any specific requirement. (#49)
+        - Speed up carmel install when all the required versions are in the artifacts
+
 v0.1.49  2022-05-08 11:47:37 PDT
         - Speed up the artifacts search and snapshot generation with lazy-loading and JSON backend
 
