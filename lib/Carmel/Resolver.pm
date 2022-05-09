@@ -27,7 +27,7 @@ sub resolve_recurse {
         my $artifact;
         my $dist = $self->find_in_snapshot($module);
         if ($dist) {
-            $artifact = $self->repo->find_match($module, sub { $_[0]->distname eq $dist->name }, $dist->name);
+            $artifact = $self->repo->find_dist($module, $dist->name);
         } elsif ($self->is_core($module, $want_version)) {
             next;
         } else {

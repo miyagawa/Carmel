@@ -68,15 +68,19 @@ sub find_all {
     $self->_find($package, $want_version, 1);
 }
 
-sub find_match {
-    my($self, $package, $cb, $distname) = @_;
+sub find_dist {
+    my($self, $package, $distname) = @_;
 
-    if ($distname) {
-        my $dir = $self->path->child($distname);
-        if ($dir->exists) {
-            return Carmel::Artifact->new($dir);
-        }
+    my $dir = $self->path->child($distname);
+    if ($dir->exists) {
+        return Carmel::Artifact->new($dir);
     }
+
+    return $self->find_match($package, sub { $_[0]->distname eq $distname });
+}
+
+sub find_match {
+    my($self, $package, $cb) = @_;
 
     for my $artifact ($self->list($package)) {
         return $artifact if $cb->($artifact);
