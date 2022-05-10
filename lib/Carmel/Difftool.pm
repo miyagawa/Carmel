@@ -6,9 +6,13 @@ use Carton::Snapshot;
 use CPAN::DistnameInfo;
 use version;
 use Class::Tiny;
+use Capture::Tiny qw(capture);
+use Path::Tiny;
 
 use constant RED => 31;
 use constant GREEN => 32;
+use constant YELLOW => 33;
+use constant PURPLE => 35;
 
 sub color {
     my($code, $text) = @_;
@@ -39,12 +43,54 @@ sub diff {
     $self->load_snapshot($args[0], \%dists, 0);
     $self->load_snapshot($args[1], \%dists, 1);
 
-    for my $dist (sort keys %dists) {
-        $self->print_diff($dist, @{$dists{$dist}});
+    if ($Carmel::DEBUG) {
+        $self->text_diff(\%dists);
+    } else {
+        for my $dist (sort { lc($a) cmp lc($b) } keys %dists) {
+            $self->dist_diff($dist, @{$dists{$dist}});
+        }
     }
 }
 
-sub print_diff {
+sub text_diff {
+    my($self, $dists) = @_;
+
+    my @text;
+    for my $dist (sort { lc($a) cmp lc($b) } keys %$dists) {
+        for my $idx (0, 1) {
+            if ($dists->{$dist}[$idx]) {
+                $text[$idx] .= "$dist\n  " . $dists->{$dist}[$idx]->pathname . "\n";
+            }
+        }
+    }
+
+    my @files = map {
+        my $tempfile = Path::Tiny->tempfile;
+        $tempfile->spew($_);
+        $tempfile;
+    } @text;
+
+    my($stdout, $stderr, $code) = capture { system("diff", "-u", @files) };
+    print $self->style_git_diff(split /\n/, $stdout);
+
+    return;
+}
+
+sub style_git_diff {
+    my($self, @lines) = @_;
+
+    for (@lines) {
+        chomp;
+        s!^\-\-\- .*?$!color(YELLOW, "--- a/cpanfile.snapshot")!e    and next;
+        s!^\+\+\+ .*?$!color(YELLOW, "+++ b/cpanfile.snapshot")!e and next;
+        s/^([\-\+])(.+)$/color($1 eq '+' ? GREEN : RED, "$1$2")/egm and next;
+        s/^(\@\@.*?\@\@)$/color(PURPLE, $1)/egm;
+    }
+
+    return join("\n", @lines, '');
+}
+
+sub dist_diff {
     my($self, $dist, $old, $new) = @_;
 
     # unchanged
@@ -52,35 +98,17 @@ sub print_diff {
 
     # added
     if (!$old && $new) {
-        if ($Carmel::DEBUG) {
-            printf "%s (%s)\n%s\n", $dist,
-              color(GREEN, $new->version),
-              color(GREEN, "+ " . $new->pathname);
-        } else {
-            printf "+ %s (%s)\n", $dist, color(GREEN, $new->version);
-        }
+        printf "+ %s (%s)\n", $dist, color(GREEN, $new->version);
         return;
     }
 
     # removed
     if ($old && !$new) {
-        if ($Carmel::DEBUG) {
-            printf "%s (%s)\n%s\n", $dist,
-              color(RED, $old->version),
-              color(RED, "- " . $old->pathname);
-        } else {
-            printf "- %s (%s)\n", $dist, color(RED, $old->version);
-        }
+        printf "- %s (%s)\n", $dist, color(RED, $old->version);
         return;
     }
 
-    if ($Carmel::DEBUG) {
-        printf "%s (%s -> %s)\n%s\n%s\n", $dist,
-          color(RED, $old->version), color(GREEN, $new->version),
-          color(RED, "- " . $old->pathname), color(GREEN, "+ " . $new->pathname);
-    } else {
-        printf "  %s (%s -> %s)\n", $dist, color(RED, $old->version), color(GREEN, $new->version);
-    }
+    printf "  %s (%s -> %s)\n", $dist, color(RED, $old->version), color(GREEN, $new->version);
 }
 
 1;
