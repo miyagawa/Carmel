@@ -16,7 +16,7 @@ use constant PURPLE => 35;
 
 sub color {
     my($code, $text) = @_;
-    return $text unless -t STDOUT && !$ENV{NO_COLOR};
+    return $text if !-t STDOUT or $ENV{NO_COLOR};
     return "\e[${code}m${text}\e[0m";
 }
 
