@@ -424,9 +424,7 @@ sub cmd_diff {
 
     my $snapshot_path = $self->cpanfile->snapshot_path->relative;
 
-    unless ($snapshot_path->parent->child('.git')->exists) {
-        die "not a git repository: Can't locate .git directory\n";
-    }
+    # Don't check if .git exists, and let git(2) handle the error
 
     if ($ENV{CARMEL_USE_DIFFTOOL}) {
         my $cmd = 'carmel difftool';
