@@ -4,12 +4,11 @@ use warnings;
 
 use Carton::Snapshot;
 use CPAN::DistnameInfo;
-use Class::Tiny;
 use version;
+use Class::Tiny;
 
 use constant RED => 31;
 use constant GREEN => 32;
-use constant PURPLE => 35;
 
 sub color {
     my($code, $text) = @_;
@@ -82,5 +81,3 @@ sub print_diff {
 }
 
 1;
-
-
