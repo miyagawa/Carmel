@@ -14,9 +14,9 @@ EOF
     $app->run_fails("diff");
     like $app->stderr, qr/Can't retrieve snapshot content/;
 
-    $app->cmd("git", "init");
-    $app->cmd("git", "add", ".");
-    $app->cmd("git", "commit", "-m", "initial");
+    $app->cmd_ok("git", "init");
+    $app->cmd_ok("git", "add", ".");
+    $app->cmd_ok("git", "commit", "-m", "initial");
 
     $app->write_cpanfile(<<EOF);
 requires 'Class::Tiny';

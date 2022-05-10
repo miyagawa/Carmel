@@ -82,6 +82,16 @@ sub cmd {
     $self->stderr($capture[1]);
 }
 
+sub cmd_ok {
+    my($self, @args) = @_;
+
+    $self->cmd(@args);
+
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    is $self->exit_code, 0, "carmel @args succeeded"
+      or diag $self->stderr;
+}
+
 sub run_in_dir {
     my($self, $dir, @args) = @_;
     local $self->{dir} = $self->dir->child($dir);
