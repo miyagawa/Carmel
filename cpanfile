@@ -12,6 +12,7 @@ requires 'Path::Tiny', '0.068';
 requires 'Try::Tiny', '0.20';
 requires 'File::Copy::Recursive';
 requires 'CPAN::DistnameInfo';
+requires 'List::Util';
 
 requires 'File::pushd', '1.009';
 requires 'ExtUtils::Install', '1.47';

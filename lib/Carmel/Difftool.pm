@@ -8,6 +8,7 @@ use version;
 use Class::Tiny;
 use Capture::Tiny qw(capture);
 use Path::Tiny;
+use List::Util qw(max);
 
 use constant RED => 31;
 use constant GREEN => 32;
@@ -36,6 +37,11 @@ sub load_snapshot {
     }
 }
 
+sub max_len {
+    my @list = @_;
+    return max map { defined($_) ? length : 0 } @list;
+}
+
 sub diff {
     my($self, @args) = @_;
 
@@ -46,8 +52,12 @@ sub diff {
     if ($Carmel::DEBUG) {
         $self->text_diff(\%dists);
     } else {
+        # compute longest dist name and versions for printing
+        my $npad  = max_len keys %dists;
+        my $vpadl = max_len map { $_->[0] && $_->[0]->version } values %dists;
+        my $vpadr = max_len map { $_->[1] && $_->[1]->version } values %dists;
         for my $dist (sort { lc($a) cmp lc($b) } keys %dists) {
-            $self->dist_diff($dist, @{$dists{$dist}});
+            $self->dist_diff($npad, $vpadl, $vpadr, $dist, @{$dists{$dist}});
         }
     }
 }
@@ -110,24 +120,33 @@ sub style_git_diff {
 }
 
 sub dist_diff {
-    my($self, $dist, $old, $new) = @_;
+    my($self, $npad, $vpadl, $vpadr, $dist, $old, $new) = @_;
 
     # unchanged
     return if $old && $new && $old->distvname eq $new->distvname;
 
+    my $fmt = "%-${npad}s";
+    my $vl = sub { sprintf("%${vpadl}s", $_[0]) };
+    my $vr = sub { sprintf("%${vpadr}s", $_[0]) };
+
     # added
     if (!$old && $new) {
-        printf "+ %s (%s)\n", $dist, color(GREEN, $new->version);
+        printf "$fmt  %s  %s\n", $dist,
+          $vl->(""),
+          color(GREEN, $vr->($new->version));
         return;
     }
 
     # removed
     if ($old && !$new) {
-        printf "- %s (%s)\n", $dist, color(RED, $old->version);
+        printf "$fmt  %s\n", $dist,
+          color(RED, $vl->($old->version));
         return;
     }
 
-    printf "  %s (%s -> %s)\n", $dist, color(RED, $old->version), color(GREEN, $new->version);
+    printf "$fmt  %s  %s\n", $dist,
+      color(RED, $vl->($old->version)),
+      color(GREEN, $vr->($new->version));
 }
 
 1;
