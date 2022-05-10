@@ -100,10 +100,10 @@ sub style_git_diff {
 
     for (@lines) {
         chomp;
-        s!^\-\-\- .*?$!color(YELLOW, "--- a/cpanfile.snapshot")!e    and next;
+        s!^\-\-\- .*?$!color(YELLOW, "--- a/cpanfile.snapshot")!e and next;
         s!^\+\+\+ .*?$!color(YELLOW, "+++ b/cpanfile.snapshot")!e and next;
-        s/^([\-\+])(.+)$/color($1 eq '+' ? GREEN : RED, "$1$2")/egm and next;
-        s/^(\@\@.*?\@\@)$/color(PURPLE, $1)/egm;
+        s/^([\-\+])(.+)$/color($1 eq '+' ? GREEN : RED, "$1$2")/e and next;
+        s/^(\@\@.*?\@\@)$/color(PURPLE, $1)/e;
     }
 
     return join("\n", @lines, '');
