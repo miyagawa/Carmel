@@ -127,7 +127,7 @@ sub dist_diff {
         return;
     }
 
-    printf "  %s (%s -> %s)\n", $dist, color(RED, $old->version), color(GREEN, $new->version);
+    printf "! %s (%s -> %s)\n", $dist, color(RED, $old->version), color(GREEN, $new->version);
 }
 
 1;
