@@ -426,7 +426,7 @@ sub cmd_diff {
 
     # Don't check if .git exists, and let git(2) handle the error
 
-    if ($ENV{CARMEL_USE_DIFFTOOL}) {
+    if ($ENV{PERL_CARMEL_USE_DIFFTOOL}) {
         my $cmd = 'carmel difftool';
         $cmd .= ' -v' if $self->verbose;
 

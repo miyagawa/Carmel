@@ -64,16 +64,35 @@ sub text_diff {
         }
     }
 
+    $self->try_text_diff(@text)
+      or $self->system_diff(@text);
+}
+
+sub try_text_diff {
+    my($self, @text) = @_;
+
+    return if $ENV{PERL_CARMEL_USE_SYSTEM_DIFF};
+
+    eval { require Text::Diff; 1 }
+      or return;
+
+    my $diff = Text::Diff::diff(\$text[0], \$text[1], { FILENAME_A => "a", FILENAME_B => "b" });
+    print $self->style_git_diff(split /\n/, $diff);
+
+    return 1;
+}
+
+sub system_diff {
+    my($self, @text) = @_;
+
     my @files = map {
-        my $tempfile = Path::Tiny->tempfile;
-        $tempfile->spew($_);
-        $tempfile;
+        my $temp = Path::Tiny->tempfile;
+        $temp->spew($_);
+        $temp;
     } @text;
 
     my($stdout, $stderr, $code) = capture { system("diff", "-u", @files) };
     print $self->style_git_diff(split /\n/, $stdout);
-
-    return;
 }
 
 sub style_git_diff {
