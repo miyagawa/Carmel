@@ -117,17 +117,23 @@ sub dist_diff {
 
     # added
     if (!$old && $new) {
-        printf "+ %s (%s)\n", $dist, color(GREEN, $new->version);
+        printf "%s %s (%s)\n",
+          color(YELLOW, 'A'),
+          $dist, color(GREEN, $new->version);
         return;
     }
 
-    # removed
+    # deleted
     if ($old && !$new) {
-        printf "- %s (%s)\n", $dist, color(RED, $old->version);
+        printf "%s %s (%s)\n",
+          color(YELLOW, 'D'),
+          $dist, color(RED, $old->version);
         return;
     }
 
-    printf "! %s (%s -> %s)\n", $dist, color(RED, $old->version), color(GREEN, $new->version);
+    printf "%s %s (%s -> %s)\n",
+      color(GREEN, 'M'),
+      $dist, color(RED, $old->version), color(GREEN, $new->version);
 }
 
 1;
