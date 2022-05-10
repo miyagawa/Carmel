@@ -34,7 +34,9 @@ EOF
     $app->dir->child('t')->mkpath;
     $app->run_in_dir('t', "diff");
     like $app->stdout, qr/Class-Tiny \(1\.006 -> /;
-      
+
+    $app->run_ok("diff", "-v");
+    like $app->stdout, qr/-  DAGOLDEN\/Class-Tiny-1\.006\.tar\.gz/;
 };
 
 done_testing;
