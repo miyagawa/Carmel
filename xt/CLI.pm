@@ -63,6 +63,25 @@ sub repo {
     Carmel::App->new->build_repo;
 }
 
+sub cmd_in_dir {
+    my($self, $dir, @args) = @_;
+    local $self->{dir} = $self->dir->child($dir);
+    $self->run(@args);
+}
+
+sub cmd {
+    my($self, @args) = @_;
+
+    my $pushd = File::pushd::pushd $self->dir;
+    my @capture = capture {
+        my $code = system @args;
+        $self->exit_code($code);
+    };
+
+    $self->stdout($capture[0]);
+    $self->stderr($capture[1]);
+}
+
 sub run_in_dir {
     my($self, $dir, @args) = @_;
     local $self->{dir} = $self->dir->child($dir);
