@@ -35,4 +35,4 @@ jobs:
           cpanm -nq --dev Menlo Carton && \
           cpanm -nq --with-develop --installdeps .
       - name: Run Tests
-        run: prove -lr xt
+        run: prove -j10 -lr xt
