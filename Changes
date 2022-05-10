@@ -2,6 +2,9 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.53  2022-05-10 02:16:50 PDT
+        - Added new command carmel diff to nicely format cpanfile.snapshot diff (#54)
+
 v0.1.52  2022-05-09 12:51:21 PDT
         - Fix a bug where carmel update fails when custom mirror is specified in cpanfile (#52)
 

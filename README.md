@@ -25,6 +25,9 @@ Carmel - CPAN Artifact Repository Manager
     # pin modules tp specific versions
     carmel update DBI@1.633 Plack@1.0000
 
+    # show diffs for cpanfile.snapshot in a nice way
+    carmel diff
+
     # Runs your perl script with modules from artifacts
     carmel exec perl ...
 
