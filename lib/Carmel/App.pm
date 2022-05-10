@@ -419,6 +419,43 @@ sub cmd_list {
     }
 }
 
+sub cmd_diff {
+    my $self = shift;
+
+    unless (-e '.git') {
+        die "carmel diff only supports Git for now\n";
+    }
+
+    my $snapshot_path = $self->locate_cpanfile->relative . '.snapshot';
+
+    if ($ENV{CARMEL_USE_DIFFTOOL}) {
+        my $cmd = 'carmel difftool';
+        $cmd .= ' -v' if $self->verbose;
+
+        system 'git', 'difftool', '--no-prompt',
+          '--extcmd', $cmd, $snapshot_path;
+    } else {
+        require Carmel::Difftool;
+
+        my $content = `git show HEAD:$snapshot_path`
+          or die "carmel diff: Can't retrieve snapshot content\n";
+        my $path = Path::Tiny->tempfile;
+        $path->spew($content);
+
+        my $diff = Carmel::Difftool->new;
+        $diff->diff($path, $snapshot_path);
+    }
+}
+
+sub cmd_difftool {
+    my($self, @args) = @_;
+
+    require Carmel::Difftool;
+
+    my $diff = Carmel::Difftool->new;
+    $diff->diff(@args);
+}
+
 sub resolve {
     my($self, $cb) = @_;
     $self->resolver(found => $cb)->resolve;
