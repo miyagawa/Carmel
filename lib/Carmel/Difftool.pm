@@ -19,6 +19,9 @@ sub color {
 sub load_snapshot {
     my($self, $file, $dists, $index) = @_;
 
+    defined $file
+      or die "Usage: carmel difftool LOCAL REMOTE\n";
+
     my $snapshot = Carton::Snapshot->new(path => $file);
     $snapshot->load;
 
