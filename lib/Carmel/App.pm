@@ -422,11 +422,11 @@ sub cmd_list {
 sub cmd_diff {
     my $self = shift;
 
-    unless (-e '.git') {
-        die "carmel diff only supports Git for now\n";
-    }
+    my $snapshot_path = $self->cpanfile->snapshot_path->relative;
 
-    my $snapshot_path = $self->locate_cpanfile->relative . '.snapshot';
+    unless ($snapshot_path->parent->child('.git')->exists) {
+        die "not a git repository: Can't locate .git directory\n";
+    }
 
     if ($ENV{CARMEL_USE_DIFFTOOL}) {
         my $cmd = 'carmel difftool';
@@ -438,7 +438,7 @@ sub cmd_diff {
         require Carmel::Difftool;
 
         my $content = `git show HEAD:$snapshot_path`
-          or die "carmel diff: Can't retrieve snapshot content\n";
+          or die "Can't retrieve snapshot content for $snapshot_path\n";
         my $path = Path::Tiny->tempfile;
         $path->spew($content);
 
