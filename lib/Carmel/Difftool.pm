@@ -46,9 +46,7 @@ sub diff {
     if ($Carmel::DEBUG) {
         $self->text_diff(\%dists);
     } else {
-        for my $dist (sort { lc($a) cmp lc($b) } keys %dists) {
-            $self->dist_diff($dist, @{$dists{$dist}});
-        }
+        $self->simple_diff(\%dists);
     }
 }
 
@@ -107,6 +105,14 @@ sub style_git_diff {
     }
 
     return join("\n", @lines, '');
+}
+
+sub simple_diff {
+    my($self, $dists) = @_;
+
+    for my $dist (sort { lc($a) cmp lc($b) } keys %$dists) {
+        $self->dist_diff($dist, @{$dists->{$dist}});
+    }
 }
 
 sub dist_diff {
