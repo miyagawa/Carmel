@@ -6,6 +6,11 @@ use xt::CLI;
 subtest 'carmel diff' => sub {
     my $app = cli();
 
+    if ($ENV{CI}) {
+        $app->cmd_ok("git", "config", "--global", "user.email", 'test@example.com');
+        $app->cmd_ok("git", "config", "--global", "user.name", "Test");
+    }
+
     $app->write_cpanfile(<<EOF);
 requires 'Class::Tiny', '== 1.006';
 EOF
