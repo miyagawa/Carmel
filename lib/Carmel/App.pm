@@ -111,8 +111,7 @@ sub cmd_update {
     my $snapshot = $self->snapshot
       or die "Can't run carmel update without snapshot. Run `carmel install` first.\n";
 
-    my $target = @args ? join(", ", @args) : "all the modules in the snapshot";
-    print "---> Checking updates for $target...\n";
+    print "---> Checking updates...\n";
 
     my $builder = $self->builder;
     my $requirements = $self->requirements;
