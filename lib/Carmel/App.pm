@@ -9,6 +9,7 @@ use Carmel::Builder;
 use Carmel::CPANfile;
 use Carmel::Repository;
 use Carmel::Resolver;
+use Carmel::ProgressBar qw(progress);
 use Config qw(%Config);
 use CPAN::Meta::Requirements;
 use Getopt::Long ();
@@ -110,8 +111,7 @@ sub cmd_update {
     my $snapshot = $self->snapshot
       or die "Can't run carmel update without snapshot. Run `carmel install` first.\n";
 
-    my $target = @args ? join(", ", @args) : "all the modules in the snapshot";
-    print "---> Checking updates for $target...\n";
+    print "---> Checking updates...\n";
 
     my $builder = $self->builder;
     my $requirements = $self->requirements;
@@ -168,10 +168,13 @@ sub cmd_update {
             $check->($module, $dist->pathname, 1, $version ? "== $version" : undef);
         }
     } else {
-        $self->resolve(sub {
+        my @artifacts;
+        $self->resolve(sub { push @artifacts, $_[0] });
+
+        progress \@artifacts, sub {
             my $artifact = shift;
             $check->($artifact->package, $artifact->install->{pathname}, 0);
-        });
+        };
     }
 
     # rebuild the snapshot
