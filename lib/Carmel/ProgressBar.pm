@@ -11,7 +11,6 @@ our @EXPORT = qw(progress);
 sub progress {
     my($args, $code) = @_;
 
-    my $do = -t STDOUT;
     my $class = __PACKAGE__;
 
     my $self = $class->new(
@@ -19,6 +18,9 @@ sub progress {
         total => scalar(@$args),
         quiet => !-t STDOUT,
     );
+
+    local $| = 1
+      unless $self->quiet;
 
     $self->update(0);
 
