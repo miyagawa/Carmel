@@ -113,6 +113,12 @@ sub cmd_update {
 
     print "---> Checking updates...\n";
 
+    $self->update_or_install($snapshot, @args);
+}
+
+sub update_or_install {
+    my($self, $snapshot, @args) = @_;
+
     my $builder = $self->builder;
     my $requirements = $self->requirements;
 
@@ -130,7 +136,7 @@ sub cmd_update {
             }
         }
 
-        if ($dist->pathname ne $pathname) {
+        if ($dist->pathname ne $pathname && $snapshot) {
             $snapshot->remove_distributions(sub {
                 my $dist = shift;
                 $dist->provides_module($module);
@@ -163,7 +169,7 @@ sub cmd_update {
     if (@args) {
         for my $arg (@args) {
             my($module, $version) = split '@', $arg, 2;
-            my $dist = $snapshot->find($module);
+            my $dist = $snapshot ? $snapshot->find($module) : undef;
             if ($dist) {
                 $check->($module, $dist->pathname, 1, $version ? "== $version" : undef);
             } elsif (defined $requirements->requirements_for_module($module)) {
@@ -176,17 +182,27 @@ sub cmd_update {
         my $missing = $requirements->clone;
 
         my @checks;
-        $self->resolve(sub {
-            my $artifact = shift;
-            for my $pkg (keys %{$artifact->provides}) {
-                $missing->clear_requirement($pkg);
-            }
-            push @checks, [ $artifact->package, $artifact->install->{pathname}, 0 ];
-        });
+        my $resolver = $self->resolver(
+            root     => $self->requirements->clone,
+            snapshot => $snapshot,
+            found    => sub {
+                my $artifact = shift;
+                for my $pkg (keys %{$artifact->provides}) {
+                    $missing->clear_requirement($pkg);
+                }
+                push @checks, [ $artifact->package, $artifact->install->{pathname}, 0 ];
+            },
+            missing  => sub {
+                my($module, $want_version) = @_;
+                $missing->add_string_requirement($module => $want_version);
+            },
+        );
+        $resolver->resolve;
 
-        # specified in cpanfile but not in snapshot, possibly core
+        # snapshot not supplied (first carmel install), or
+        # specified in cpanfile but not in snapshot, possibly core module
         for my $module ($missing->required_modules) {
-            push @checks, [ $module, '', 1 ];
+            push @checks, [ $module, '', 0 ];
         }
 
         progress \@checks, sub { $check->(@{$_[0]}) };
@@ -201,7 +217,13 @@ sub cmd_install {
 
     die "Usage: carmel install\n" if @args;
 
-    $self->update_dependencies($self->requirements, $self->snapshot);
+    my $snapshot = $self->snapshot;
+    if ($snapshot) {
+        $self->update_dependencies($self->requirements, $snapshot);
+    } else {
+        print "---> Installing modules...\n";
+        $self->update_or_install($snapshot);
+    }
 }
 
 sub update_dependencies {
