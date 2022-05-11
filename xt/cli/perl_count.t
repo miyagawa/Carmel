@@ -13,6 +13,7 @@ EOF
 
 
     $app->run_ok("install");
+    unlike $app->stderr, qr/Can't find perl on CPAN/;
     like $app->stdout, qr/1 cpanfile dependencies/ or diag $app->stderr;
 };
 

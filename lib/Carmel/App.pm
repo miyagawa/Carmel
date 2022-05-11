@@ -125,6 +125,8 @@ sub update_or_install {
     my $check = sub {
         my($module, $pathname, $in_args, $version) = @_;
 
+        return if $module eq 'perl';
+
         my $dist = $builder->search_module($module, $version);
         unless ($dist) {
             if ($version) {
