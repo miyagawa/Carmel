@@ -36,7 +36,6 @@ sub install {
         unshift @cmd,
           "--mirror-index", $path,
           "--cascade-search",
-          "--mirror", "http://cpan.metacpan.org";
     }
 
     local $ENV{PERL_CPANM_HOME} = $self->tempdir;
@@ -57,7 +56,7 @@ sub install {
     my $cli = Menlo::CLI::Compat->new;
     $cli->parse_options(
         ($Carmel::DEBUG ? () : "--quiet"),
-        ($mirror ? ("-M", $mirror) : ()),
+        ($mirror ? ("-M", $mirror) : ("--mirror", "https://cpan.metacpan.org/")),
         "--notest",
         "--save-dists", $self->repository_base->child('cache'),
         "-L", $lib,
