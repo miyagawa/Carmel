@@ -75,7 +75,7 @@ EOF
     unlike( $app->snapshot->find("Try::Tiny")->name, qr/Try-Tiny-0\.28/ );
 
     $app->run_fails("update", "HTTP::Tiny");
-    like $app->stderr, qr/HTTP::Tiny is not found in the snapshot/;
+    like $app->stderr, qr/HTTP::Tiny is not found in/;
 };
 
 subtest 'carmel update with pinned cpanfile' => sub {

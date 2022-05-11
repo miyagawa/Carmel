@@ -163,18 +163,33 @@ sub cmd_update {
     if (@args) {
         for my $arg (@args) {
             my($module, $version) = split '@', $arg, 2;
-            my $dist = $snapshot->find($module)
-              or die "$module is not found in the snapshot.\n";
-            $check->($module, $dist->pathname, 1, $version ? "== $version" : undef);
+            my $dist = $snapshot->find($module);
+            if ($dist) {
+                $check->($module, $dist->pathname, 1, $version ? "== $version" : undef);
+            } elsif (defined $requirements->requirements_for_module($module)) {
+                $check->($module, '', 1, $version ? "== $version" : undef);
+            } else {
+                die "$module is not found in cpanfile or cpanfile.snapshot\n";
+            }
         }
     } else {
-        my @artifacts;
-        $self->resolve(sub { push @artifacts, $_[0] });
+        my $missing = $requirements->clone;
 
-        progress \@artifacts, sub {
+        my @checks;
+        $self->resolve(sub {
             my $artifact = shift;
-            $check->($artifact->package, $artifact->install->{pathname}, 0);
-        };
+            for my $pkg (keys %{$artifact->provides}) {
+                $missing->clear_requirement($pkg);
+            }
+            push @checks, [ $artifact->package, $artifact->install->{pathname}, 0 ];
+        });
+
+        # specified in cpanfile but not in snapshot, possibly core
+        for my $module ($missing->required_modules) {
+            push @checks, [ $module, '', 1 ];
+        }
+
+        progress \@checks, sub { $check->(@{$_[0]}) };
     }
 
     # rebuild the snapshot
