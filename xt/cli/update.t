@@ -7,7 +7,7 @@ subtest 'carmel update with mirrors' => sub {
     my $app = cli();
 
     $app->write_cpanfile(<<EOF);
-mirror 'http://cpan.metacpan.org';
+mirror 'https://cpan.metacpan.org';
 requires 'Class::Tiny';
 EOF
 
