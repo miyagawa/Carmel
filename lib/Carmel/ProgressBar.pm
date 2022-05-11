@@ -11,6 +11,8 @@ our @EXPORT = qw(progress);
 sub progress {
     my($args, $code) = @_;
 
+    return unless @$args;
+
     my $class = __PACKAGE__;
 
     my $self = $class->new(
