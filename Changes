@@ -2,6 +2,9 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.54  2022-05-10 21:54:59 PDT
+        - Add a simple progress bar to carmel update (#56)
+
 v0.1.53  2022-05-10 02:16:50 PDT
         - Added new command carmel diff to nicely format cpanfile.snapshot diff (#54)
 
