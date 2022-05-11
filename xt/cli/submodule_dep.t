@@ -16,15 +16,12 @@ EOF
     $app->run_ok("install");
     $app->dir->child("cpanfile.snapshot")->remove;
 
-    # because it's random, run it twice
- TODO: {
-        local $TODO = "Artifact provides are not compared with root cpanfile requirement";
-        for (1..2) {
-            $app->run_ok("install");
-            like $app->stdout, qr/Using CPAN::Test::Dummy::Perl5::Deps::UndefModule/;
-            like $app->stdout, qr/Using CPAN::Test::Dummy::Perl5::VersionBump \(0\.01\)/;
-            unlike $app->stdout, qr/Using CPAN::Test::Dummy::Perl5::VersionBump \(0\.02\)/;
-        }
+    # because it could be random, run it twice
+    for (1..2) {
+        $app->run_ok("install");
+        like $app->stdout, qr/Using CPAN::Test::Dummy::Perl5::Deps::UndefModule/;
+        like $app->stdout, qr/Using CPAN::Test::Dummy::Perl5::VersionBump \(0\.01\)/;
+        unlike $app->stdout, qr/Using CPAN::Test::Dummy::Perl5::VersionBump \(0\.02\)/;
     }
 };
 
