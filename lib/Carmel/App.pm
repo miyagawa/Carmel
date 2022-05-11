@@ -454,7 +454,7 @@ sub cmd_diff {
         require Carmel::Difftool;
 
         my $content = `git show HEAD:$snapshot_path`
-          or die "Can't retrieve snapshot content for $snapshot_path\n";
+          or die "Can't retrieve snapshot content (not in git repository?)\n";
         my $path = Path::Tiny->tempfile;
         $path->spew($content);
 
