@@ -2,6 +2,9 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.1.56  2022-05-11 12:40:21 PDT
+        - carmel install without the snapshot will install the latest versions (#53)
+
 v0.1.55  2022-05-11 00:20:03 PDT
         - carmel update now updates core modules specified in cpanfile (#48)
         - Fix a bug where carmel update fails with division by zero when there's no dist in snapshot
