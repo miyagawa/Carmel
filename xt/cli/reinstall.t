@@ -29,7 +29,10 @@ EOF
     like $app->stdout, qr/installed Class-Tiny-/;
     like $app->stdout, qr/installed Try-Tiny-0\.30/;
 
-    ok $app->dir->child(".carmel/builds/Try-Tiny-0.30/blib/lib/Try/Tiny.pm")->exists;
+    if ($ENV{TEST_CLEAN}) {
+        ok $app->dir->child(".carmel/builds/Try-Tiny-0.30/blib/lib/Try/Tiny.pm")->exists;
+    }
+
     $app->run_ok("exec", "perl", "-e", 'use Try::Tiny; print $INC{"Try/Tiny.pm"}');
 
     $app->run_fails("reinstall", "Plack");
