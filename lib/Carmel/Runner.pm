@@ -45,10 +45,11 @@ sub execute {
 
     shift @args if $args[0] && $args[0] eq '--';
 
-    %ENV = (%ENV, $self->env);
     if ($UseSystem) {
+        local %ENV = (%ENV, $self->env);
         system @args;
     } else {
+        %ENV = (%ENV, $self->env);
         exec @args;
         exit 127; # command not found
     }

@@ -56,6 +56,11 @@ sub run {
     my $call = $self->can("cmd_$cmd")
       or die "Can't find command '$cmd': run `carmel help` to see the list of commands.\n";
 
+    # for testing, returns the exit code directly with system()
+    if ($cmd eq 'exec') {
+        return $self->cmd_exec(@args);
+    }
+
     my $code = 0;
     try {
         $self->$call(@args);
