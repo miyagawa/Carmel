@@ -138,6 +138,10 @@ sub update_or_install {
             }
         }
 
+        # non-dual core module like "strict.pm"
+        # TODO should be $dist->is_perl
+        return if $dist->name =~ /^perl-5\.\d+\.\d+$/;
+
         if (defined $version) {
             try {
                 $requirements->add_string_requirement($module, $version);
