@@ -11,8 +11,7 @@ requires 'Try::Tiny';
 EOF
 
     $app->run_ok("install");
-    $app->run_ok("exec", "perl", "-e", "use Moose; warn \$INC{'Moose.pm'}");
-
+    $app->run_fails("exec", "perl", "-e", "use Moose; warn \$INC{'Moose.pm'}");
     like $app->stderr, qr/Can't locate Moose.pm/;
 };
 
