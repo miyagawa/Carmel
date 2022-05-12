@@ -138,13 +138,6 @@ sub update_or_install {
             }
         }
 
-        if ($dist->pathname ne $pathname && $snapshot) {
-            $snapshot->remove_distributions(sub {
-                my $dist = shift;
-                $dist->provides_module($module);
-            });
-        }
-
         if (defined $version) {
             try {
                 $requirements->add_string_requirement($module, $version);
