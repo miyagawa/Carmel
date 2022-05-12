@@ -9,6 +9,7 @@ subtest 'carmel reinstall' => sub {
     $app->write_cpanfile(<<EOF);
 requires 'HTTP::Tiny';
 requires 'Class::Tiny';
+requires 'Try::Tiny', '== 0.30';
 EOF
 
     $app->run_fails("reinstall");
@@ -19,6 +20,7 @@ EOF
 
     like $app->stdout, qr/installed HTTP-Tiny-/;
     like $app->stdout, qr/installed Class-Tiny-/;
+    like $app->stdout, qr/installed Try-Tiny-0\.30/;
 
     $app->run_fails("reinstall", "Plack");
     like $app->stderr, qr/not found in cpanfile.snapshot/;
