@@ -432,19 +432,22 @@ sub cmd_find {
 }
 
 sub cmd_show {
+    my($self, $module) = @_;
+
+    $module or die "Usage: carmel show Module\n";
+
+    my $artifact = $self->artifact_for($module);
+    printf "%s (%s) in %s\n", $artifact->package, $artifact->version || '0', $artifact->path
+      if $artifact;
+}
+
+sub cmd_info {
     my $self = shift;
-    $self->cmd_list(@_);
+    $self->cmd_show(@_);
 }
 
 sub cmd_list {
-    my($self, @args) = @_;
-
-    if (my $module = shift @args) {
-        my $artifact = $self->artifact_for($module);
-        printf "%s (%s) in %s\n", $artifact->package, $artifact->version || '0', $artifact->path
-          if $artifact;
-        return;
-    }
+    my $self = shift;
 
     my @artifacts;
     $self->resolve(sub { push @artifacts, $_[0] });
