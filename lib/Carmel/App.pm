@@ -307,6 +307,33 @@ sub install {
     return @artifacts;
 }
 
+sub cmd_reinstall {
+    my($self, @args) = @_;
+
+    my @modules = @args ? @args : $self->requirements->required_modules;
+
+    my $snapshot = $self->snapshot
+      or die "Can't run carmel reinstall without snapshot. Run `carmel install` first.\n";
+
+    my $reqs = CPAN::Meta::Requirements->new;
+    for my $module (@modules) {
+        if (my $dist = $snapshot->find($module)) {
+            $reqs->add_string_requirement($module, $dist->version_for($module));
+        } elsif (@args) {
+            die "$module is not found in cpanfile.snapshot\n";
+        }
+    }
+
+    my $cpanfile = Module::CPANfile->from_prereqs({
+        runtime => {
+            requires => $reqs->as_string_hash,
+        },
+    });
+
+    $self->builder(cpanfile => $cpanfile, snapshot => $snapshot)->install;
+    $self->cmd_install;
+}
+
 sub builder {
     my($self, @args) = @_;
 
