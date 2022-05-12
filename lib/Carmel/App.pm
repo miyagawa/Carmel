@@ -315,8 +315,6 @@ sub cmd_reinstall {
     my $snapshot = $self->snapshot
       or die "Can't run carmel reinstall without snapshot. Run `carmel install` first.\n";
 
-    my $cpanfile = $self->cpanfile->load;
-
     my $reqs = CPAN::Meta::Requirements->new;
     for my $module (@modules) {
         if (my $dist = $snapshot->find($module)) {
@@ -326,7 +324,7 @@ sub cmd_reinstall {
         }
     }
 
-    $cpanfile = Module::CPANfile->from_prereqs({
+    my $cpanfile = Module::CPANfile->from_prereqs({
         runtime => {
             requires => $reqs->as_string_hash,
         },
