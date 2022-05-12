@@ -12,6 +12,7 @@ use Carmel::Resolver;
 use Carmel::ProgressBar qw(progress);
 use Config qw(%Config);
 use CPAN::Meta::Requirements;
+use File::pushd qw(pushd);
 use Getopt::Long ();
 use Module::CPANfile;
 use Module::Metadata;
@@ -491,6 +492,20 @@ sub cmd_list {
     for my $artifact (sort { $a->package cmp $b->package } @artifacts) {
         printf "%s (%s)\n", $artifact->package, $artifact->version || '0';
     }
+}
+
+sub cmd_look {
+    my($self, $module) = @_;
+
+    $module or die "Usage: carmel look Module\n";
+
+    my $shell = $ENV{SHELL}
+      or die "Can't determine shell from SHELL variable\n";
+
+    my $artifact = $self->artifact_for($module);
+
+    my $dir = pushd $artifact->path;
+    system $shell;
 }
 
 sub cmd_diff {
