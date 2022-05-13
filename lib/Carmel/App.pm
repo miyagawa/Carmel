@@ -127,6 +127,7 @@ sub update_or_install {
 
     my $builder = $self->builder;
     my $requirements = $self->requirements;
+    my $cpanfile = $self->cpanfile->load;
 
     my $check = sub {
         my($module, $pathname, $in_args, $version) = @_;
@@ -148,7 +149,15 @@ sub update_or_install {
         # TODO should be $dist->is_perl
         return if $dist->name =~ /^perl-5\.\d+\.\d+$/;
 
+        my $pinned;
+        if (my $opts = $cpanfile->options_for_module($module)) {
+            $pinned = $opts->{url} || $opts->{dist};
+        }
+
         if (defined $version) {
+            if ($pinned) {
+                die "$module is pinned in cpanfile with 'url' or 'dist'\n";
+            }
             try {
                 $requirements->add_string_requirement($module, $version);
             } catch {
@@ -157,6 +166,9 @@ sub update_or_install {
                 die "Requested version for $module '$version' conflicts with version required in cpanfile '$old': $err\n";
             };
         } else {
+            # there's an update but ignore it if it's pinned in cpanfile
+            return if $pinned;
+
             my $want_ver = $dist->version_for($module);
             try {
                 $requirements->add_string_requirement($module, $want_ver);
@@ -295,6 +307,16 @@ sub try_install {
                 requires => $missing->as_string_hash,
             },
         });
+
+        # pass around cpanfile options like dist or url to cpanm
+        # NOTE: artifacts for module overridden with that could be different per project
+        my $orig = $self->cpanfile->load;
+        for my $module ($missing->required_modules) {
+            my $opts = $orig->options_for_module($module)
+              or next;
+            %{$cpanfile->options_for_module($module)} = %$opts;
+        }
+        
         print "---> Installing new dependencies: ", join(", ", $missing->required_modules), "\n";
         my $builder = $self->builder(cpanfile => $cpanfile, snapshot => $snapshot);
         $builder->install;
@@ -335,6 +357,13 @@ sub cmd_reinstall {
             requires => $reqs->as_string_hash,
         },
     });
+
+    my $orig = $self->cpanfile->load;
+    for my $module ($reqs->required_modules) {
+        my $opts = $orig->options_for_module($module)
+          or next;
+        %{$cpanfile->options_for_module($module)} = %$opts;
+    }
 
     $self->builder(cpanfile => $cpanfile, snapshot => $snapshot)->install;
     $self->cmd_install;
