@@ -27,7 +27,10 @@ sub import_artifact {
     my($self, $dir) = @_;
 
     my $dest = $self->path->child($dir->basename);
-    File::Copy::Recursive::dircopy($dir, $dest);
+
+    local $File::Copy::Recursive::RMTrgDir = 2;
+    File::Copy::Recursive::dircopy($dir, $dest)
+      or die "Failed copying $dir -> $dest";
 
     $self->load($dest);
 }
