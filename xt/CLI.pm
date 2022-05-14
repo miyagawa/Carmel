@@ -17,7 +17,7 @@ use File::pushd ();
 use Path::Tiny;
 use Test::More;
 
-$Carmel::Runner::UseSystem = 1;
+our $DEV = Path::Tiny->new(".")->absolute;
 
 use Class::Tiny qw( dir stdout stderr exit_code clean );
 
@@ -106,13 +106,25 @@ sub run {
       if $self->{clean};
 
     my @capture = capture {
-        my $code = eval { Carmel::App->new->run(@args) };
+        my $code = eval { $self->run_cli(@args) };
         $self->exit_code($@ ? 255 : $code);
+        warn $@ if $@;
     };
 
     $self->stdout($capture[0]);
     $self->stderr($capture[1]);
 }
+
+sub run_cli {
+    my($self, @cmd) = @_;
+
+    if ($cmd[0] eq "exec") {
+        system $^X, "-I$DEV/lib", "$DEV/script/carmel", @cmd;
+    } else {
+        Carmel::App->new->run(@cmd);
+    }
+}
+
 
 sub run_ok {
     my($self, @args) = @_;

@@ -57,9 +57,8 @@ sub run {
     my $call = $self->can("cmd_$cmd")
       or die "Can't find command '$cmd': run `carmel help` to see the list of commands.\n";
 
-    # for testing, returns the exit code directly with system()
-    if ($cmd eq 'exec') {
-        return $self->cmd_exec(@args);
+    if ($cmd eq 'run') {
+        return $self->cmd_run(@args);
     }
 
     my $code = 0;
@@ -490,7 +489,12 @@ sub cmd_env {
     print join "", map qq($_=$env{$_}\n), sort keys %env;
 }
 
-# TODO remove. just here for testing
+sub cmd_run {
+    my($self, @args) = @_;
+    Carmel::Runner->new->run(@args);
+}
+
+# Usually carmel exec is handled in carmel script, not here
 sub cmd_exec {
     my($self, @args) = @_;
     Carmel::Runner->new->execute(@args);
