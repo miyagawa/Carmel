@@ -16,7 +16,7 @@ sub progress {
     my $class = __PACKAGE__;
 
     my $self = $class->new(
-        width => 50,
+        width => 40,
         total => scalar(@$args),
         quiet => !-t STDOUT,
     );
