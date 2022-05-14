@@ -2,6 +2,22 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.9.0  2022-05-14 15:59:45 PDT
+    [NEW FEATURES]
+        - Added carmel reinstall to rebuild build artifacts for all the dependencies (#59, #68)
+        - Added carmel info as an alias for show
+        - Added carmel look to open a new shell inside the build artifact directory, like cpanm --look
+        - Added carmel run, like carmel exec but uses system() instead of exec() (#20)
+    [BUG FIXES]
+        - Ignore core modules that are not dual life e.g. strict.pm (#69)
+    [IMPROVEMENTS]
+        - carmel update won't downgrade if you have a higher version than what's on CPAN (#66)
+        - carmel update progress bar will show the actual number of dists, rather than percentage
+        - Uses https mirror (https://cpan.metacpan.org/) by default (#42)
+        - Remove existing artifacts before importing, for clean install (#70)
+        - carmel inject now works without cpanfile, outside a project directory (#73)
+        - Documentation updates
+
 v0.1.56  2022-05-11 12:40:21 PDT
         - carmel install without the snapshot will install the latest versions (#53)
 

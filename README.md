@@ -106,22 +106,26 @@ Carmel allows you to manage all the dependencies the same way across development
 environments and production environments. However, there might be cases where
 you want to avoid running your application with `carmel exec` in production, to
 avoid the overhead with large number of include paths, or to avoid installing
-Carmel in the production hosts.
+Carmel in the production hosts. Carmel provides two easy ways to avoid depending
+on Carmel on the deploy target environments.
 
-Carmel provides two easy ways to avoid depending on Carmel on the deploy target
-environments. First, `carmel rollout` rolls out the build artifacts into a
-regular perl5 library path in `local`. Once the rollout is complete, you can
-include the path just like a regular [local::lib](https://metacpan.org/pod/local%3A%3Alib) directory.
+### carmel rollout
+
+`carmel rollout` rolls out the build artifacts into a regular perl5 library
+path in `local`. Once the rollout is complete, you can include the path just
+like a regular [local::lib](https://metacpan.org/pod/local%3A%3Alib) directory.
 
     # Production environment: Roll out to ./local
     > carmel rollout
     > perl -Ilocal/lib/perl5 local/bin/starman -p 8080 myapp.psgi
 
-You can run `carmel rollout`> in a CI system to create the `local` directory
+You can run `carmel rollout` in a CI system to create the `local` directory
 next to your application code for a linux package (e.g. deb package), or Docker
 containers.
 
-Second, `carmel package` (similar to `carton bundle`) creates a directory with
+### carmel package
+
+`carmel package` (similar to `carton bundle`) creates a directory with
 tarballs and CPAN-style package index files, which you can pass to [cpanm](https://metacpan.org/pod/cpanm) on a
 target machine. This way, you only need `cpanm`, which is available as a
 self-contained single executable, to bootstrap the installation on a host with a
@@ -134,7 +138,9 @@ stock perl.
 
     # Remote environment (CI etc.)
     > git clone https://.../myapp.git && cd myapp
-    > cpanm -L /path/to/lib --from $PWD/vendor/cache -nq --installdeps .
+
+    # Install the modules to ./local (like carmel rollout)
+    > cpanm -L ./local --from $PWD/vendor/cache -nq --installdeps .
 
 # HOW IT WORKS
 
