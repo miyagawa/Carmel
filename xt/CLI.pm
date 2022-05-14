@@ -106,7 +106,7 @@ sub run {
       if $self->{clean};
 
     my @capture = capture {
-        my $code = eval { $self->run_cli(@args) };
+        my $code = $self->run_cli(@args);
         $self->exit_code($@ ? 255 : $code);
         warn $@ if $@;
     };
@@ -121,10 +121,9 @@ sub run_cli {
     if ($cmd[0] eq "exec") {
         system $^X, "-I$DEV/lib", "$DEV/script/carmel", @cmd;
     } else {
-        Carmel::App->new->run(@cmd);
+        eval { Carmel::App->new->run(@cmd) };
     }
 }
-
 
 sub run_ok {
     my($self, @args) = @_;
