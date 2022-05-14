@@ -41,6 +41,7 @@ sub install {
     local $ENV{PERL_CPANM_HOME} = $self->tempdir;
     local $ENV{PERL_CPANM_OPT};
 
+    # FIXME: we could set the mirror option to $self->cpanfile in the caller
     my $cpanfile = $self->cpanfile_path
       or die "Can't locate 'cpanfile' to load module list.\n";
 
@@ -66,12 +67,15 @@ sub install {
 
     $cli->run;
 
+    my @artifacts;
     for my $ent ($self->tempdir->child("latest-build")->children) {
         next unless $ent->is_dir && $ent->child("blib/meta/install.json")->exists;
-        $self->collect_artifact->($ent);
+        push @artifacts, $self->collect_artifact->($ent);
     }
 
     $lib->remove_tree({ safe => 0 });
+
+    return @artifacts;
 }
 
 sub search_module {

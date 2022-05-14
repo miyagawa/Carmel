@@ -32,7 +32,7 @@ sub import_artifact {
     File::Copy::Recursive::dircopy($dir, $dest)
       or die "Failed copying $dir -> $dest";
 
-    $self->load($dest);
+    return $self->load($dest);
 }
 
 sub load_artifacts {
@@ -54,6 +54,8 @@ sub load {
     while (my($package, $data) = each %{ $artifact->provides }) {
         $self->add($package, $artifact);
     }
+
+    return $artifact;
 }
 
 sub add {

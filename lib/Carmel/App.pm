@@ -103,7 +103,44 @@ sub cmd_version {
 
 sub cmd_inject {
     my($self, @args) = @_;
-    $self->builder->install("--reinstall", @args);
+
+    my $reqs = CPAN::Meta::Requirements->new;
+    for my $arg (@args) {
+        my($module, $version) = split /@/, $arg, 2;
+        $reqs->add_string_requirement($module, $version ? "== $version" : 0);
+    }
+
+    my $cpanfile = Module::CPANfile->from_prereqs({
+        runtime => {
+            requires => $reqs->as_string_hash,
+        },
+    });
+
+    # FIXME: $builder->install() reads mirror info from cpanfile_path
+    my $path = Path::Tiny->tempfile;
+    $cpanfile->save($path);
+
+    my @artifacts = $self->builder(cpanfile => $cpanfile, cpanfile_path => $path)->install;
+
+    my @failed;
+ MODULE:
+    for my $module ($reqs->required_modules) {
+        my $want = $reqs->requirements_for_module($module);
+        for my $artifact (@artifacts) {
+            if ($artifact->provides->{$module}) {
+                my $version = $artifact->version_for($module);
+                $reqs->accepts_module($module => $version)
+                  or die "Installed version for $module ($version) doesn't satisfy the requirement: $want\n";
+                next MODULE;
+            }
+        }
+
+        push @failed, $module;
+    }
+
+    if (@failed) {
+        die "Couldn't install module(s): ", join(", ", @failed), "\n";
+    }
 }
 
 sub cmd_pin {
