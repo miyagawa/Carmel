@@ -20,11 +20,15 @@ sub load {
         eval {
             require "$path/.carmel/MySetup.pm";
         };
-        if ($@ && $@ =~ /Can't locate .*\.carmel\/MySetup\.pm/) {
-            $err = "Can't locate .carmel/MySetup.pm in '$path'. You need to run `carmel install` first.\n";
+        if ($@) {
+            if ($@ =~ /Can't locate .*\.carmel\/MySetup\.pm/) {
+                $err = "Can't locate .carmel/MySetup.pm in '$path'. You need to run `carmel install` first.\n";
+            } else {
+                $err = $@;
+            }
         }
     }
-    
+
     die $err if $err;
 
     $environment = \%Carmel::MySetup::environment;
