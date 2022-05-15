@@ -17,7 +17,8 @@ sub acquire {
     while (1) {
         flock $fh, LOCK_EX|LOCK_NB and last;
 
-        $self->warn_stale;
+        my $pid = $self->pid;
+        warn "Waiting for another carmel process (pid: $pid) to finish.\n";
 
         local $SIG{ALRM} = sub {
             die "Couldn't get lock held by ", $self->pid, " for ${timeout}s, giving up.\n";
@@ -31,21 +32,6 @@ sub acquire {
     $self->pidfile->spew("$$\n");
 
     return 1;
-}
-
-sub warn_stale {
-    my $self = shift;
-
-    my $pid = $self->pid;
-
-    warn sprintf <<EOF, $pid, $pid, $self->lockfile;
-Waiting for another carmel process (pid: %d) to finish.
-If you believe this is a stale lock, run:
-
-    kill %d
-    rm -f %s
-
-EOF
 }
 
 sub pid {
