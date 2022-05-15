@@ -284,6 +284,11 @@ Update C<cpanfile> to explicitly update the version requirement for C<Foo>.
 
 =back
 
+=item *
+
+Carmel doesn't support Taint mode (C<-T>). You'll see an error message
+C<Insecure dependency in require while running with -T switch>.
+
 =back
 
 =head1 COMPARISONS WITH SIMILAR TOOLS
