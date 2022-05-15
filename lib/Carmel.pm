@@ -222,9 +222,10 @@ another box, so long as the perl version and architecture is the same.
 
 If you run multiple instances of C<carmel>, or hit Ctrl-C to interrupt the cpanm
 install session, Carmel might get into a state where some modules have been
-installed properly, while some modules in the dependency chain are missing. Make
-sure you don't run multiple instances of C<carmel> at the same time, and let it
-finish the installation to get the full builds properly.
+installed properly, while some modules in the dependency chain are
+missing. Carmel checks if there's another process running simultaneously using a
+lock file to prevent this problem, but make sure you let it finish the
+installation to get the full builds properly.
 
 =item *
 
@@ -233,9 +234,8 @@ install>, and you'll see the error message "Can't find an artifact for
 Foo".
 
 Please report it to the issue tracker if you can reliably reproduce this type of
-errors.
-
-Usually you run C<carmel install> again and the error will be gone.
+errors. L<https://github.com/miyagawa/Carmel/issues/74> has a list of known
+modules that could cause problems like this.
 
 =item *
 
@@ -249,8 +249,8 @@ For example, suppose you have:
   requires 'Foo';
   requires 'Bar'; # which requires Foo >= 1.001
 
-Without the snapshot, Carmel has no trouble resolving the correct versions for
-this combination. But if you have:
+Without a snapshot file, Carmel has no trouble resolving the correct versions
+for this combination. But if you have:
 
   # cpanfile.snapshot
   Foo-1.000
