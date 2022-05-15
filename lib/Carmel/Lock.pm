@@ -43,7 +43,7 @@ Waiting for another carmel process (pid: %d) to finish.
 If you believe this is a stale lock, run:
 
     kill %d
-    rm -rf %s
+    rm -f %s
 
 EOF
 }
