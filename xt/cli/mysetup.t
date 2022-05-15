@@ -9,8 +9,11 @@ subtest 'broken MySetup.pm' => sub {
     $app->write_cpanfile("");
     $app->run_ok("install");
 
-    $app->run_fails("exec", "prove", "-t", "$TestCLI::DEV/xt/cli/taint.pl");
-    like $app->stderr, qr/Insecure dependency/;
+    # seems prove -l doesn't propagate for perl < 5.20 and you get "Can't locate Carmel/Setup.pm"
+    if (eval 'use v5.20; 1') {
+        $app->run_fails("exec", "prove", "-t", "$TestCLI::DEV/xt/cli/taint.pl");
+        like $app->stderr, qr/Insecure dependency/;
+    }
     
     $app->dir->child(".carmel/MySetup.pm")->spew("die");
     $app->run_fails("exec", "perl", "-e1");
