@@ -1,55 +1,34 @@
 package Carmel::Lock;
 use strict;
 use warnings;
-use Path::Tiny ();
-use Class::Tiny qw(path locked _warned);
+use Fcntl qw(:flock);
+use Class::Tiny qw(path _handle);
 
 sub acquire {
     my $self = shift;
 
-    $self->path->parent->mkpath;
+    $self->path->mkpath;
 
     my $timeout = 3600; # 1h: reasonable?
-    my $i;
 
-    while ($i++ < $timeout) {
-        $self->try_lock and return 1;
-        $self->check_stale;
-        sleep 1;
-    }
+    my $fh = $self->lockfile->openw or die "Can't open ", $self->lockfile, ": $!";
+    $self->_handle($fh);
 
-    die "Couldn't get lock held by ", $self->pid, " for ${timeout}s, giving up.\n";
-}
+    while (1) {
+        flock $fh, LOCK_EX|LOCK_NB and last;
 
-sub try_lock {
-    my $self = shift;
-
-    mkdir $self->path, 0777 or return;
-    $self->pidfile->spew("$$\n");
-
-    $self->locked(1);
-
-    return 1;
-}
-
-sub check_stale {
-    my $self = shift;
-
-    my $pid = $self->pid;
-
-    if (kill 0, $pid) {
-        # pid is still running
         $self->warn_stale;
-        return;
+
+        local $SIG{ALRM} = sub {
+            die "Couldn't get lock held by ", $self->pid, " for ${timeout}s, giving up.\n";
+        };
+        alarm $timeout;
+
+        flock $fh, LOCK_EX
+          or die "Couldn't get lock held by ", $self->pid, "\n";
     }
 
-    warn "Can't send signal to possibly state pid $pid. Cleaning up." if $Carmel::DEBUG;
-
-    # strictly speaking there's a race here: another process might have gotten a
-    # lock in-between.
-
-    $self->path->remove_tree({ safe => 0 })
-      or die "Couldn't remove lock directory ", $self->path, ": $!";
+    $self->pidfile->spew("$$\n");
 
     return 1;
 }
@@ -57,11 +36,9 @@ sub check_stale {
 sub warn_stale {
     my $self = shift;
 
-    return if $self->_warned;
-
     my $pid = $self->pid;
 
-    warn sprintf <<EOF, $pid, $pid, $self->path;
+    warn sprintf <<EOF, $pid, $pid, $self->lockfile;
 Waiting for another carmel process (pid: %d) to finish.
 If you believe this is a stale lock, run:
 
@@ -69,14 +46,22 @@ If you believe this is a stale lock, run:
     rm -rf %s
 
 EOF
-
-    $self->_warned(1);
 }
 
 sub pid {
     my $self = shift;
-    chomp(my $pid = $self->pidfile->slurp);
-    return $pid;
+
+    if ($self->pidfile->exists) {
+        chomp(my $pid = $self->pidfile->slurp);
+        return $pid;
+    }
+
+    return '';
+}
+
+sub lockfile {
+    my $self = shift;
+    $self->path->child('lock');
 }
 
 sub pidfile {
@@ -86,8 +71,11 @@ sub pidfile {
 
 sub release {
     my $self = shift;
-    return unless $self->locked;
-    $self->path->remove_tree({ safe => 0 }); 
+
+    return unless $self->_handle;
+
+    $self->_handle->close;
+    $self->pidfile->remove;
 }
 
 sub DESTROY {
