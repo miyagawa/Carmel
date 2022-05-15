@@ -4,6 +4,7 @@ use warnings;
 use Class::Tiny qw( snapshot cpanfile cpanfile_path repository_base collect_artifact );
 use Path::Tiny;
 use File::pushd;
+use Carmel::Lock;
 
 sub tempdir {
     my $self = shift;
@@ -47,6 +48,9 @@ sub install {
 
     # one mirror for now
     my $mirror = Module::CPANfile->load($cpanfile)->mirrors->[0];
+
+    my $lock = Carmel::Lock->new(path => $self->repository_base->child('run'));
+    $lock->acquire;
 
     # cleanup perl5 in case it was left from previous runs
     my $lib = $self->repository_base->child('perl5');
