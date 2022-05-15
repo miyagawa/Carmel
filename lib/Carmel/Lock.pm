@@ -24,7 +24,6 @@ sub acquire {
 sub try_lock {
     my $self = shift;
 
-
     mkdir $self->path, 0777 or return;
     $self->pidfile->spew("$$\n");
 
@@ -44,7 +43,10 @@ sub check_stale {
         return;
     }
 
-    warn "Can't send signal to possibley state pid $pid. Cleaning up." if $Carmel::DEBUG;
+    warn "Can't send signal to possibly state pid $pid. Cleaning up." if $Carmel::DEBUG;
+
+    # strictly speaking there's a race here: another process might have gotten a
+    # lock in-between.
 
     $self->path->remove_tree({ safe => 0 })
       or die "Couldn't remove lock directory ", $self->path, ": $!";
