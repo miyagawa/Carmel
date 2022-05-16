@@ -21,12 +21,12 @@ sub acquire {
         warn "Waiting for another carmel process (pid: $pid) to finish.\n";
 
         local $SIG{ALRM} = sub {
-            die "Couldn't get lock held by ", $self->pid, " for ${timeout}s, giving up.\n";
+            die "Couldn't get lock held by $pid for ${timeout}s, giving up.\n";
         };
         alarm $timeout;
 
         flock $fh, LOCK_EX
-          or die "Couldn't get lock held by ", $self->pid, "\n";
+          or die "Couldn't get lock held by $pid\n";
     }
 
     $self->pidfile->spew("$$\n");
