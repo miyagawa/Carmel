@@ -36,17 +36,24 @@ sub load_snapshot {
     }
 }
 
-sub diff {
+sub compute {
     my($self, @args) = @_;
 
     my %dists;
     $self->load_snapshot($args[0], \%dists, 0);
     $self->load_snapshot($args[1], \%dists, 1);
 
+    return \%dists;
+}
+
+sub diff {
+    my($self, @args) = @_;
+
+    my $dists = $self->compute(@args);
     if ($Carmel::DEBUG) {
-        $self->text_diff(\%dists);
+        $self->text_diff($dists);
     } else {
-        $self->simple_diff(\%dists);
+        $self->simple_diff($dists);
     }
 }
 
