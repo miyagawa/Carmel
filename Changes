@@ -2,6 +2,11 @@ Revision history for Carmel
 
 {{$NEXT}}
 
+v0.9.1  2022-05-20 14:55:34 PDT
+    [IMPROVEMENTS]
+        - Added a file-based lock during install/update run to avoid corrupted artifacts (#41, #79)
+        - Improved error message for running under -T (#76)
+
 v0.9.0  2022-05-14 15:59:45 PDT
     [NEW FEATURES]
         - Added carmel reinstall to rebuild build artifacts for all the dependencies (#59, #68)

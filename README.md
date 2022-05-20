@@ -208,17 +208,17 @@ another box, so long as the perl version and architecture is the same.
 
 - If you run multiple instances of `carmel`, or hit Ctrl-C to interrupt the cpanm
 install session, Carmel might get into a state where some modules have been
-installed properly, while some modules in the dependency chain are missing. Make
-sure you don't run multiple instances of `carmel` at the same time, and let it
-finish the installation to get the full builds properly.
+installed properly, while some modules in the dependency chain are
+missing. Carmel checks if there's another process running simultaneously using a
+lock file to prevent this problem, but make sure you let it finish the
+installation to get the full builds properly.
 - There're certain dependencies that get missed during the initial `carmel
 install`, and you'll see the error message "Can't find an artifact for
 Foo".
 
     Please report it to the issue tracker if you can reliably reproduce this type of
-    errors.
-
-    Usually you run `carmel install` again and the error will be gone.
+    errors. [https://github.com/miyagawa/Carmel/issues/74](https://github.com/miyagawa/Carmel/issues/74) has a list of known
+    modules that could cause problems like this.
 
 - In some situation, you might encounter conflicts in version resolutions, between
 what's pinned in the snapshot and a new version that's needed when you introduce
@@ -230,8 +230,8 @@ a new module.
         requires 'Foo';
         requires 'Bar'; # which requires Foo >= 1.001
 
-    Without the snapshot, Carmel has no trouble resolving the correct versions for
-    this combination. But if you have:
+    Without a snapshot file, Carmel has no trouble resolving the correct versions
+    for this combination. But if you have:
 
         # cpanfile.snapshot
         Foo-1.000
@@ -255,6 +255,9 @@ a new module.
 
     - Run `carmel update Foo` to pull the latest version of Foo from CPAN, ignoring what's in the snapshot.
     - Update `cpanfile` to explicitly update the version requirement for `Foo`.
+
+- Carmel doesn't support Taint mode (`-T`). You'll see an error message
+`Insecure dependency in require while running with -T switch`.
 
 # COMPARISONS WITH SIMILAR TOOLS
 
