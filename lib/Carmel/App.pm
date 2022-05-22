@@ -369,7 +369,7 @@ sub builder {
 
     Carmel::Builder->new(
         repository_base => $self->env->repository_base,
-        cpanfile_path => $self->cpanfile_path,
+        cpanfile_path => $self->env->cpanfile->path,
         collect_artifact => sub { $self->env->repo->import_artifact(@_) },
         @args,
     );
@@ -409,7 +409,7 @@ sub save_snapshot {
     require Carton::Snapshot;
     require Carton::Dist;
 
-    my $snapshot = Carton::Snapshot->new(path => $self->cpanfile->snapshot_path);
+    my $snapshot = Carton::Snapshot->new(path => $self->env->cpanfile->snapshot_path);
 
     for my $artifact (@$artifacts) {
         my $dist = Carton::Dist->new(
@@ -443,7 +443,7 @@ sub dump_bootstrap {
         %modules = (%modules, $artifact->module_files);
     }
 
-    my $prereqs = $self->cpanfile->load->prereqs->as_string_hash;
+    my $prereqs = $self->env->cpanfile->load->prereqs->as_string_hash;
     my $package = "Carmel::MySetup"; # hide from PAUSE
 
     my $file = Path::Tiny->new(".carmel/MySetup.pm");
@@ -540,7 +540,7 @@ sub cmd_look {
 sub cmd_diff {
     my $self = shift;
 
-    my $snapshot_path = $self->cpanfile->snapshot_path->relative;
+    my $snapshot_path = $self->env->cpanfile->snapshot_path->relative;
 
     # Don't check if .git exists, and let git(2) handle the error
 
@@ -707,46 +707,16 @@ sub build_index {
     $index;
 }
 
-sub cpanfile_path {
-    my $self = shift;
-    $self->{cpanfile_path} ||= Path::Tiny->new($self->locate_cpanfile)->absolute;
-}
-
-sub locate_cpanfile {
-    my $self = shift;
-
-    my $path = $ENV{PERL_CARMEL_CPANFILE};
-    if ($path) {
-        return $path;
-    }
-
-    my $current  = Path::Tiny->cwd;
-    my $previous = '';
-
-    until ($current eq '/' or $current eq $previous) {
-        my $try = $current->child('cpanfile');
-        return $try if $try->is_file;
-        ($previous, $current) = ($current, $current->parent);
-    }
-
-    return 'cpanfile'; # fallback, most certainly fails later
-}
-
-sub cpanfile {
-    my $self = shift;
-    Carmel::CPANfile->new(path => $self->cpanfile_path);
-}
-
 sub requirements {
     my $self = shift;
 
-    return $self->cpanfile->load->prereqs
+    return $self->env->cpanfile->load->prereqs
       ->merged_requirements(['runtime', 'test', 'develop'], ['requires']);
 }
 
 sub snapshot {
     my $self = shift;
-    $self->cpanfile->load_snapshot;
+    $self->env->cpanfile->load_snapshot;
 }
 
 1;

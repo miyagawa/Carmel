@@ -10,6 +10,7 @@ use Class::Tiny {
     repository_base => sub { $_[0]->build_repository_base },
     repo => sub { $_[0]->build_repo },
     home => sub { Path::Tiny->new($ENV{HOME} || $ENV{HOMEPATH}) },
+    cpanfile => sub { $_[0]->build_cpanfile },
 };
 
 sub build_repository_base {
@@ -22,14 +23,30 @@ sub build_repo {
     Carmel::Repository->new(path => $self->repository_base->child('builds'));
 }
 
-1;
+sub build_cpanfile {
+    my $self = shift;
+    my $path = Path::Tiny->new($self->locate_cpanfile);
+    Carmel::CPANfile->new(path => $path->absolute);
+}
 
+sub locate_cpanfile {
+    my $self = shift;
 
+    my $path = $ENV{PERL_CARMEL_CPANFILE};
+    if ($path) {
+        return $path;
+    }
 
+    my $current  = Path::Tiny->cwd;
+    my $previous = '';
 
+    until ($current eq '/' or $current eq $previous) {
+        my $try = $current->child('cpanfile');
+        return $try if $try->is_file;
+        ($previous, $current) = ($current, $current->parent);
+    }
 
-
-
-
+    return 'cpanfile'; # fallback, most certainly fails later
+}
 
 1;
