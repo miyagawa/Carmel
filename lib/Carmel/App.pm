@@ -138,7 +138,7 @@ sub cmd_pin {
 sub cmd_update {
     my($self, @args) = @_;
 
-    my $snapshot = $self->snapshot
+    my $snapshot = $self->env->snapshot
       or die "Can't run carmel update without snapshot. Run `carmel install` first.\n";
 
     print "---> Checking updates...\n";
@@ -246,7 +246,7 @@ sub cmd_install {
 
     die "Usage: carmel install\n" if @args;
 
-    my $snapshot = $self->snapshot;
+    my $snapshot = $self->env->snapshot;
     if ($snapshot) {
         $self->update_dependencies($self->requirements, $snapshot);
     } else {
@@ -342,7 +342,7 @@ sub cmd_reinstall {
 
     my @modules = @args ? @args : $self->requirements->required_modules;
 
-    my $snapshot = $self->snapshot
+    my $snapshot = $self->env->snapshot
       or die "Can't run carmel reinstall without snapshot. Run `carmel install` first.\n";
 
     my $reqs = CPAN::Meta::Requirements->new;
@@ -409,7 +409,7 @@ sub save_snapshot {
     require Carton::Snapshot;
     require Carton::Dist;
 
-    my $snapshot = Carton::Snapshot->new(path => $self->env->cpanfile->snapshot_path);
+    my $snapshot = Carton::Snapshot->new(path => $self->env->snapshot_path);
 
     for my $artifact (@$artifacts) {
         my $dist = Carton::Dist->new(
@@ -540,7 +540,7 @@ sub cmd_look {
 sub cmd_diff {
     my $self = shift;
 
-    my $snapshot_path = $self->env->cpanfile->snapshot_path->relative;
+    my $snapshot_path = $self->env->snapshot_path->relative;
 
     # Don't check if .git exists, and let git(2) handle the error
 
@@ -583,7 +583,7 @@ sub resolver {
     Carmel::Resolver->new(
         repo     => $self->env->repo,
         root     => $self->requirements,
-        snapshot => scalar $self->snapshot,
+        snapshot => scalar $self->env->snapshot,
         missing  => sub { $self->missing_default(@_) },
         @args,
     );
@@ -712,11 +712,6 @@ sub requirements {
 
     return $self->env->cpanfile->load->prereqs
       ->merged_requirements(['runtime', 'test', 'develop'], ['requires']);
-}
-
-sub snapshot {
-    my $self = shift;
-    $self->env->cpanfile->load_snapshot;
 }
 
 1;

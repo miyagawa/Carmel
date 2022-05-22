@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Config;
 use Path::Tiny;
+use Carmel::CPANfile;
 use Carmel::Repository;
 
 use Class::Tiny {
@@ -11,6 +12,7 @@ use Class::Tiny {
     repo => sub { $_[0]->build_repo },
     home => sub { Path::Tiny->new($ENV{HOME} || $ENV{HOMEPATH}) },
     cpanfile => sub { $_[0]->build_cpanfile },
+    snapshot => sub { $_[0]->build_snapshot },
 };
 
 sub build_repository_base {
@@ -47,6 +49,25 @@ sub locate_cpanfile {
     }
 
     return 'cpanfile'; # fallback, most certainly fails later
+}
+
+sub build_snapshot {
+    my $self = shift;
+
+    my $path = $self->snapshot_path;
+    if ($path && $path->exists) {
+        require Carton::Snapshot;
+        my $snapshot = Carton::Snapshot->new(path => $path);
+        $snapshot->load;
+        return $snapshot;
+    }
+
+    return;
+}
+
+sub snapshot_path {
+    my $self = shift;
+    Path::Tiny->new($self->cpanfile->path . ".snapshot");
 }
 
 1;

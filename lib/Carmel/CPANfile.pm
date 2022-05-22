@@ -13,23 +13,4 @@ sub load {
     Module::CPANfile->load($self->path);
 }
 
-sub snapshot_path {
-    my $self = shift;
-    Path::Tiny->new($self->path . ".snapshot");
-}
-
-sub load_snapshot {
-    my $self = shift;
-
-    my $path = $self->snapshot_path;
-    if ($path && $path->exists) {
-        require Carton::Snapshot;
-        my $snapshot = Carton::Snapshot->new(path => $path);
-        $snapshot->load;
-        return $snapshot;
-    }
-
-    return;
-}
-
 1;
