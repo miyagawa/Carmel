@@ -7,6 +7,7 @@ use Carmel::Runner;
 use Carp ();
 use Carmel::Builder;
 use Carmel::CPANfile;
+use Carmel::Environment;
 use Carmel::Repository;
 use Carmel::Resolver;
 use Carmel::ProgressBar qw(progress);
@@ -26,7 +27,6 @@ $ENV{PERL_JSON_BACKEND} = 1
 
 use Class::Tiny {
     verbose => sub { 0 },
-    perl_arch => sub { "$Config{version}-$Config{archname}" },
 };
 
 sub parse_options {
@@ -72,21 +72,9 @@ sub run {
     return $code;
 }
 
-sub repository_base {
+sub env {
     my $self = shift;
-
-    my $home = $ENV{HOME} || $ENV{HOMEPATH};
-    Path::Tiny->new($ENV{PERL_CARMEL_REPO} || "$home/.carmel/" . $self->perl_arch);
-}
-
-sub repo {
-    my $self = shift;
-    $self->{repo} ||= $self->build_repo;
-}
-
-sub build_repo {
-    my $self = shift;
-    Carmel::Repository->new(path => $self->repository_base->child('builds'));
+    $self->{env} ||= Carmel::Environment->new;
 }
 
 sub cmd_help {
@@ -380,9 +368,9 @@ sub builder {
     my($self, @args) = @_;
 
     Carmel::Builder->new(
-        repository_base => $self->repository_base,
+        repository_base => $self->env->repository_base,
         cpanfile_path => $self->cpanfile_path,
-        collect_artifact => sub { $self->repo->import_artifact(@_) },
+        collect_artifact => sub { $self->env->repo->import_artifact(@_) },
         @args,
     );
 }
@@ -503,7 +491,7 @@ sub cmd_exec {
 sub cmd_find {
     my($self, $module, $requirement) = @_;
 
-    my @artifacts = $self->repo->find_all($module, $requirement || '0');
+    my @artifacts = $self->env->repo->find_all($module, $requirement || '0');
     for my $artifact (@artifacts) {
         printf "%s (%s) in %s\n", $artifact->package, $artifact->version || '0', $artifact->path;
     }
@@ -593,7 +581,7 @@ sub resolver {
     my($self, @args) = @_;
 
     Carmel::Resolver->new(
-        repo     => $self->repo,
+        repo     => $self->env->repo,
         root     => $self->requirements,
         snapshot => scalar $self->snapshot,
         missing  => sub { $self->missing_default(@_) },
@@ -655,7 +643,7 @@ sub cmd_package {
 
     my $index = $self->build_index;
 
-    my $source_base = $self->repository_base->child('cache');
+    my $source_base = $self->env->repository_base->child('cache');
     my $target_base = Path::Tiny->new('vendor/cache');
 
     my %done;
@@ -675,7 +663,7 @@ sub cmd_package {
         } else {
             die sprintf "%s not found in %s.\n" .
               "Run `carmel install` to fix this. If that didn't resolve the issue, try removing %s\n",
-              $package->pathname, $source_base, $self->repository_base;
+              $package->pathname, $source_base, $self->env->repository_base;
         }
     }
 

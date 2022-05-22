@@ -60,7 +60,7 @@ sub repo {
     local $ENV{PERL_CARMEL_REPO} = $self->dir->child(".carmel")
       if $self->{clean};
 
-    Carmel::App->new->build_repo;
+    Carmel::Environment->new->repo;
 }
 
 sub cmd_in_dir {
