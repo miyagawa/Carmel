@@ -14,9 +14,13 @@ use constant GREEN => 32;
 use constant YELLOW => 33;
 use constant PURPLE => 35;
 
+sub should_color {
+    -t STDOUT && !$ENV{NO_COLOR};
+}
+
 sub color {
     my($code, $text) = @_;
-    return $text if !-t STDOUT or $ENV{NO_COLOR};
+    return $text unless should_color();
     return "\e[${code}m${text}\e[0m";
 }
 
@@ -75,7 +79,7 @@ sub git_diff {
     } @text;
 
     my @options;
-    @options = ("--color") if -t STDOUT && !$ENV{NO_COLOR};
+    @options = ("--color") if should_color();
 
     my($stdout, $stderr, $code) = capture { system("git", "diff", @options, @files) };
     print $stdout;
