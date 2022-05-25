@@ -2,7 +2,6 @@ package Carmel::Builder;
 use strict;
 use warnings;
 use Class::Tiny qw( snapshot cpanfile cpanfile_path repository_base collect_artifact ), {
-    index => sub { $_[0]->build_index },
     mirror => sub { $_[0]->build_mirror },
 };
 
@@ -100,10 +99,6 @@ sub install {
 sub search_module {
     my($self, $module, $version) = @_;
 
-    unless ($version && $version =~ /==|<|!/) {
-        return $self->search_index($module);
-    }
-
     local $ENV{PERL_CPANM_HOME} = $self->tempdir;
     local $ENV{PERL_CPANM_OPT};
 
@@ -124,8 +119,10 @@ sub search_module {
     $cli->setup_home;
     $cli->init_tools;
 
-    my $dist = $cli->search_module($module, $version);
-    if ($dist) {
+    if ($version && $version =~ /==|<|!/) {
+        my $dist = $cli->search_module($module, $version)
+          or return;
+
         return Carton::Dist->new(
             name => $dist->{distvname},
             pathname => $dist->{pathname},
@@ -136,40 +133,40 @@ sub search_module {
             },
             version => $dist->{version},
         );
-    }
+    } else {
+        my $res = $self->index($cli)->search_packages({ package => $module })
+          or return;
 
-    return;
+        (my $path = $res->{uri}) =~ s!^cpan:///distfile/!!;
+        my $info = CPAN::DistnameInfo->new($path);
+
+        return Carton::Dist->new(
+            name => $info->distvname,
+            pathname => $info->pathname,
+            provides => {
+                $res->{package} => {
+                    version => $res->{version},
+                },
+            },
+            version => $info->version,
+        );
+    }
 }
 
-sub search_index {
-    my($self, $module) = @_;
-
-    my $res = $self->index->search_packages({ package => $module })
-      or return;
-
-    (my $path = $res->{uri}) =~ s!^cpan:///distfile/!!;
-    my $info = CPAN::DistnameInfo->new($path);
-
-    return Carton::Dist->new(
-        name => $info->distvname,
-        pathname => $info->pathname,
-        provides => {
-            $res->{package} => {
-                version => $res->{version},
-            },
-        },
-        version => $info->version,
-    );
+sub index {
+    my $self = shift;
+    $self->{index} ||= $self->build_index(@_);
 }
 
 sub build_index {
-    my $self = shift;
+    my($self, $cli) = @_;
 
-    my $http   = HTTP::Tinyish->new(agent => "Carmel/$Carmel::VERSION");
     my $mirror = $self->mirror || "https://cpan.metacpan.org/";
+
+    # Use $cli->mirror to support file: URLs
     return Menlo::Index::Mirror->new({
-        mirror => $mirror,
-        fetcher => sub { $http->mirror(@_) },
+        mirror  => $mirror,
+        fetcher => sub { $cli->mirror(@_) },
     });
 }
 
