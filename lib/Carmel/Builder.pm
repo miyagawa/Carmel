@@ -1,10 +1,17 @@
 package Carmel::Builder;
 use strict;
 use warnings;
-use Class::Tiny qw( snapshot cpanfile cpanfile_path repository_base collect_artifact );
+use Class::Tiny qw( snapshot cpanfile cpanfile_path repository_base collect_artifact ), {
+    index => sub { $_[0]->build_index },
+    mirror => sub { $_[0]->build_mirror },
+};
+
 use Path::Tiny;
 use File::pushd;
 use Carmel::Lock;
+use Carton::Dist;
+use CPAN::Common::Index::Mirror;
+use CPAN::DistnameInfo;
 
 sub tempdir {
     my $self = shift;
@@ -17,6 +24,17 @@ sub build_tempdir {
       if exists $ENV{PERL_FILE_TEMP_CLEANUP};
 
     Path::Tiny->tempdir(%opts);
+}
+
+sub build_mirror {
+    my $self = shift;
+
+    # FIXME: we could set the mirror option to $self->cpanfile in the caller
+    my $cpanfile = $self->cpanfile_path
+      or die "Can't locate 'cpanfile' to load module list.\n";
+
+    # one mirror for now
+    Module::CPANfile->load($cpanfile)->mirrors->[0];
 }
 
 sub install {
@@ -42,12 +60,7 @@ sub install {
     local $ENV{PERL_CPANM_HOME} = $self->tempdir;
     local $ENV{PERL_CPANM_OPT};
 
-    # FIXME: we could set the mirror option to $self->cpanfile in the caller
-    my $cpanfile = $self->cpanfile_path
-      or die "Can't locate 'cpanfile' to load module list.\n";
-
-    # one mirror for now
-    my $mirror = Module::CPANfile->load($cpanfile)->mirrors->[0];
+    my $mirror = $self->mirror;
 
     my $lock = Carmel::Lock->new(path => $self->repository_base->child('run'));
     $lock->acquire;
@@ -85,17 +98,16 @@ sub install {
 sub search_module {
     my($self, $module, $version) = @_;
 
+    unless ($version && $version =~ /==|<|!/) {
+        return $self->search_index($module);
+    }
+
     local $ENV{PERL_CPANM_HOME} = $self->tempdir;
     local $ENV{PERL_CPANM_OPT};
 
-    my $cpanfile = $self->cpanfile_path
-      or die "Can't locate 'cpanfile' to load module list.\n";
-
-    # one mirror for now
-    my $mirror = Module::CPANfile->load($cpanfile)->mirrors->[0];
+    my $mirror = $self->mirror;
 
     require Menlo::CLI::Compat;
-    require Carton::Dist;
 
     my $cli = Menlo::CLI::Compat->new;
     $cli->parse_options(
@@ -125,6 +137,34 @@ sub search_module {
     }
 
     return;
+}
+
+sub search_index {
+    my($self, $module) = @_;
+
+    my $res = $self->index->search_packages({ package => $module })
+      or return;
+
+    (my $path = $res->{uri}) =~ s!^cpan:///distfile/!!;
+    my $info = CPAN::DistnameInfo->new($path);
+
+    return Carton::Dist->new(
+        name => $info->distvname,
+        pathname => $info->pathname,
+        provides => {
+            $res->{package} => {
+                version => $res->{version},
+            },
+        },
+        version => $info->version,
+    );
+}
+
+sub build_index {
+    my $self = shift;
+
+    my $mirror = $self->mirror || "https://cpan.metacpan.org/";
+    return CPAN::Common::Index::Mirror->new({ mirror => $mirror });
 }
 
 sub rollout {
