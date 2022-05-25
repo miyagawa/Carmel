@@ -6,12 +6,14 @@ use Class::Tiny qw( snapshot cpanfile cpanfile_path repository_base collect_arti
     mirror => sub { $_[0]->build_mirror },
 };
 
+use Carmel;
 use Path::Tiny;
 use File::pushd;
 use Carmel::Lock;
 use Carton::Dist;
-use CPAN::Common::Index::Mirror;
 use CPAN::DistnameInfo;
+use Menlo::Index::Mirror;
+use HTTP::Tinyish;
 
 sub tempdir {
     my $self = shift;
@@ -163,8 +165,12 @@ sub search_index {
 sub build_index {
     my $self = shift;
 
+    my $http   = HTTP::Tinyish->new(agent => "Carmel/$Carmel::VERSION");
     my $mirror = $self->mirror || "https://cpan.metacpan.org/";
-    return CPAN::Common::Index::Mirror->new({ mirror => $mirror });
+    return Menlo::Index::Mirror->new({
+        mirror => $mirror,
+        fetcher => sub { $http->mirror(@_) },
+    });
 }
 
 sub rollout {
