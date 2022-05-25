@@ -102,22 +102,7 @@ sub search_module {
     local $ENV{PERL_CPANM_HOME} = $self->tempdir;
     local $ENV{PERL_CPANM_OPT};
 
-    my $mirror = $self->mirror;
-
-    require Menlo::CLI::Compat;
-
-    my $cli = Menlo::CLI::Compat->new;
-    $cli->parse_options(
-        ($Carmel::DEBUG ? () : "--quiet"),
-        ($mirror ? ("-M", $mirror) : ()),
-        "--info",
-        "--save-dists", $self->repository_base->child('cache'),
-        ".",
-    );
-
-    # This needs to be done to setup http backends for mirror #52
-    $cli->setup_home;
-    $cli->init_tools;
+    my $cli = $self->cached_cli;
 
     if ($version && $version =~ /==|<|!/) {
         my $dist = $cli->search_module($module, $version)
@@ -134,7 +119,7 @@ sub search_module {
             version => $dist->{version},
         );
     } else {
-        my $res = $self->index($cli)->search_packages({ package => $module })
+        my $res = $self->index->search_packages({ package => $module })
           or return;
 
         (my $path = $res->{uri}) =~ s!^cpan:///distfile/!!;
@@ -153,20 +138,48 @@ sub search_module {
     }
 }
 
+sub cached_cli {
+    my $self = shift;
+    $self->{cli} ||= $self->build_cli();
+}
+
+sub build_cli {
+    my $self = shift;
+
+    my $mirror = $self->mirror;
+
+    require Menlo::CLI::Compat;
+
+    my $cli = Menlo::CLI::Compat->new;
+    $cli->parse_options(
+        ($Carmel::DEBUG ? () : "--quiet"),
+        ($mirror ? ("-M", $mirror) : ()),
+        "--info",
+        "--save-dists", $self->repository_base->child('cache'),
+        ".",
+    );
+
+    # This needs to be done to setup http backends for mirror #52
+    $cli->setup_home;
+    $cli->init_tools;
+
+    return $cli;
+}
+
 sub index {
     my $self = shift;
-    $self->{index} ||= $self->build_index(@_);
+    $self->{index} ||= $self->build_index;
 }
 
 sub build_index {
-    my($self, $cli) = @_;
+    my $self = shift;
 
     my $mirror = $self->mirror || "https://cpan.metacpan.org/";
 
     # Use $cli->mirror to support file: URLs
     return Menlo::Index::Mirror->new({
         mirror  => $mirror,
-        fetcher => sub { $cli->mirror(@_) },
+        fetcher => sub { $self->cached_cli->mirror(@_) },
     });
 }
 
