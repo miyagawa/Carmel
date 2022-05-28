@@ -10,7 +10,6 @@ use Carmel::CPANfile;
 use Carmel::Environment;
 use Carmel::Repository;
 use Carmel::Resolver;
-use Carmel::ProgressBar qw(progress);
 use Config qw(%Config);
 use CPAN::Meta::Requirements;
 use File::pushd qw(pushd);
@@ -234,7 +233,9 @@ sub update_or_install {
             push @checks, [ $module, '', 0 ];
         }
 
-        progress \@checks, sub { $check->(@{$_[0]}) };
+        for my $args (@checks) {
+            $check->(@$args);
+        }
     }
 
     # rebuild the snapshot
