@@ -50,7 +50,7 @@ sub load_artifacts {
 sub load {
     my($self, $dir) = @_;
 
-    my $artifact = Carmel::Artifact->new($dir);
+    my $artifact = Carmel::Artifact->load($dir);
     while (my($package, $data) = each %{ $artifact->provides }) {
         $self->add($package, $artifact);
     }
@@ -78,7 +78,7 @@ sub find_dist {
 
     my $dir = $self->path->child($distname);
     if ($dir->exists) {
-        return Carmel::Artifact->new($dir);
+        return Carmel::Artifact->load($dir);
     }
 
     return $self->find_match($package, sub { $_[0]->distname eq $distname });
