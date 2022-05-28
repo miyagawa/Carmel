@@ -1,13 +1,22 @@
 package Carmel::Artifact;
 use strict;
+use Carmel::Patch;
 use CPAN::Meta;
 use JSON ();
 use Path::Tiny ();
 
-sub new {
-    my($class, $path) = @_;
-    bless { path => Path::Tiny->new($path) }, $class;
+sub load {
+    my($class, $dir) = @_;
+
+    my $path = Path::Tiny->new($dir);
+    my $patch = Carmel::Patch->lookup($path->basename);
+
+    my $self = bless { path => $path }, $patch || $class;
+    $self->init();
+    $self;
 }
+
+sub init {}
 
 sub path { $_[0]->{path} }
 
@@ -118,7 +127,7 @@ sub sharedir_libs {
 
 sub meta {
     my $self = shift;
-    CPAN::Meta->load_file($self->path->child("MYMETA.json"));
+    $self->{meta} ||= CPAN::Meta->load_file($self->path->child("MYMETA.json"));
 }
 
 sub requirements {
