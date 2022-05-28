@@ -5,8 +5,10 @@ use warnings;
 my %patches;
 
 sub add {
-    my($class, $name, $patch) = @_;
-    $patches{$name} = $class->new($name, $patch);
+    my($class, %args) = @_;
+    while (my($name, $patch) = each %args) {
+        $patches{$name} = $class->new($name, $patch);
+    }
 }
 
 sub new {
@@ -35,6 +37,12 @@ __PACKAGE__->add(
         init => sub {
             my $self = shift;
             delete $self->install->{provides}{"Time::Piece"};
+        },
+    },
+    'Proc-PID-File-Fcntl-1.01' => {
+        init => sub {
+            my $self = shift;
+            $self->install->{provides}{"Proc::PID::File::Fcntl"}{version} = "1.01";
         },
     },
 );
