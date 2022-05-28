@@ -2,13 +2,14 @@ package Carmel::Patch;
 use strict;
 use warnings;
 
+use parent 'Exporter';
+our @EXPORT = qw(patch);
+
 my %patches;
 
-sub add {
-    my($class, %args) = @_;
-    while (my($name, $patch) = each %args) {
-        $patches{$name} = $class->new($name, $patch);
-    }
+sub patch {
+    my($name, $patch) = @_;
+    $patches{$name} = __PACKAGE__->new($name, $patch);
 }
 
 sub new {
@@ -18,7 +19,7 @@ sub new {
     $pkg = "Carmel::Artifact::$pkg";
 
     no strict 'refs';
-    @{"$pkg\::ISA"} = qw( Carmel::Artifact );
+    @{"$pkg\::ISA"} = ("Carmel::Artifact");
 
     for my $hook (keys %$hooks) {
         *{"$pkg\::$hook"} = $hooks->{$hook};
