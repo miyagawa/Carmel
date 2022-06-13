@@ -150,7 +150,7 @@ stock perl.
   > git clone https://.../myapp.git && cd myapp
 
   # Install the modules to ./local (like carmel rollout)
-  > cpanm -L ./local --from $PWD/vendor/cache -nq --installdeps .
+  > cpanm -L ./local --from file://$PWD/vendor/cache -nq --installdeps .
 
 =head1 HOW IT WORKS
 
