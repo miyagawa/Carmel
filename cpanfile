@@ -3,7 +3,6 @@ requires 'perl', '5.014000';
 requires 'JSON';
 requires 'Class::Tiny', '1.001';
 requires 'CPAN::Meta::Requirements', '2.129';
-requires 'CPAN::Meta::Prereqs', '2.132830';
 requires 'Module::CoreList';
 requires 'Module::CPANfile', '1.1000';
 requires 'Module::Runtime', '0.014';
@@ -21,7 +20,6 @@ requires 'Carton', 'v1.0.35';
 
 # vendor
 requires 'Menlo::CLI::Compat', '1.9018';
-requires 'CPAN::Common::Index', '0.006';
 
 on test => sub {
     requires 'Test::More', '0.96';

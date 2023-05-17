@@ -50,9 +50,7 @@ my %WriteMakefileArgs = (
 
 
 my %FallbackPrereqs = (
-  "CPAN::Common::Index" => "0.006",
   "CPAN::DistnameInfo" => 0,
-  "CPAN::Meta::Prereqs" => "2.132830",
   "CPAN::Meta::Requirements" => "2.129",
   "Carton" => "1.0.35",
   "Class::Tiny" => "1.001",
