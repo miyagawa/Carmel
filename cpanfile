@@ -1,6 +1,6 @@
 requires 'perl', '5.014000';
 
-requires 'JSON';
+requires 'JSON::MaybeXS';
 requires 'Class::Tiny', '1.001';
 requires 'CPAN::Meta::Requirements', '2.129';
 requires 'Module::CoreList';
