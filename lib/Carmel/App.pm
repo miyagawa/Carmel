@@ -13,6 +13,7 @@ use Carmel::Resolver;
 use Config qw(%Config);
 use CPAN::Meta::Requirements;
 use File::pushd qw(pushd);
+use Capture::Tiny qw(capture);
 use Getopt::Long ();
 use Module::CPANfile;
 use Module::Metadata;
@@ -571,6 +572,72 @@ sub cmd_difftool {
 
     my $diff = Carmel::Difftool->new;
     $diff->diff(@args);
+}
+
+sub cmd_changes {
+    my($self, @args) = @_;
+
+    my $snapshot_path = $self->cpanfile->snapshot_path->relative;
+
+    require Carmel::Difftool;
+
+    my $content = `git show HEAD:$snapshot_path`
+      or die "Can't retrieve snapshot content (not in git repository?)\n";
+    my $path = Path::Tiny->tempfile;
+    $path->spew($content);
+
+    my $diff = Carmel::Difftool->new;
+    my $dists = $diff->compute($path, $snapshot_path);
+
+    for my $dist (sort { lc($a) cmp lc($b) } keys %$dists) {
+        $self->show_dist_changes($dist, @{$dists->{$dist}});
+    }
+}
+
+sub show_dist_changes {
+    my($self, $dist, $old, $new) = @_;
+    
+    # ignore everything except updated
+    return unless $old && $new && $old->distvname ne $new->distvname;
+
+    my @artifacts = map $self->repo->find_dist(undef, $_->distvname), ($old, $new);
+    unless (@artifacts == 2) {
+        warn "Can't find artifacts for $dist\n";
+        return;
+    }
+
+    my @files = map $self->locate_changes($_->path), @artifacts;
+    unless ((grep defined, @files) == 2) {
+        warn "Can't find Changes file for: ", join(", ", map $_->distname, @artifacts), "\n";
+        return;
+    }
+
+    printf "%s (%s -> %s)\n%s\n",
+      $dist, $old->version, $new->version,
+      ("-" x (length($dist) + length($old->version) + length($new->version) + 7));
+    my($stdout, $stderr, $code) = capture { system("diff", @files) };
+    for (split /\r?\n/, $stdout) {
+        s/^> // or next;
+        print "$_\n";
+    }
+    print "\n";
+}
+
+sub locate_changes {
+    my($self, $path) = @_;
+
+    my $re = qr/^(?:Changes|Changelog|History)\b/i;
+
+    my $found;
+    $path->visit(sub {
+        my($path, $state) = @_;
+        if ($path->basename =~ $re) {
+            $found = $path;
+            return \0;
+        }
+    });
+
+    return $found;
 }
 
 sub resolve {
