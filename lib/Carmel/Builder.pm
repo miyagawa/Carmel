@@ -1,7 +1,7 @@
 package Carmel::Builder;
 use strict;
 use warnings;
-use Class::Tiny qw( snapshot cpanfile cpanfile_path repository_base collect_artifact ), {
+use Class::Tiny qw( snapshot cpanfile cpanfile_path repository_base collect_artifact disable_fallback ), {
     mirror => sub { $_[0]->build_mirror },
 };
 
@@ -38,6 +38,21 @@ sub build_mirror {
     Module::CPANfile->load($cpanfile)->mirrors->[0];
 }
 
+sub mirror_options {
+    my $self = shift;
+
+    my @mirrors;
+    if (my $mirror = $self->mirror) {
+        push @mirrors, $mirror;
+    }
+
+    unless ($self->disable_fallback) {
+        push @mirrors, "https://cpan.metacpan.org";
+    }
+
+    return map { ("--mirror", $_) } @mirrors;
+}
+
 sub install {
     my($self, @args) = @_;
 
@@ -61,8 +76,6 @@ sub install {
     local $ENV{PERL_CPANM_HOME} = $self->tempdir;
     local $ENV{PERL_CPANM_OPT};
 
-    my $mirror = $self->mirror;
-
     my $lock = Carmel::Lock->new(path => $self->repository_base->child('run'));
     $lock->acquire;
 
@@ -75,7 +88,7 @@ sub install {
     my $cli = Menlo::CLI::Compat->new;
     $cli->parse_options(
         ($Carmel::DEBUG ? () : "--quiet"),
-        ($mirror ? ("-M", $mirror) : ("--mirror", "https://cpan.metacpan.org/")),
+        $self->mirror_options,
         "--notest",
         "--save-dists", $self->repository_base->child('cache'),
         "-L", $lib,
@@ -146,14 +159,12 @@ sub cached_cli {
 sub build_cli {
     my $self = shift;
 
-    my $mirror = $self->mirror;
-
     require Menlo::CLI::Compat;
 
     my $cli = Menlo::CLI::Compat->new;
     $cli->parse_options(
         ($Carmel::DEBUG ? () : "--quiet"),
-        ($mirror ? ("-M", $mirror) : ()),
+        $self->mirror_options,
         "--info",
         "--save-dists", $self->repository_base->child('cache'),
         ".",
