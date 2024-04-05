@@ -22,7 +22,7 @@ Carmel - CPAN Artifact Repository Manager
     # update all the modules in the snapshot
     carmel update
 
-    # pin modules tp specific versions
+    # pin modules to specific versions
     carmel update DBI@1.633 Plack@1.0000
 
     # show diffs for cpanfile.snapshot in a nice way
@@ -85,7 +85,7 @@ across machines.
     > carmel install
     > echo /.carmel >> .gitignore
     > git add cpanfile cpanfile.snapshot .gitignore
-    > git commit -m "add Plack and Starman"
+    > git commit -m "Add Plack and Starman"
 
     # On a new setup, or another developer's machine
     > git pull
