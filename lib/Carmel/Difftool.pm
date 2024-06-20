@@ -5,14 +5,16 @@ use warnings;
 use Carton::Snapshot;
 use CPAN::DistnameInfo;
 use version;
-use Class::Tiny;
+use Class::Tiny {
+    env => sub { Carmel::Environment->new },
+};
+
 use Capture::Tiny qw(capture);
 use Path::Tiny;
 
 use constant RED => 31;
 use constant GREEN => 32;
 use constant YELLOW => 33;
-use constant PURPLE => 35;
 
 sub should_color {
     -t STDOUT && !$ENV{NO_COLOR};
@@ -47,53 +49,85 @@ sub diff {
     $self->load_snapshot($args[0], \%dists, 0);
     $self->load_snapshot($args[1], \%dists, 1);
 
-    if ($Carmel::DEBUG) {
-        $self->text_diff(\%dists);
-    } else {
-        $self->simple_diff(\%dists);
+    # TODO support simple diff
+    # $self->simple_diff(\%dists);
+
+    my $fh = $self->pager_output;
+
+    for my $dist (sort { lc($a) cmp lc($b) } keys %dists) {
+        $self->dist_diff($fh, $dist, @{$dists{$dist}});
     }
 }
 
-sub text_diff {
-    my($self, $dists) = @_;
+sub dist_diff {
+    my($self, $fh, $dist, $old, $new) = @_;
 
-    my @text;
-    for my $dist (sort { lc($a) cmp lc($b) } keys %$dists) {
-        for my $idx (0, 1) {
-            if ($dists->{$dist}[$idx]) {
-                $text[$idx] .= "$dist\n  " . $dists->{$dist}[$idx]->pathname . "\n";
-            }
-        }
+    my @dists = ($old->distvname, $new->distvname);
+
+    # show only modified
+    return unless $old && $new && $dists[0] ne $dists[1];
+
+    # TODO: find_dist() could fail when distvname contains TRIAL #84
+    my @artifacts = map $self->env->repo->find_dist('', $_), @dists;
+    unless (@artifacts == 2) {
+        die "Couldn't find artifacts for ", join(", ", @dists), "\n";
     }
 
-    $self->git_diff(@text);
-}
+    # TODO: support full diffs including t/?
+    my @paths;
+    if (my $changes = $self->locate_changes($artifacts[0]->path)) {
+        push @paths, [ map $_->path->child($changes), @artifacts ];
+    }
 
-sub git_diff {
-    my($self, @text) = @_;
-
-    my @files = map {
-        my $temp = Path::Tiny->tempfile;
-        $temp->spew($_);
-        $temp;
-    } @text;
+    push @paths, [ map $_->path->child('blib/lib'), @artifacts ];
 
     my @options;
     @options = ("--color") if should_color();
 
-    my($stdout, $stderr, $code) = capture { system("git", "diff", @options, @files) };
-    print $stdout;
+    for my $pairs (@paths) {
+        my($stdout, $stderr, $code) = capture { system("git", "diff", @options, @$pairs) };
+        print $fh $stdout;
+    }
+}
+
+sub locate_changes {
+    my($self, $path) = @_;
+
+    my $found;
+
+    $path->visit(sub {
+        my($f, $state) = @_;
+
+        if ($f->is_file && $f->basename =~ /^(?:Changes|Changelog|History)\b/i) {
+            $found = $f;
+        }
+    });
+
+    return $found->basename;
+}
+
+sub pager_output {
+    my $self = shift;
+
+    # stdout is not tty
+    return \*STDOUT if !-t STDOUT;
+
+    my $pager = $ENV{PERL_CARMEL_PAGER} || $ENV{PAGER};
+    return \*STDOUT unless $pager;
+
+    open my $fh, "|-", $pager;
+    return $fh;
 }
 
 sub simple_diff {
     my($self, $dists) = @_;
 
     for my $dist (sort { lc($a) cmp lc($b) } keys %$dists) {
-        $self->dist_diff($dist, @{$dists->{$dist}});
+        $self->simple_dist_diff($dist, @{$dists->{$dist}});
     }
 }
 
-sub dist_diff {
+sub simple_dist_diff {
     my($self, $dist, $old, $new) = @_;
 
     # unchanged
@@ -118,6 +152,22 @@ sub dist_diff {
     printf "%s %s (%s -> %s)\n",
       color(GREEN, 'M'),
       $dist, color(RED, $old->version), color(GREEN, $new->version);
+}
+
+sub git_diff {
+    my($self, @text) = @_;
+
+    my @files = map {
+        my $temp = Path::Tiny->tempfile;
+        $temp->spew($_);
+        $temp;
+    } @text;
+
+    my @options;
+    @options = ("--color") if should_color();
+
+    my($stdout, $stderr, $code) = capture { system("git", "diff", @options, @files) };
+    print $stdout;
 }
 
 1;
