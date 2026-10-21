@@ -17,6 +17,9 @@ EOF
 
     $app->run_ok("install");
 
+    # HTTP::Tiny is only installed when CPAN has a newer version than core
+    my $installs_http_tiny = $app->stdout =~ /installed HTTP-Tiny-/;
+
     if ($ENV{TEST_CLEAN}) {
         $app->dir->child(".carmel/builds/Try-Tiny-0.30/blib/lib/Try/Tiny.pm")->spew("die");
         $app->run_fails("exec", "perl", "-e", 'use Try::Tiny; warn $INC{"Try/Tiny.pm"}');
@@ -25,7 +28,7 @@ EOF
 
     $app->run_ok("reinstall");
 
-    like $app->stdout, qr/installed HTTP-Tiny-/;
+    like $app->stdout, qr/installed HTTP-Tiny-/ if $installs_http_tiny;
     like $app->stdout, qr/installed Class-Tiny-/;
     like $app->stdout, qr/installed Try-Tiny-0\.30/;
 
