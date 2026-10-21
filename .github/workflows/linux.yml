@@ -31,7 +31,7 @@ jobs:
         run: perl -V
       - name: Install Dependencies
         run: |
-          curl -sL https://cpanmin.us/ | perl - App::cpanminus && \
+          cpanm -nq App::cpanminus && \
           cpanm -nq --dev Menlo Carton && \
           cpanm -nq --with-develop --installdeps .
       - name: Run Tests
