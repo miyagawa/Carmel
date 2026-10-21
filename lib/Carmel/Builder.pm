@@ -14,6 +14,9 @@ use CPAN::DistnameInfo;
 use Menlo::Index::Mirror;
 use HTTP::Tinyish;
 
+# https mirror that also serves BackPAN, so pinned old releases stay available
+our $DefaultMirror = "https://cpan.metacpan.org/";
+
 sub tempdir {
     my $self = shift;
     $self->{tempdir} ||= $self->build_tempdir;
@@ -75,7 +78,7 @@ sub install {
     my $cli = Menlo::CLI::Compat->new;
     $cli->parse_options(
         ($Carmel::DEBUG ? () : "--quiet"),
-        ($mirror ? ("-M", $mirror) : ("--mirror", "https://cpan.metacpan.org/")),
+        ($mirror ? ("-M", $mirror) : ("--mirror", $DefaultMirror)),
         "--notest",
         "--save-dists", $self->repository_base->child('cache'),
         "-L", $lib,
@@ -153,7 +156,7 @@ sub build_cli {
     my $cli = Menlo::CLI::Compat->new;
     $cli->parse_options(
         ($Carmel::DEBUG ? () : "--quiet"),
-        ($mirror ? ("-M", $mirror) : ()),
+        ($mirror ? ("-M", $mirror) : ("--mirror", $DefaultMirror)),
         "--info",
         "--save-dists", $self->repository_base->child('cache'),
         ".",
@@ -174,7 +177,7 @@ sub index {
 sub build_index {
     my $self = shift;
 
-    my $mirror = $self->mirror || "https://cpan.metacpan.org/";
+    my $mirror = $self->mirror || $DefaultMirror;
 
     # Use $cli->mirror to support file: URLs
     return Menlo::Index::Mirror->new({
