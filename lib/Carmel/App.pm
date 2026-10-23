@@ -20,9 +20,9 @@ use Path::Tiny ();
 use Pod::Usage ();
 use Try::Tiny;
 
-# prefer Parse::CPAN::Meta in XS, PP order with JSON.pm
-$ENV{PERL_JSON_BACKEND} = 1
-  unless defined $ENV{PERL_JSON_BACKEND};
+# prefer Parse::CPAN::Meta in XS, PP order with JSON::MaybeXS
+$ENV{CPAN_META_JSON_BACKEND} = 'JSON::MaybeXS'
+  unless defined $ENV{PERL_JSON_BACKEND} or defined $ENV{CPAN_META_JSON_BACKEND};
 
 use Class::Tiny {
     verbose => sub { 0 },

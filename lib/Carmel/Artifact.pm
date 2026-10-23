@@ -2,7 +2,7 @@ package Carmel::Artifact;
 use strict;
 use Carmel::Patch;
 use CPAN::Meta;
-use JSON ();
+use JSON::MaybeXS;
 use Path::Tiny ();
 
 sub load {
@@ -30,7 +30,7 @@ sub _build_install {
 
     my $file = $self->path->child("blib/meta/install.json");
     if ($file->exists) {
-        return JSON::decode_json($file->slurp);
+        return decode_json($file->slurp);
     }
 
     die "Can't read build artifact from ", $self->path;
